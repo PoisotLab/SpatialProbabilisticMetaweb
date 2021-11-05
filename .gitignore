@@ -1,3 +1,4 @@
 Manifest.toml
 sdms/*
 .vscode/*
+*.code-workspace
