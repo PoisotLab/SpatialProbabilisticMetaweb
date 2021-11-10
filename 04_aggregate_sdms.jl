@@ -105,24 +105,58 @@ for (i,si) in enumerate(species(P))
     end
 end
 
-# Get a preliminary map
-sites = keys(reference_layer)
-networks = zeros(Bool, length(sites), size(P)..., 10)
-p = Progress(length(sites))
-Threads.@threads for i in eachindex(sites)
-    site = sites[i]
-    s = [D[s][site] for s in species(P)]
-    pcooc = mean.(s) .* mean.(s)'
-    # 1 [sdm - | classifier -] --> avg * avg'
-    # 2 [sdm - | classifier +] --> (avg > thr) * (avg > thr)'
-    # 3 [sdm + | classifier -] --> rnd * rnd'
-    # 4 [sdm + | classifier +] --> (rnd > thr) * (rnd > thr)'
-    for j in 1:size(networks, 4)
-        networks[i, :, :, j] .= adjacency(rand(UnipartiteProbabilisticNetwork(pcooc .* A, species(P))))
-    end
-    next!(p)
+# Prepare cutoff values for all species
+sdm_results = CSV.read("sdm_fit_results.csv", DataFrame)
+sdm_results.species = replace.(sdm_results.species, "_" => " ")
+cutoffs = Dict{String, Float64}()
+for r in eachrow(sdm_results)
+    cutoffs[r.species] = r.cutoff
 end
+# Some species have no cutoffs, so let's add an impossible one to make everything work
+missing_sp = setdiff(species(P), sdm_results.species)
+for m in missing_sp
+    cutoffs[m] = 1.0
+end
+cutoffs
+
+# Get a preliminary map
+function assemble_networks(reference_layer, P, D, A, cutoffs; type="avg", n_itr=10)
+    sites = keys(reference_layer)
+    networks = zeros(Bool, length(sites), size(P)..., n_itr)
+    p = Progress(length(sites))
+    Threads.@threads for i in eachindex(sites)
+        site = sites[i]
+        s = [D[s][site] for s in species(P)]
+        c = [cutoffs[s] for s in species(P)]
+        if type == "avg"
+            # 1 [sdm - | classifier -] --> avg * avg'
+            pcooc = mean.(s) .* mean.(s)'
+        elseif type == "avg_thr"
+            # 2 [sdm - | classifier +] --> (avg > thr) * (avg > thr)'
+            pcooc = @. (mean(s) > c) * (mean(s) > c)'
+        elseif type == "rnd"
+            # 3 [sdm + | classifier -] --> rnd * rnd'
+            pcooc = rand.(s) .* rand.(s)'
+        elseif type == "rnd_thr"
+            # 4 [sdm + | classifier +] --> (rnd > thr) * (rnd > thr)'
+            pcooc = @. (rand(s) > c) * (rand.(s) > c)'
+        end
+        for j in 1:size(networks, 4)
+            networks[i, :, :, j] .= adjacency(rand(UnipartiteProbabilisticNetwork(pcooc .* A, species(P))))
+        end
+        next!(p)
+    end
+    return networks
+end
+
+# Assembly based on average
+@time networks = assemble_networks(reference_layer, P, D, A, cutoffs); # 2 min
 size(networks) # 12,455 sites x 163 sp x 163 sp x 10 iterations
+networks_avg = copy(networks)
+
+# Different assembly options
+@time networks = assemble_networks(reference_layer, P, D, A, cutoffs; type="avg_thr"); # 30 sec.
+@time networks = assemble_networks(reference_layer, P, D, A, cutoffs; type="rnd"); # 2 min
 
 # Get non-zero interactions
 valued_interactions = findall(!iszero, sum(networks; dims=(1,4))[1,:,:])
@@ -132,6 +166,7 @@ by_site = sum(networks; dims=(4))
 # Create a site x non-zero interactions matrix
 Z = zeros(Int64, (length(reference_layer), length(valued_interactions)))
 # Number of iterations where the interaction is realized
+sites = keys(reference_layer)
 for i in 1:length(sites)
     Z[i,:] = by_site[i,valued_interactions]
 end
