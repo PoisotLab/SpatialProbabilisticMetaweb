@@ -150,13 +150,13 @@ function assemble_networks(reference_layer, P, D, A, cutoffs; type="avg", n_itr=
 end
 
 # Assembly based on average
-@time networks = assemble_networks(reference_layer, P, D, A, cutoffs); # 2 min
-size(networks) # 12,455 sites x 163 sp x 163 sp x 10 iterations
+networks = assemble_networks(reference_layer, P, D, A, cutoffs); # 2 min
 networks_avg = copy(networks)
 
 # Different assembly options
-@time networks = assemble_networks(reference_layer, P, D, A, cutoffs; type="avg_thr"); # 30 sec.
-@time networks = assemble_networks(reference_layer, P, D, A, cutoffs; type="rnd"); # 2 min
+# networks = assemble_networks(reference_layer, P, D, A, cutoffs; type="avg_thr"); # 30 sec.
+# networks = assemble_networks(reference_layer, P, D, A, cutoffs; type="rnd"); # 2 min
+# networks = assemble_networks(reference_layer, P, D, A, cutoffs; type="rnd_thr"); # 30 sec.
 
 # Get non-zero interactions
 valued_interactions = findall(!iszero, sum(networks; dims=(1,4))[1,:,:])
@@ -170,10 +170,14 @@ sites = keys(reference_layer)
 for i in 1:length(sites)
     Z[i,:] = by_site[i,valued_interactions]
 end
+# Remove sites without interactions
+Zfull = Z[findall(!iszero, vec(sum(Z; dims=2))), :]
 
 # Network LCBD
 lcbd_networks = similar(reference_layer)
-lcbd_networks[keys(reference_layer)] = LCBD(hellinger(Z))[1]
+lcbd_networks[keys(reference_layer)] = sum(Z; dims=2)
+replace!(lcbd_networks, 0 => nothing)
+lcbd_networks[keys(lcbd_networks)] = LCBD(hellinger(Zfull))[1]
 
 # Map & compare LCBD values
 plot(
