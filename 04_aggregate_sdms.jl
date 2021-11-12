@@ -143,12 +143,15 @@ function assemble_networks(
         elseif type == "avg_thr"
             pcooc = @. (mean(s) > c) * (mean(s) > c)'
         elseif type == "rnd"
-            pcooc = @. rand(s) * rand(s)'
+            rng = MersenneTwister(seed)
+            pcooc = @. rand(rng, s) * rand(rng, s)'
         elseif type == "rnd_thr"
-            pcooc = @. (rand(s) > c) * (rand(s) > c)'
+            rng = MersenneTwister(seed+1)
+            pcooc = @. (rand(rng, s) > c) * (rand(rng, s) > c)'
         end
+        rng = MersenneTwister(seed)
         for j in 1:size(networks, 4)
-            networks[i, :, :, j] .= adjacency(rand(UnipartiteProbabilisticNetwork(pcooc .* A, species(P))))
+            networks[i, :, :, j] .= adjacency(rand(rng, UnipartiteProbabilisticNetwork(pcooc .* A, species(P))))
         end
         next!(p)
     end
@@ -163,6 +166,8 @@ networks_avg = copy(networks)
 # networks = assemble_networks(reference_layer, P, D, A, cutoffs; type="avg_thr"); # 30 sec.
 # networks = assemble_networks(reference_layer, P, D, A, cutoffs; type="rnd"); # 2 min
 # networks = assemble_networks(reference_layer, P, D, A, cutoffs; type="rnd_thr"); # 30 sec.
+networks1 = assemble_networks(reference_layer, P, D, A, cutoffs; type="rnd_thr"); # 30 sec.
+networks2 = assemble_networks(reference_layer, P, D, A, cutoffs; type="rnd_thr"); # 30 sec.
 
 # Get non-zero interactions
 valued_interactions = findall(!iszero, sum(networks; dims=(1,4))[1,:,:])
