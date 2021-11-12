@@ -1,14 +1,12 @@
 using SimpleSDMLayers
 using StatsPlots
-using JSON
 using EcologicalNetworks
 using DataFrames
 import CSV
 using ProgressMeter
 using Statistics
 using Distributions
-using Clustering
-using MultivariateStats
+using Random
 
 include("A1_LCBD.jl")
 
@@ -120,7 +118,19 @@ end
 cutoffs
 
 # Get a preliminary map
-function assemble_networks(reference_layer, P, D, A, cutoffs; type="avg", n_itr=10)
+function assemble_networks(
+    reference_layer::SimpleSDMLayer,
+    P::UnipartiteProbabilisticNetwork,
+    D::Dict{String, SimpleSDMResponse},
+    A::Matrix,
+    cutoffs::Dict{String, Float64};
+    type::String="avg",
+    n_itr::Int64=10,
+    seed::Int64=42
+)
+    type in ["avg", "avg_thr", "rnd", "rnd_thr"] ||
+        throw(ArgumentError("type must be avg, avg_thr, rnd, or rnd_thr"))
+
     sites = keys(reference_layer)
     networks = zeros(Bool, length(sites), size(P)..., n_itr)
     p = Progress(length(sites))
@@ -129,17 +139,13 @@ function assemble_networks(reference_layer, P, D, A, cutoffs; type="avg", n_itr=
         s = [D[s][site] for s in species(P)]
         c = [cutoffs[s] for s in species(P)]
         if type == "avg"
-            # 1 [sdm - | classifier -] --> avg * avg'
-            pcooc = mean.(s) .* mean.(s)'
+            pcooc = @. mean(s) * mean(s)'
         elseif type == "avg_thr"
-            # 2 [sdm - | classifier +] --> (avg > thr) * (avg > thr)'
             pcooc = @. (mean(s) > c) * (mean(s) > c)'
         elseif type == "rnd"
-            # 3 [sdm + | classifier -] --> rnd * rnd'
-            pcooc = rand.(s) .* rand.(s)'
+            pcooc = @. rand(s) * rand(s)'
         elseif type == "rnd_thr"
-            # 4 [sdm + | classifier +] --> (rnd > thr) * (rnd > thr)'
-            pcooc = @. (rand(s) > c) * (rand.(s) > c)'
+            pcooc = @. (rand(s) > c) * (rand(s) > c)'
         end
         for j in 1:size(networks, 4)
             networks[i, :, :, j] .= adjacency(rand(UnipartiteProbabilisticNetwork(pcooc .* A, species(P))))
