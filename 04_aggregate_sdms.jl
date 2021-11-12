@@ -22,7 +22,7 @@ map_files = joinpath.("sdms", readdir("sdms"))
 # Load predictions mean & variance layers
 μ = Dict{String,SimpleSDMPredictor}()
 σ = Dict{String,SimpleSDMPredictor}()
-for map_file in map_files
+Threads.@threads for map_file in map_files
     if contains(map_file, "_error.tif")
         sp_name = replace(replace(replace(map_file, "sdms/" => ""), "_" => " "), "error.tif" => "")[1:end-1]
         σ[sp_name] = geotiff(SimpleSDMPredictor, map_file; spatialrange...)
@@ -39,14 +39,14 @@ Base.zero(::Type{Truncated{Normal{T}, Continuous, T}}) where {T} = Truncated(zer
 
 # Create layers of Truncated Normal distributions given the mean & variance
 D = Dict{String, SimpleSDMResponse}()
-for sp in keys(μ)
+Threads.@threads for sp in String.(keys(μ))
     _t = similar(μ[sp], Truncated{Normal{Float64}, Continuous, Float64})
     for site in keys(μ[sp])
         _t[site] = Truncated(Normal(Float64(μ[sp][site]), Float64(σ[sp][site])), 0.0, 1.0)
     end
     D[sp] = _t
-    GC.gc()
 end
+GC.gc()
 
 # Map of species richness and standard deviation
 Smeans = map(l -> broadcast(mean, l), collect(values(D)))
