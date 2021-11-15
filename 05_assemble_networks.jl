@@ -127,6 +127,25 @@ bv_pal_1 = (p0=p0, p1=colorant"#64acbe", p2=colorant"#c85a5a")
 bv_pal_2 = (p0=p0, p1=colorant"#73ae80", p2=colorant"#6c83b5")
 bv_pal_3 = (p0=p0, p1=colorant"#9972af", p2=colorant"#c8b35a")
 bv_pal_4 = (p0=p0, p1=colorant"#be64ac", p2=colorant"#5ac8c8")
+# Testing color gradients
+biv_plots = []
+for pal in [bv_pal_1, bv_pal_2, bv_pal_3, bv_pal_4]
+    bp = bivariate(lcbd_networks, lcbd_species; quantiles=true, pal..., classes=3)
+    bp = bivariatelegend!(
+        lcbd_networks,
+        lcbd_species;
+        classes=3,
+        inset=(1, bbox(0.04, 0.05, 0.28, 0.28, :top, :right)),
+        subplot=2,
+        xlab="Networks LCBD",
+        ylab="Species LCBD",
+        guidefontsize=7,
+        pal...
+    )
+    push!(biv_plots, bp)
+end
+plot(biv_plots..., size = (900, 600))
+savefig("lcbd_bivariate_pal")
 # Bivariate LCBD
 biv_plots = []
 for lcbd_n in [lcbd_networks, lcbd_networks_thr, lcbd_networks_rnd, lcbd_networks_rnd_thr]
