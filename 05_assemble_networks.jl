@@ -40,6 +40,8 @@ for m in missing_sp
 end
 cutoffs
 
+## Networks in space
+
 # Get a preliminary map
 function assemble_networks(
     reference_layer::SimpleSDMLayer,
@@ -90,8 +92,15 @@ networks_thr = assemble_networks(reference_layer, P, D, A, cutoffs; type="avg_th
 networks_rnd = assemble_networks(reference_layer, P, D, A, cutoffs; type="rnd"); # 2 min
 networks_rnd_thr = assemble_networks(reference_layer, P, D, A, cutoffs; type="rnd_thr"); # 30 sec.
 
+## LCBD values
+
 # Get the networks LCBD
-function networks_LCBD(networks::Array{Bool, 4}, reference_layer::SimpleSDMLayer)
+function networks_to_layer(
+    networks::Array{Bool, 4}, reference_layer::SimpleSDMLayer; type::String="lcbd"
+)
+    type in ["lcbd", "links"] ||
+        throw(ArgumentError("type must be lcbd or links"))
+
     # Get non-zero interactions
     valued_interactions = findall(!iszero, sum(networks; dims=(1,4))[1,:,:])
     # Sum over all iterations
@@ -111,15 +120,21 @@ function networks_LCBD(networks::Array{Bool, 4}, reference_layer::SimpleSDMLayer
     lcbd_networks = similar(reference_layer)
     lcbd_networks[keys(reference_layer)] = sum(Z; dims=2)
     replace!(lcbd_networks, 0 => nothing)
-    lcbd_networks[keys(lcbd_networks)] = LCBD(hellinger(Zfull))[1]
+    if type == "lcbd"
+        lcbd_networks[keys(lcbd_networks)] = LCBD(hellinger(Zfull))[1]
+    else
+        lcbd_networks[keys(lcbd_networks)] = vec(sum(Z .> 0; dims=2)) ./ size(Z, 2)
+    end
 
     return lcbd_networks
 end
-lcbd_networks = networks_LCBD(networks, reference_layer)
-lcbd_networks_thr = networks_LCBD(networks_thr, reference_layer)
-lcbd_networks_rnd = networks_LCBD(networks_rnd, reference_layer)
-lcbd_networks_rnd_thr = networks_LCBD(networks_rnd_thr, reference_layer)
+lcbd_networks = networks_to_layer(networks, reference_layer)
+lcbd_networks_thr = networks_to_layer(networks_thr, reference_layer)
+lcbd_networks_rnd = networks_to_layer(networks_rnd, reference_layer)
+lcbd_networks_rnd_thr = networks_to_layer(networks_rnd_thr, reference_layer)
+links = networks_to_layer(networks, reference_layer; type="links")
 
+## Bivariate maps
 
 # Prepare bivariate colors
 p0 = colorant"#e8e8e8"
@@ -149,6 +164,12 @@ end
 plot(biv_plots..., size = (900, 600))
 savefig("lcbd_bivariate_all")
 
+## Other maps
+
+# Proportion of realized links
+plot(links; c=:cividis, title="Proportion of realized links")
+savefig(joinpath("figures", "links_proportion.png"))
+
 # Map & compare LCBD values
 plot(
     plot(lcbd_species, leg=false, c=:viridis, title="Species LCBD"),
@@ -156,6 +177,7 @@ plot(
     layout=(2,1),
     size=(600,600)
 )
+savefig(joinpath("figures", "lcbd_two-panels.png"))
 
 # Univariate rescaled LCBD
 plot(
@@ -165,12 +187,36 @@ plot(
     layout=(2,1),
     size=(600,600)
 )
+savefig(joinpath("figures", "lcbd_two-panels_rescaled.png"))
 
-# Visualize relationship
+## Relationship
+
+# Visualize LCBD relationship
 histogram2d(
     rescale(lcbd_networks, collect(0.0:0.05:1.0)),
     rescale(lcbd_species, collect(0.0:0.05:1.0));
     bins=20,
-    xlim=(0, 1),
-    ylim=(0, 1)
+    xaxis=((0, 1), "Networks LCBD"),
+    yaxis=((0, 1), "Species LCBD")
 )
+savefig(joinpath("figures", "relationship_lcbd.png"))
+
+# Links relationship
+histogram2d(
+    rescale(links, collect(0.0:0.05:1.0)),
+    rescale(lcbd_networks, collect(0.0:0.05:1.0));
+    bins=20,
+    xaxis=((0, 1), "Proportion of realized links"),
+    yaxis=((0, 1), "Networks LCBD")
+)
+savefig(joinpath("figures", "relationship_links.png"))
+
+# Richness relationship
+histogram2d(
+    rescale(Sμ, collect(0.0:0.05:1.0)),
+    rescale(lcbd_networks, collect(0.0:0.05:1.0));
+    bins=20,
+    xaxis=((0, 1), "Proportion of realized links"),
+    yaxis=((0, 1), "Networks LCBD")
+)
+savefig(joinpath("figures", "relationship_richness.png"))
