@@ -66,11 +66,11 @@ function assemble_networks(
             Random.seed!(seed)
             pcooc = @. rand(s) * rand(s)'
         elseif type == "rnd_thr"
-            Random.seed!(seed - 1)
+            Random.seed!(seed + 1)
             pcooc = @. (rand(s) > c) * (rand(s) > c)'
         end
         for j in 1:size(networks, 4)
-            Random.seed!(seed + j)
+            Random.seed!(seed + j*i)
             prob_network = UnipartiteProbabilisticNetwork(pcooc .* A, species(P))
             networks[i, :, :, j] .= adjacency(rand(prob_network))
         end
