@@ -8,7 +8,11 @@ using Statistics
 using Distributions
 using Random
 
+default(; dpi=200)
+
 include("A1_LCBD.jl")
+
+## Probabilistic distributions
 
 # Define reference layer
 spatialrange = (left=-80., right=-50., bottom=45., top=65.)
@@ -46,18 +50,29 @@ Threads.@threads for sp in String.(keys(μ))
 end
 GC.gc()
 
+## Richness
+
 # Map of species richness and standard deviation
 Smeans = map(l -> broadcast(mean, l), collect(values(D)))
 Sμ = reduce(+, Smeans)
 Svars = map(l -> broadcast(var, l), collect(values(D)))
 Sσ = sqrt(reduce(+, Svars))
 
+# Prepare colors
+p0 = colorant"#e8e8e8"
+bv_pal_2 = (p0=p0, p1=colorant"#73ae80", p2=colorant"#6c83b5")
+
 # Univariate maps
-p1 = plot(Sμ, title="Expected richness", c=:batlow)
-p2 = plot(Sσ, title="Std. dev. of richness", c=:acton)
+plot(
+    plot(Sμ, title="Expected richness", c=cgrad([p0, bv_pal_2[2]])),
+    plot(Sσ, title="Std. dev. of richness", c=cgrad([p0, bv_pal_2[3]]));
+    layout=(2,1),
+    size=(600, 600)
+)
+savefig("figures/richness_two-panels.png")
 
 # Bivariate map
-p3 = bivariate(Sμ, Sσ; quantiles=true, classes=3, xlab="Longitude", ylab="Latitude")
+bivariate(Sμ, Sσ; quantiles=true, classes=3, xlab="Longitude", ylab="Latitude", bv_pal_2...)
 bivariatelegend!(
     Sμ,
     Sσ;
@@ -67,9 +82,12 @@ bivariatelegend!(
     xlab="Expected richness",
     ylab="Std. dev. of richness",
     guidefontsize=7,
+    bv_pal_2...
 )
+plot!(title=["Richness & uncertainty bivariate" ""])
+savefig(joinpath("figures", "richness_bivariate.png"))
 
-plot(p1, p2, p3, layout=(3,1), size=(600,1200))
+## LCBD values
 
 # Y matrix
 Y = zeros(Float64, (length(reference_layer), length(Smeans)))
@@ -80,4 +98,7 @@ end
 # LCBD
 lcbd_species = similar(reference_layer)
 lcbd_species[keys(reference_layer)] = LCBD(hellinger(Y))[1]
-plot(lcbd_species)
+
+# Plot LCBD
+plot(lcbd_species; c=:viridis, title="Species LCBD")
+savefig(joinpath("figures", "lcbd_species.png"))
