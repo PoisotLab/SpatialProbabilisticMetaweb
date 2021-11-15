@@ -2,6 +2,9 @@
 
 include("04_aggregate_sdms.jl")
 
+D # Truncated Normal distribution per pixel
+lcbd_species
+
 ## Metaweb
 
 # Download and parse the metaweb
@@ -83,30 +86,70 @@ end
 networks = assemble_networks(reference_layer, P, D, A, cutoffs); # 2 min
 
 # Different assembly options
-# networks = assemble_networks(reference_layer, P, D, A, cutoffs; type="avg_thr"); # 30 sec.
-# networks = assemble_networks(reference_layer, P, D, A, cutoffs; type="rnd"); # 2 min
-# networks = assemble_networks(reference_layer, P, D, A, cutoffs; type="rnd_thr"); # 30 sec.
+networks_thr = assemble_networks(reference_layer, P, D, A, cutoffs; type="avg_thr"); # 30 sec.
+networks_rnd = assemble_networks(reference_layer, P, D, A, cutoffs; type="rnd"); # 2 min
+networks_rnd_thr = assemble_networks(reference_layer, P, D, A, cutoffs; type="rnd_thr"); # 30 sec.
 
-# Get non-zero interactions
-valued_interactions = findall(!iszero, sum(networks; dims=(1,4))[1,:,:])
-# Sum over all iterations
-by_site = sum(networks; dims=(4))
+# Get the networks LCBD
+function networks_LCBD(networks::Array{Bool, 4}, reference_layer::SimpleSDMLayer)
+    # Get non-zero interactions
+    valued_interactions = findall(!iszero, sum(networks; dims=(1,4))[1,:,:])
+    # Sum over all iterations
+    by_site = sum(networks; dims=(4))
 
-# Create a site x non-zero interactions matrix
-Z = zeros(Int64, (length(reference_layer), length(valued_interactions)))
-# Number of iterations where the interaction is realized
-sites = keys(reference_layer)
-for i in 1:length(sites)
-    Z[i,:] = by_site[i,valued_interactions]
+    # Create a site x non-zero interactions matrix
+    Z = zeros(Int64, (length(reference_layer), length(valued_interactions)))
+    # Number of iterations where the interaction is realized
+    sites = keys(reference_layer)
+    for i in 1:length(sites)
+        Z[i,:] = by_site[i,valued_interactions]
+    end
+    # Remove sites without interactions
+    Zfull = Z[findall(!iszero, vec(sum(Z; dims=2))), :]
+
+    # Network LCBD
+    lcbd_networks = similar(reference_layer)
+    lcbd_networks[keys(reference_layer)] = sum(Z; dims=2)
+    replace!(lcbd_networks, 0 => nothing)
+    lcbd_networks[keys(lcbd_networks)] = LCBD(hellinger(Zfull))[1]
+
+    return lcbd_networks
 end
-# Remove sites without interactions
-Zfull = Z[findall(!iszero, vec(sum(Z; dims=2))), :]
+lcbd_networks = networks_LCBD(networks, reference_layer)
+lcbd_networks_thr = networks_LCBD(networks_thr, reference_layer)
+lcbd_networks_rnd = networks_LCBD(networks_rnd, reference_layer)
+lcbd_networks_rnd_thr = networks_LCBD(networks_rnd_thr, reference_layer)
 
-# Network LCBD
-lcbd_networks = similar(reference_layer)
-lcbd_networks[keys(reference_layer)] = sum(Z; dims=2)
-replace!(lcbd_networks, 0 => nothing)
-lcbd_networks[keys(lcbd_networks)] = LCBD(hellinger(Zfull))[1]
+
+# Prepare bivariate colors
+p0 = colorant"#e8e8e8"
+bv_pal_1 = (p0=p0, p1=colorant"#64acbe", p2=colorant"#c85a5a")
+bv_pal_2 = (p0=p0, p1=colorant"#73ae80", p2=colorant"#6c83b5")
+bv_pal_3 = (p0=p0, p1=colorant"#9972af", p2=colorant"#c8b35a")
+bv_pal_4 = (p0=p0, p1=colorant"#be64ac", p2=colorant"#5ac8c8")
+# Bivariate LCBD
+biv_plots = []
+for lcbd_n in [lcbd_networks, lcbd_networks_thr, lcbd_networks_rnd, lcbd_networks_rnd_thr]
+    bp = bivariate(lcbd_n, lcbd_species; quantiles=true, bv_pal_4..., classes=3)
+    bp = bivariatelegend!(
+        lcbd_n,
+        lcbd_species;
+        classes=3,
+        inset=(1, bbox(0.04, 0.05, 0.28, 0.28, :top, :right)),
+        subplot=2,
+        xlab="Networks LCBD",
+        ylab="Species LCBD",
+        guidefontsize=7,
+        bv_pal_4...
+    )
+    push!(biv_plots, bp)
+end
+titles = ["Mean", "Mean > cutoff", "Rnd", "Rnd > cutoff"]
+for (bp, t) in zip(biv_plots, titles)
+    plot!(bp; title=[t ""])
+end
+plot(biv_plots..., size = (900, 600))
+savefig("lcbd_bivariate_all")
 
 # Map & compare LCBD values
 plot(
@@ -116,35 +159,20 @@ plot(
     size=(600,600)
 )
 
-# Prepare bivariate colors
-p0 = colorant"#e8e8e8"
-bv_pal_1 = (p0=p0, p1=colorant"#64acbe", p2=colorant"#c85a5a")
-bv_pal_2 = (p0=p0, p1=colorant"#73ae80", p2=colorant"#6c83b5")
-bv_pal_3 = (p0=p0, p1=colorant"#9972af", p2=colorant"#c8b35a")
-bv_pal_4 = (p0=p0, p1=colorant"#be64ac", p2=colorant"#5ac8c8")
-# Bivariate LCBD
-bivariate(lcbd_networks, lcbd_species; quantiles=true, bv_pal_4..., classes=3)
-bivariatelegend!(
-    lcbd_networks,
-    lcbd_species;
-    classes=3,
-    inset=(1, bbox(0.04, 0.05, 0.28, 0.28, :top, :right)),
-    subplot=2,
-    xlab="Networks LCBD",
-    ylab="Species LCBD",
-    guidefontsize=7,
-    bv_pal_4...
-)
-
 # Univariate rescaled LCBD
-plot(rescale(lcbd_networks, collect(0.0:0.05:1.0)); c=cgrad([p0, bv_pal_4[2]]))
-plot(rescale(lcbd_species, collect(0.0:0.05:1.0)); c=cgrad([p0, bv_pal_4[3]]))
+plot(
+    plot(rescale(lcbd_species, collect(0.0:0.05:1.0)); c=cgrad([p0, bv_pal_4[3]])),
+    plot(rescale(lcbd_networks, collect(0.0:0.05:1.0)); c=cgrad([p0, bv_pal_4[2]])),
+    title=["Species LCBD (rescaled)" "Networks LCBD (rescaled)"],
+    layout=(2,1),
+    size=(600,600)
+)
 
 # Visualize relationship
 histogram2d(
     rescale(lcbd_networks, collect(0.0:0.05:1.0)),
     rescale(lcbd_species, collect(0.0:0.05:1.0));
-    bins=20
+    bins=20,
+    xlim=(0, 1),
+    ylim=(0, 1)
 )
-xaxis!((0,1))
-yaxis!((0,1))
