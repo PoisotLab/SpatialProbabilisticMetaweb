@@ -58,6 +58,31 @@ Sμ = reduce(+, Smeans)
 Svars = map(l -> broadcast(var, l), collect(values(D)))
 Sσ = sqrt(reduce(+, Svars))
 
+# Species richness for random samples
+Random.seed!(42)
+Srands = map(l -> broadcast(rand, l), collect(values(D)))
+Sr = reduce(+, Srands)
+
+# Species richness for thresholded distributions
+spp = collect(keys(D))
+Smeans_cut = [broadcast(>(cutoffs[sp]), S) for (sp, S) in zip(spp, Smeans)]
+Srands_cut = [broadcast(>(cutoffs[sp]), S) for (sp, S) in zip(spp, Srands)]
+Sμ_cut, Sr_cut = [reduce(+, convert.(Float32, S)) for S in (Smeans_cut, Srands_cut)]
+
+# Plot all options
+clim1 = mapreduce(minimum, min, [Sμ, Sr, Sμ_cut, Sr_cut])
+clim2 = mapreduce(maximum, max, [Sμ, Sr, Sμ_cut, Sr_cut])
+lims = (clim1, clim2)
+plot(
+    plot(Sμ; c=:cividis, title="Sμ", clim=lims),
+    plot(Sr; c=:cividis, title="Sr", clim=lims),
+    plot(Sμ_cut; c=:cividis, title="Sμ_cut", clim=lims),
+    plot(Sr_cut; c=:cividis, title="Sr_cut", clim=lims);
+    layout=(2,2),
+    size=(900,600),
+)
+savefig(joinpath("figures", "richness_all.png"))
+
 # Prepare colors
 p0 = colorant"#e8e8e8"
 bv_pal_2 = (p0=p0, p1=colorant"#73ae80", p2=colorant"#6c83b5")
