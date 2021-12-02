@@ -63,6 +63,20 @@ Random.seed!(42)
 Srands = map(l -> broadcast(rand, l), collect(values(D)))
 Sr = reduce(+, Srands)
 
+# Prepare cutoff values for all species
+sdm_results = CSV.read("sdm_fit_results.csv", DataFrame)
+sdm_results.species = replace.(sdm_results.species, "_" => " ")
+cutoffs = Dict{String, Float64}()
+for r in eachrow(sdm_results)
+    cutoffs[r.species] = r.cutoff
+end
+# Some species have no cutoffs, so let's add an impossible one to make everything work
+missing_sp = setdiff(keys(D), sdm_results.species)
+for m in missing_sp
+    cutoffs[m] = 1.0
+end
+cutoffs
+
 # Species richness for thresholded distributions
 spp = collect(keys(D))
 Smeans_cut = [broadcast(>(cutoffs[sp]), S) for (sp, S) in zip(spp, Smeans)]
