@@ -128,16 +128,32 @@ savefig(joinpath("figures", "richness_bivariate.png"))
 
 ## LCBD values
 
-# Y matrix
-Y = zeros(Float64, (length(reference_layer), length(Smeans)))
-for i in eachindex(Smeans)
-    Y[:,i] = Smeans[i][keys(reference_layer)]
-end
+lcbd_layers = []
+for S in (Smeans, Srands, Smeans_cut, Srands_cut)
+    # Y matrix
+    Y = zeros(Float64, (length(reference_layer), length(S)))
+    for i in eachindex(S)
+        Y[:,i] = S[i][keys(reference_layer)]
+    end
 
-# LCBD
-lcbd_species = similar(reference_layer)
-lcbd_species[keys(reference_layer)] = LCBD(hellinger(Y))[1]
+    # LCBD
+    lcbd_species = similar(reference_layer)
+    lcbd_species[keys(reference_layer)] = LCBD(hellinger(Y))[1]
+    push!(lcbd_layers, lcbd_species)
+end
+lcbd_species = lcbd_layers[1]
+
 
 # Plot LCBD
 plot(lcbd_species; c=:viridis, title="Species LCBD")
 savefig(joinpath("figures", "lcbd_species.png"))
+
+plot(
+    plot(lcbd_layers[1]; c=:viridis, title="LCBD means"),
+    plot(lcbd_layers[2]; c=:viridis, title="LCBD rands"),
+    plot(lcbd_layers[3]; c=:viridis, title="LCBD means cut"),
+    plot(lcbd_layers[4]; c=:viridis, title="LCBD rands cut"),
+    layout=(2,2),
+    size=(900,600),
+)
+savefig(joinpath("figures", "lcbd_species_all.png"))
