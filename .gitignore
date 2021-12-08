@@ -1,2 +1,3 @@
-Manifest.toml
-sdms/*
+data/sdms/*
+.vscode/*
+*.code-workspace

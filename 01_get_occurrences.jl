@@ -25,12 +25,12 @@ end
 # Occurrences for every taxon
 p = Progress(richness(P))
 
-ispath("occurrences") || mkpath("occurrences")
+ispath(joinpath("data", "occurrences")) || mkpath(joinpath("data", "occurrences"))
 
 Threads.@threads for i in 1:richness(P)
     this_sp = species(P)[i]
     _spname = this_sp.name
-    _file = joinpath("occurrences", replace(_spname, " " => "_")*".csv")
+    _file = joinpath("data", "occurrences", replace(_spname, " " => "_")*".csv")
     if !isfile(_file)
         this_occ = occurrences(this_sp, "hasCoordinate" => true, "limit" => 300, "decimalLatitude"=>"10,90", "decimalLongitude" => "-175,-45")
         while length(this_occ) < min(2_000, size(this_occ))

@@ -10,11 +10,11 @@ import CSV
 layers = SimpleSDMPredictor(WorldClim, BioClim, 1:19; left=-180., right=-40., bottom=18., top=89.)
 all_values = hcat([layer[keys(layer)] for layer in layers]...)
 
-ispath("sdms") || mkpath("sdms")
+ispath(joinpath("data", "sdms")) || mkpath(joinpath("data", "sdms"))
 
 df = [DataFrame(species = String[], occurrences = Int64[], AUC = Float64[], J = Float64[], cutoff = Float64[]) for i in 1:Threads.nthreads()]
 
-pa_files = joinpath.("presence_absence", readdir("presence_absence/"))
+pa_files = readdir(joinpath("data", "presence_absence"); join=true)
 p = Progress(length(pa_files))
 
 Threads.@threads for i in 1:length(pa_files)
@@ -45,8 +45,8 @@ Threads.@threads for i in 1:length(pa_files)
         sdm = similar(layers[1])
         sdm[keys(sdm)] = fill(length(pr)/length(sdm), length(sdm))
         var = similar(sdm)
-        geotiff(joinpath("sdms", spname*"_model.tif"),sdm)
-        geotiff(joinpath("sdms", spname*"_error.tif"),var)
+        geotiff(joinpath("data", "sdms", spname*"_model.tif"),sdm)
+        geotiff(joinpath("data", "sdms", spname*"_error.tif"),var)
         next!(p)
         continue
     end
@@ -105,8 +105,8 @@ Threads.@threads for i in 1:length(pa_files)
 
     range_mask = broadcast(v -> v >= τ, distribution)
     sdm = mask(range_mask, distribution)/maximum(mask(range_mask, distribution))
-    geotiff(joinpath("sdms", spname*"_model.tif"),distribution)
-    geotiff(joinpath("sdms", spname*"_error.tif"),uncertainty)
+    geotiff(joinpath("data", "sdms", spname*"_model.tif"),distribution)
+    geotiff(joinpath("data", "sdms", spname*"_error.tif"),uncertainty)
     next!(p)
 end
 

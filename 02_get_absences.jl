@@ -5,9 +5,9 @@ using ProgressMeter
 
 reference_layer = SimpleSDMPredictor(WorldClim, BioClim, 1; left=-180., right=-40., bottom=18., top=89.)
 
-occfiles = joinpath.("occurrences", readdir("occurrences/"))
+occfiles = readdir(joinpath("data", "occurrences"); join=true)
 
-ispath("presence_absence") || mkpath("presence_absence")
+ispath(joinpath("data", "presence_absence")) || mkpath(joinpath("data", "presence_absence"))
 
 p = Progress(length(occfiles))
 
