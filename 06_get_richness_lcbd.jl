@@ -68,10 +68,10 @@ end
 lcbd_species = lcbd_layers[1]
 
 # Export results
-geotiff(joinpath("data", "results", "lcbd_mean.tif"), lcbd_layers[1])
-geotiff(joinpath("data", "results", "lcbd_rand.tif"), lcbd_layers[2])
-geotiff(joinpath("data", "results", "lcbd_mean_thr.tif"), lcbd_layers[3])
-geotiff(joinpath("data", "results", "lcbd_rand_thr.tif"), lcbd_layers[4])
+geotiff(joinpath("data", "results", "lcbd_species_mean.tif"), lcbd_layers[1])
+geotiff(joinpath("data", "results", "lcbd_species_rand.tif"), lcbd_layers[2])
+geotiff(joinpath("data", "results", "lcbd_species_mean_thr.tif"), lcbd_layers[3])
+geotiff(joinpath("data", "results", "lcbd_species_rand_thr.tif"), lcbd_layers[4])
 
 ## Plot results
 
