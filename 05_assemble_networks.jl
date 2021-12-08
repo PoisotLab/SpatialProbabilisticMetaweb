@@ -3,7 +3,6 @@
 include("04_aggregate_sdms.jl")
 
 D # Truncated Normal distribution per pixel
-lcbd_species
 
 ## Metaweb
 
@@ -134,89 +133,8 @@ lcbd_networks_rnd = networks_to_layer(networks_rnd, reference_layer)
 lcbd_networks_rnd_thr = networks_to_layer(networks_rnd_thr, reference_layer)
 links = networks_to_layer(networks, reference_layer; type="links")
 
-## Bivariate maps
-
-# Prepare bivariate colors
-p0 = colorant"#e8e8e8"
-bv_pal_4 = (p0=p0, p1=colorant"#be64ac", p2=colorant"#5ac8c8")
-
-# Bivariate LCBD
-biv_plots = []
-for lcbd_n in [lcbd_networks, lcbd_networks_thr, lcbd_networks_rnd, lcbd_networks_rnd_thr]
-    bp = bivariate(lcbd_n, lcbd_species; quantiles=true, bv_pal_4..., classes=3)
-    bp = bivariatelegend!(
-        lcbd_n,
-        lcbd_species;
-        classes=3,
-        inset=(1, bbox(0.04, 0.05, 0.28, 0.28, :top, :right)),
-        subplot=2,
-        xlab="Networks LCBD",
-        ylab="Species LCBD",
-        guidefontsize=7,
-        bv_pal_4...
-    )
-    push!(biv_plots, bp)
-end
-titles = ["Mean", "Mean > cutoff", "Rnd", "Rnd > cutoff"]
-for (bp, t) in zip(biv_plots, titles)
-    plot!(bp; title=[t ""])
-end
-plot(biv_plots..., size = (900, 600))
-savefig("lcbd_bivariate_all")
-
-## Other maps
-
-# Proportion of realized links
-plot(links; c=:cividis, title="Proportion of realized links")
-savefig(joinpath("figures", "links_proportion.png"))
-
-# Map & compare LCBD values
-plot(
-    plot(lcbd_species, leg=false, c=:viridis, title="Species LCBD"),
-    plot(lcbd_networks, leg=false, c=:viridis, title="Networks LCBD"),
-    layout=(2,1),
-    size=(600,600)
-)
-savefig(joinpath("figures", "lcbd_two-panels.png"))
-
-# Univariate rescaled LCBD
-plot(
-    plot(rescale(lcbd_species, collect(0.0:0.05:1.0)); c=cgrad([p0, bv_pal_4[3]])),
-    plot(rescale(lcbd_networks, collect(0.0:0.05:1.0)); c=cgrad([p0, bv_pal_4[2]])),
-    title=["Species LCBD (rescaled)" "Networks LCBD (rescaled)"],
-    layout=(2,1),
-    size=(600,600)
-)
-savefig(joinpath("figures", "lcbd_two-panels_rescaled.png"))
-
-## Relationship
-
-# Visualize LCBD relationship
-histogram2d(
-    rescale(lcbd_networks, collect(0.0:0.05:1.0)),
-    rescale(lcbd_species, collect(0.0:0.05:1.0));
-    bins=20,
-    xaxis=((0, 1), "Networks LCBD"),
-    yaxis=((0, 1), "Species LCBD")
-)
-savefig(joinpath("figures", "relationship_lcbd.png"))
-
-# Links relationship
-histogram2d(
-    rescale(links, collect(0.0:0.05:1.0)),
-    rescale(lcbd_networks, collect(0.0:0.05:1.0));
-    bins=20,
-    xaxis=((0, 1), "Proportion of realized links"),
-    yaxis=((0, 1), "Networks LCBD")
-)
-savefig(joinpath("figures", "relationship_links.png"))
-
-# Richness relationship
-histogram2d(
-    rescale(Sμ, collect(0.0:0.05:1.0)),
-    rescale(lcbd_networks, collect(0.0:0.05:1.0));
-    bins=20,
-    xaxis=((0, 1), "Proportion of realized links"),
-    yaxis=((0, 1), "Networks LCBD")
-)
-savefig(joinpath("figures", "relationship_richness.png"))
+# Export
+geotiff(joinpath("data", "results", "lcbd_networks_mean.tif"), lcbd_networks)
+geotiff(joinpath("data", "results", "lcbd_networks_rand.tif"), lcbd_networks_rnd)
+geotiff(joinpath("data", "results", "lcbd_networks_mean_thr.tif"), lcbd_networks_thr)
+geotiff(joinpath("data", "results", "lcbd_networks_rand_thr.tif"), lcbd_networks_rnd_thr)
