@@ -9,17 +9,17 @@ spatialrange = (left=-80., right=-50., bottom=45., top=65.)
 reference_layer = SimpleSDMPredictor(WorldClim, BioClim, 1; spatialrange...)
 
 # Select files to load
-map_files = joinpath.("sdms", readdir("sdms"))
+map_files = readdir(joinpath("data", "sdms"); join=true)
 
 # Load predictions mean & variance layers
 μ = Dict{String,SimpleSDMPredictor}()
 σ = Dict{String,SimpleSDMPredictor}()
 for map_file in map_files
     sp_name = @chain map_file begin
-        replace("sdms/" => "")
+        basename
+        replace("_error.tif" => "")
+        replace("_model.tif" => "")
         replace("_" => " ")
-        replace(" error.tif" => "")
-        replace(" model.tif" => "")
     end
     if contains(map_file, "error.tif")
         σ[sp_name] = geotiff(SimpleSDMPredictor, map_file; spatialrange...)
