@@ -5,38 +5,41 @@ include("A0_required.jl")
 ## Load data
 
 # Richness layers
-Sμ = geotiff(SimpleSDMPredictor, joinpath("data", "results", "richness_mean.tif"))
+S_all = fill(SimpleSDMPredictor(rand(Float64, 2,2)), 4)
+S_all[1] = geotiff(SimpleSDMPredictor, joinpath("data", "results", "richness_mean.tif"))
+S_all[2] = geotiff(SimpleSDMPredictor, joinpath("data", "results", "richness_rand.tif"))
+S_all[3] = geotiff(SimpleSDMPredictor, joinpath("data", "results", "richness_mean_thr.tif"))
+S_all[4] = geotiff(SimpleSDMPredictor, joinpath("data", "results", "richness_rand_thr.tif"))
 Sσ = geotiff(SimpleSDMPredictor, joinpath("data", "results", "richness_uncertainty.tif"))
-Sr = geotiff(SimpleSDMPredictor, joinpath("data", "results", "richness_rand.tif"))
-Sμ_cut = geotiff(SimpleSDMPredictor, joinpath("data", "results", "richness_mean_thr.tif"))
-Sr_cut = geotiff(SimpleSDMPredictor, joinpath("data", "results", "richness_rand_thr.tif"))
 
 # Species LCBD layers
-lcbd_layers = fill(SimpleSDMPredictor(rand(Float32, 2,2)), 4)
-lcbd_layers[1] = geotiff(SimpleSDMPredictor, joinpath("data", "results", "lcbd_species_mean.tif"))
-lcbd_layers[2] = geotiff(SimpleSDMPredictor, joinpath("data", "results", "lcbd_species_rand.tif"))
-lcbd_layers[3] = geotiff(SimpleSDMPredictor, joinpath("data", "results", "lcbd_species_mean_thr.tif"))
-lcbd_layers[4] = geotiff(SimpleSDMPredictor, joinpath("data", "results", "lcbd_species_rand_thr.tif"))
+lcbd_species_all = fill(SimpleSDMPredictor(rand(Float32, 2,2)), 4)
+lcbd_species_all[1] = geotiff(SimpleSDMPredictor, joinpath("data", "results", "lcbd_species_mean.tif"))
+lcbd_species_all[2] = geotiff(SimpleSDMPredictor, joinpath("data", "results", "lcbd_species_mean_thr.tif"))
+lcbd_species_all[3] = geotiff(SimpleSDMPredictor, joinpath("data", "results", "lcbd_species_rand.tif"))
+lcbd_species_all[4] = geotiff(SimpleSDMPredictor, joinpath("data", "results", "lcbd_species_rand_thr.tif"))
 lcbd_species = lcbd_layers[1]
 
 # Networks LCBD layers
-lcbd_networks = geotiff(SimpleSDMPredictor, joinpath("data", "results", "lcbd_networks_mean.tif"))
-lcbd_networks_rnd = geotiff(SimpleSDMPredictor, joinpath("data", "results", "lcbd_networks_rand.tif"))
-lcbd_networks_thr = geotiff(SimpleSDMPredictor, joinpath("data", "results", "lcbd_networks_mean_thr.tif"))
-lcbd_networks_rnd_thr = geotiff(SimpleSDMPredictor, joinpath("data", "results", "lcbd_networks_rand_thr.tif"))
+lcbd_networks_all = fill(SimpleSDMPredictor(rand(Float32, 2,2)), 4)
+lcbd_networks_all[1] = geotiff(SimpleSDMPredictor, joinpath("data", "results", "lcbd_networks_mean.tif"))
+lcbd_networks_all[2] = geotiff(SimpleSDMPredictor, joinpath("data", "results", "lcbd_networks_mean_thr.tif"))
+lcbd_networks_all[3] = geotiff(SimpleSDMPredictor, joinpath("data", "results", "lcbd_networks_rand.tif"))
+lcbd_networks_all[4] = geotiff(SimpleSDMPredictor, joinpath("data", "results", "lcbd_networks_rand_thr.tif"))
+
+# Others
 L = geotiff(SimpleSDMPredictor, joinpath("data", "results", "links.tif"))
 
 ## Richness plots
 
 # All richness options
-clim1 = mapreduce(minimum, min, [Sμ, Sr, Sμ_cut, Sr_cut])
-clim2 = mapreduce(maximum, max, [Sμ, Sr, Sμ_cut, Sr_cut])
+subtitles = ["Mean" "Mean > cutoff" "Rnd" "Rnd > cutoff"]
+clim1 = mapreduce(minimum, min, S_all)
+clim2 = mapreduce(maximum, max, S_all)
 lims = (clim1, clim2)
 plot(
-    plot(Sμ; c=:cividis, title="Sμ", clim=lims),
-    plot(Sr; c=:cividis, title="Sr", clim=lims),
-    plot(Sμ_cut; c=:cividis, title="Sμ_cut", clim=lims),
-    plot(Sr_cut; c=:cividis, title="Sr_cut", clim=lims);
+    [plot(S; c=:cividis, title=t, clim=lims) for (S,t) in zip(S_all, subtitles)]...;
+    cb_title="Species richness",
     layout=(2,2),
     size=(900,600),
 )
@@ -71,10 +74,10 @@ savefig(joinpath("figures", "richness_bivariate.png"))
 
 # All LCBD options
 plot(
-    plot(lcbd_layers[1]; c=:viridis, title="LCBD means"),
-    plot(lcbd_layers[2]; c=:viridis, title="LCBD rands"),
-    plot(lcbd_layers[3]; c=:viridis, title="LCBD means cut"),
-    plot(lcbd_layers[4]; c=:viridis, title="LCBD rands cut"),
+    plot(lcbd_species_all[1]; c=:viridis, title="LCBD means"),
+    plot(lcbd_species_all[2]; c=:viridis, title="LCBD means cut"),
+    plot(lcbd_species_all[3]; c=:viridis, title="LCBD rands"),
+    plot(lcbd_species_all[4]; c=:viridis, title="LCBD rands cut"),
     layout=(2,2),
     size=(900,600),
 )
@@ -96,10 +99,10 @@ savefig(joinpath("figures", "lcbd_networks_all.png"))
 # Bivariate species-networks LCBD
 biv_plots = []
 for lcbd_n in [lcbd_networks, lcbd_networks_thr, lcbd_networks_rnd, lcbd_networks_rnd_thr]
-    bp = bivariate(lcbd_n, lcbd_species; quantiles=true, bv_pal_4..., classes=3)
+    bp = bivariate(lcbd_n, lcbd_species[1]; quantiles=true, bv_pal_4..., classes=3)
     bp = bivariatelegend!(
         lcbd_n,
-        lcbd_species;
+        lcbd_species[1];
         classes=3,
         inset=(1, bbox(0.04, 0.05, 0.28, 0.28, :top, :right)),
         subplot=2,
@@ -125,7 +128,7 @@ savefig(joinpath("figures", "links_proportion.png"))
 
 # Map & compare LCBD values
 plot(
-    plot(lcbd_species, leg=false, c=:viridis, title="Species LCBD"),
+    plot(lcbd_species_all[1], leg=false, c=:viridis, title="Species LCBD"),
     plot(lcbd_networks, leg=false, c=:viridis, title="Networks LCBD"),
     layout=(2,1),
     size=(600,600)
