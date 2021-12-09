@@ -114,10 +114,6 @@ bivariatelegend!(
 plot!(title=["Richness & uncertainty bivariate" ""])
 savefig(joinpath("figures", "richness_bivariate.png"))
 
-# Single LCBD map
-plot(lcbd_species; c=:viridis, title="Species LCBD")
-savefig(joinpath("figures", "lcbd_species.png"))
-
 # All LCBD options
 plot(
     plot(lcbd_layers[1]; c=:viridis, title="LCBD means"),
