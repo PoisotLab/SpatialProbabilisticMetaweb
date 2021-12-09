@@ -24,7 +24,7 @@ lcbd_networks = geotiff(SimpleSDMPredictor, joinpath("data", "results", "lcbd_ne
 lcbd_networks_rnd = geotiff(SimpleSDMPredictor, joinpath("data", "results", "lcbd_networks_rand.tif"))
 lcbd_networks_thr = geotiff(SimpleSDMPredictor, joinpath("data", "results", "lcbd_networks_mean_thr.tif"))
 lcbd_networks_rnd_thr = geotiff(SimpleSDMPredictor, joinpath("data", "results", "lcbd_networks_rand_thr.tif"))
-# links = geotiff(SimpleSDMPredictor, joinpath("data", "results", "links.tif"))
+L = geotiff(SimpleSDMPredictor, joinpath("data", "results", "links.tif"))
 
 ## Bivariate maps
 
@@ -66,8 +66,8 @@ savefig(joinpath("figures", "lcbd_networks_all.png"))
 ## Other maps
 
 # Proportion of realized links
-# plot(links; c=:cividis, title="Proportion of realized links")
-# savefig(joinpath("figures", "links_proportion.png"))
+plot(L; c=:cividis, title="Proportion of realized links")
+savefig(joinpath("figures", "links_proportion.png"))
 
 # Map & compare LCBD values
 plot(
@@ -101,14 +101,14 @@ histogram2d(
 savefig(joinpath("figures", "relationship_lcbd.png"))
 
 # Links relationship
-# histogram2d(
-#     rescale(links, collect(0.0:0.05:1.0)),
-#     rescale(lcbd_networks, collect(0.0:0.05:1.0));
-#     bins=20,
-#     xaxis=((0, 1), "Proportion of realized links"),
-#     yaxis=((0, 1), "Networks LCBD")
-# )
-# savefig(joinpath("figures", "relationship_links.png"))
+histogram2d(
+    rescale(L, collect(0.0:0.05:1.0)),
+    rescale(lcbd_networks, collect(0.0:0.05:1.0));
+    bins=20,
+    xaxis=((0, 1), "Proportion of realized links"),
+    yaxis=((0, 1), "Networks LCBD")
+)
+savefig(joinpath("figures", "relationship_links.png"))
 
 # Richness relationship
 histogram2d(

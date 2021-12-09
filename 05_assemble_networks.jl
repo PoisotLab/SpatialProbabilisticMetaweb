@@ -132,10 +132,11 @@ lcbd_networks = networks_to_layer(networks, reference_layer)
 lcbd_networks_thr = networks_to_layer(networks_thr, reference_layer)
 lcbd_networks_rnd = networks_to_layer(networks_rnd, reference_layer)
 lcbd_networks_rnd_thr = networks_to_layer(networks_rnd_thr, reference_layer)
-links = networks_to_layer(networks, reference_layer; type="links")
+L = networks_to_layer(networks, reference_layer; type="links")
 
 # Export
 geotiff(joinpath("data", "results", "lcbd_networks_mean.tif"), lcbd_networks)
 geotiff(joinpath("data", "results", "lcbd_networks_rand.tif"), lcbd_networks_rnd)
 geotiff(joinpath("data", "results", "lcbd_networks_mean_thr.tif"), lcbd_networks_thr)
 geotiff(joinpath("data", "results", "lcbd_networks_rand_thr.tif"), lcbd_networks_rnd_thr)
+geotiff(joinpath("data", "results", "links.tif"), L)
