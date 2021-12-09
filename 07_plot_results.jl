@@ -26,9 +26,74 @@ lcbd_networks_thr = geotiff(SimpleSDMPredictor, joinpath("data", "results", "lcb
 lcbd_networks_rnd_thr = geotiff(SimpleSDMPredictor, joinpath("data", "results", "lcbd_networks_rand_thr.tif"))
 L = geotiff(SimpleSDMPredictor, joinpath("data", "results", "links.tif"))
 
-## Bivariate maps
+## Richness plots
 
-# Bivariate LCBD
+# All richness options
+clim1 = mapreduce(minimum, min, [Sμ, Sr, Sμ_cut, Sr_cut])
+clim2 = mapreduce(maximum, max, [Sμ, Sr, Sμ_cut, Sr_cut])
+lims = (clim1, clim2)
+plot(
+    plot(Sμ; c=:cividis, title="Sμ", clim=lims),
+    plot(Sr; c=:cividis, title="Sr", clim=lims),
+    plot(Sμ_cut; c=:cividis, title="Sμ_cut", clim=lims),
+    plot(Sr_cut; c=:cividis, title="Sr_cut", clim=lims);
+    layout=(2,2),
+    size=(900,600),
+)
+savefig(joinpath("figures", "richness_all.png"))
+
+# Univariate richness maps
+plot(
+    plot(Sμ, title="Expected richness", c=cgrad([p0, bv_pal_2[2]])),
+    plot(Sσ, title="Std. dev. of richness", c=cgrad([p0, bv_pal_2[3]]));
+    layout=(2,1),
+    size=(600, 600)
+)
+savefig(joinpath("figures", "richness_two-panels.png"))
+
+# Bivariate richness map
+bivariate(Sμ, Sσ; quantiles=true, classes=3, xlab="Longitude", ylab="Latitude", bv_pal_2...)
+bivariatelegend!(
+    Sμ,
+    Sσ;
+    classes=3,
+    inset=(1, bbox(0.04, 0.05, 0.28, 0.28, :top, :right)),
+    subplot=2,
+    xlab="Expected richness",
+    ylab="Std. dev. of richness",
+    guidefontsize=7,
+    bv_pal_2...
+)
+plot!(title=["Richness & uncertainty bivariate" ""])
+savefig(joinpath("figures", "richness_bivariate.png"))
+
+## Species LCBD plots
+
+# All LCBD options
+plot(
+    plot(lcbd_layers[1]; c=:viridis, title="LCBD means"),
+    plot(lcbd_layers[2]; c=:viridis, title="LCBD rands"),
+    plot(lcbd_layers[3]; c=:viridis, title="LCBD means cut"),
+    plot(lcbd_layers[4]; c=:viridis, title="LCBD rands cut"),
+    layout=(2,2),
+    size=(900,600),
+)
+savefig(joinpath("figures", "lcbd_species_all.png"))
+
+# Networks LCBD plots
+
+# All networks LCBD options
+netw_plots = []
+for lcbd_n in [lcbd_networks, lcbd_networks_thr, lcbd_networks_rnd, lcbd_networks_rnd_thr]
+    p = plot(lcbd_networks; c=:lightgrey)
+    plot!(p, lcbd_n; c=:viridis, clim=extrema(lcbd_n))
+    push!(netw_plots, p)
+end
+titles = ["Mean", "Mean > cutoff", "Rnd", "Rnd > cutoff"]
+plot(netw_plots..., size = (900, 600), title=permutedims(titles))
+savefig(joinpath("figures", "lcbd_networks_all.png"))
+
+# Bivariate species-networks LCBD
 biv_plots = []
 for lcbd_n in [lcbd_networks, lcbd_networks_thr, lcbd_networks_rnd, lcbd_networks_rnd_thr]
     bp = bivariate(lcbd_n, lcbd_species; quantiles=true, bv_pal_4..., classes=3)
@@ -51,17 +116,6 @@ for (bp, t) in zip(biv_plots, titles)
 end
 plot(biv_plots..., size = (900, 600))
 savefig(joinpath("figures", "lcbd_bivariate_all.png"))
-
-# Networks LCBD
-netw_plots = []
-for lcbd_n in [lcbd_networks, lcbd_networks_thr, lcbd_networks_rnd, lcbd_networks_rnd_thr]
-    p = plot(lcbd_networks; c=:lightgrey)
-    plot!(p, lcbd_n; c=:viridis, clim=extrema(lcbd_n))
-    push!(netw_plots, p)
-end
-titles = ["Mean", "Mean > cutoff", "Rnd", "Rnd > cutoff"]
-plot(netw_plots..., size = (900, 600), title=permutedims(titles))
-savefig(joinpath("figures", "lcbd_networks_all.png"))
 
 ## Other maps
 
