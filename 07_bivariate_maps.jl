@@ -52,6 +52,17 @@ end
 plot(biv_plots..., size = (900, 600))
 savefig(joinpath("figures", "lcbd_bivariate_all.png"))
 
+# Networks LCBD
+netw_plots = []
+for lcbd_n in [lcbd_networks, lcbd_networks_thr, lcbd_networks_rnd, lcbd_networks_rnd_thr]
+    p = plot(lcbd_networks; c=:lightgrey)
+    plot!(p, lcbd_n; c=:viridis, clim=extrema(lcbd_n))
+    push!(netw_plots, p)
+end
+titles = ["Mean", "Mean > cutoff", "Rnd", "Rnd > cutoff"]
+plot(netw_plots..., size = (900, 600), title=permutedims(titles))
+savefig(joinpath("figures", "lcbd_networks_all.png"))
+
 ## Other maps
 
 # Proportion of realized links
