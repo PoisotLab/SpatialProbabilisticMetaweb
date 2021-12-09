@@ -9,7 +9,9 @@ using ProgressMeter
 EcologicalNetworks._check_species_validity(::Type{GBIFTaxon}) = nothing
 
 # Download and parse the metaweb
-mw_output = DataFrame(CSV.File(download("https://raw.githubusercontent.com/PoisotLab/MetawebTransferLearning/main/artifacts/canadian_thresholded.csv"); stringtype=String))
+mw_path = joinpath("data", "input", "canadian_thresholded.csv")
+download("https://raw.githubusercontent.com/PoisotLab/MetawebTransferLearning/main/artifacts/canadian_thresholded.csv", mw_path)
+mw_output = DataFrame(CSV.File(mw_path; stringtype=String))
 
 # Turn the metaweb into a network
 sp = GBIF.taxon.(unique(vcat(mw_output.from, mw_output.to)))

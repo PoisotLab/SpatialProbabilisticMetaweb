@@ -110,4 +110,4 @@ Threads.@threads for i in 1:length(pa_files)
     next!(p)
 end
 
-CSV.write("sdm_fit_results.csv", vcat(df...))
+CSV.write(joinpath("data", "input", "sdm_fit_results.csv"), vcat(df...))

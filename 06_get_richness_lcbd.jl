@@ -20,7 +20,7 @@ Sr = reduce(+, Srands)
 
 # Option 3-4: Convert to presence absence data based on cutoff value
 # Prepare cutoff values for all species
-sdm_results = CSV.read("sdm_fit_results.csv", DataFrame)
+sdm_results = CSV.read(joinpath("data", "input", "sdm_fit_results.csv"), DataFrame)
 sdm_results.species = replace.(sdm_results.species, "_" => " ")
 cutoffs = Dict{String, Float64}()
 for r in eachrow(sdm_results)
