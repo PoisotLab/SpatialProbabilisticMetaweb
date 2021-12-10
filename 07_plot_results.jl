@@ -85,9 +85,9 @@ savefig(joinpath("figures", "richness_bivariate.png"))
 
 # All LCBD options
 plot(
-    [plot(lcbd_species_all[opt]; c=:viridis) for opt in options]...;
+    [plot(lcbd_species_all[opt]/maximum(lcbd_species_all[opt]); c=:viridis) for opt in options]...;
     title=titles,
-    cbtitle="Species LCBD",
+    cbtitle="Relative species LCBD",
     layout=(2,2),
     size=(900,600),
 )
@@ -98,11 +98,13 @@ savefig(joinpath("figures", "lcbd_species_all.png"))
 # All networks LCBD options
 netw_plots = []
 for opt in options
+    _l = lcbd_networks_all[opt]
+    _lrel = _l/maximum(_l)
     p = plot(reference_layer; c=:lightgrey)
-    plot!(p, lcbd_networks_all[opt]; c=:viridis, clim=extrema(lcbd_networks_all[opt]))
+    plot!(p, _lrel; c=:viridis, clim=extrema(_lrel))
     push!(netw_plots, p)
 end
-plot(netw_plots..., size = (900, 600), title=titles, cbtitle="Networks LCBD")
+plot(netw_plots..., size = (900, 600), title=titles, cbtitle="Relative networks LCBD")
 savefig(joinpath("figures", "lcbd_networks_all.png"))
 
 # Bivariate species-networks LCBD
