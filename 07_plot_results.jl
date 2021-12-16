@@ -35,6 +35,8 @@ lcbd_networks_all
 # Others
 Sσ = geotiff(SimpleSDMPredictor, joinpath("data", "results", "richness_uncertainty.tif"))
 L = geotiff(SimpleSDMPredictor, joinpath("data", "results", "links.tif"))
+L_mean = geotiff(SimpleSDMPredictor, joinpath("data", "results", "links_mean.tif"))
+L_std = geotiff(SimpleSDMPredictor, joinpath("data", "results", "links_std.tif"))
 spatialrange = (left=-80.0, right=-50.0, bottom=45.0, top=65.)
 reference_layer = SimpleSDMPredictor(WorldClim, BioClim, 1; spatialrange...)
 
@@ -135,6 +137,14 @@ savefig(joinpath("figures", "lcbd_bivariate_all.png"))
 # Proportion of realized links
 plot(L; c=:cividis, title="Proportion of realized links")
 savefig(joinpath("figures", "links_proportion.png"))
+
+# Sum of the link probabilities
+plot(L_mean; c=:cividis, title="Sum of the link probabilities")
+savefig(joinpath("figures", "links_sum.png"))
+
+# Standard deviation of the link probabilities
+plot(L_std; c=:cividis, title="Standard deviation of the link probabilities")
+savefig(joinpath("figures", "links_std.png"))
 
 # Map & compare LCBD values
 plot(
