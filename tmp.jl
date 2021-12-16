@@ -7,7 +7,7 @@ function handmade_sum(test::Array{Bool, 4})
     by_site2 = zeros(Int64, (ts..., 1))
     for i in 1:ts[1]
         for j in 1:ts[2]
-            for k in 1:[3]
+            for k in 1:ts[3]
                 by_site2[i, j, k, 1] = sum(test[i, j, k, :])
             end
         end
@@ -54,9 +54,9 @@ function handmade_std(values)
     sqrt.((values_sum .* (1 .- values_means).^2 .+ (n .- values_sum) .* (0 .- values_means).^2)./(n-1))
 end
 
-sq1 = sqrt.((values_sum .* (1 .- values_means).^2 .+ (n .- values_sum) .* (0 .- values_means).^2)./(n-1))
-sq2 = map(std, eachrow(values))
-sq3 = handmade_std(values)
+@time sq1 = sqrt.((values_sum .* (1 .- values_means).^2 .+ (n .- values_sum) .* (0 .- values_means).^2)./(n-1))
+@time sq2 = map(std, eachrow(values))
+@time sq3 = handmade_std(values)
 sq1 == sq2
 isapprox(sq1, sq2)
 isapprox(sq3, sq2)
