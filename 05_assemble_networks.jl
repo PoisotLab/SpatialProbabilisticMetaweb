@@ -95,24 +95,6 @@ networks_rnd_thr = assemble_networks(reference_layer, P, D, A, cutoffs; type="rn
 ## LCBD values
 
 # Get the networks LCBD
-function map_4D(f::Function, networks::Array{Bool, 4})
-    dims = size(networks)[1:3]
-    by_site = zeros(Float64, (dims..., 1))
-    for i in 1:dims[1]
-        for j in 1:dims[2]
-            for k in 1:dims[3]
-                by_site[i, j, k, 1] = f(networks[i, j, k, :])
-            end
-        end
-    end
-    return by_site
-end
-@time map_4D(std, test)
-@time map_4D(sum, test)
-@time sum(test, dims=4)
-
-@time map_4D(std, networks) # 166 sec
-
 function networks_to_layer(
     networks::Array{Bool, 4}, reference_layer::SimpleSDMLayer; type::String="lcbd"
 )
@@ -123,7 +105,7 @@ function networks_to_layer(
     valued_interactions = findall(!iszero, sum(networks; dims=(1,4))[1,:,:])
     # Sum over all iterations
     if type == "std"
-        by_site = map_4D(std, networks)
+        by_site = std(networks; dims=4)
     elseif type == "mean"
         by_site = mean(networks; dims=4)
     else
