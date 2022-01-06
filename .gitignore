@@ -1,3 +1,4 @@
 data/sdms/*
-.vscode/*
+.vscode
 *.code-workspace
+*JuliaSysimage.so

@@ -1,4 +1,4 @@
-import Pkg; Pkg.activate("."); Pkg.instantiate()
+import Pkg; Pkg.activate(".")
 
 import CSV
 using Chain
