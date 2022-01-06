@@ -146,6 +146,25 @@ savefig(joinpath("figures", "links_sum.png"))
 plot(L_std; c=:cividis, title="Standard deviation of the link probabilities")
 savefig(joinpath("figures", "links_std.png"))
 
+# Link probabilities bivariate map
+bivariate(
+    L_mean, L_std;
+    quantiles=true, classes=3, xlab="Longitude", ylab="Latitude", bv_pal_2...
+)
+bivariatelegend!(
+    L_mean,
+    L_std;
+    classes=3,
+    inset=(1, bbox(0.04, 0.05, 0.28, 0.28, :top, :right)),
+    subplot=2,
+    xlab="Sum of the link probabilities",
+    ylab="Std. dev. of link probabilities",
+    guidefontsize=7,
+    bv_pal_2...
+)
+plot!(title=["Links & uncertainty bivariate" ""])
+savefig(joinpath("figures", "links_bivariate.png"))
+
 # Map & compare LCBD values
 plot(
     plot(lcbd_species_all["mean"], leg=false, c=:viridis, title="Species LCBD"),
