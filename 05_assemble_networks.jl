@@ -123,6 +123,24 @@ _inds = findall(!isnothing, reference_layer.grid)
 _mat[_inds] = networks_vec
 layer = SimpleSDMResponse(_mat, reference_layer)
 
+# Get some network measures
+c = broadcast(connectance, layer)
+# o = broadcast(omnivory, layer)
+# tl = broadcast(trophic_level, layer)
+l = broadcast(links, layer)
+lv = broadcast(links_var, layer)
+ld = broadcast(linkage_density, layer)
+# m = broadcast(find_motif, layer)
+
+# Plot 'em
+plot(
+    plot(c; c=:cividis, title="Connectance"),
+    plot(l; c=:cividis, title="Links"),
+    plot(lv; c=:cividis, title="Link variance"),
+    plot(ld; c=:cividis, title="Linkage density"),
+)
+savefig("figures/network_things.png")
+
 ## LCBD values
 
 # Get the networks LCBD
