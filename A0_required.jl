@@ -10,6 +10,7 @@ using SimpleSDMLayers
 using Random
 using Statistics
 using StatsPlots
+using Base.Threads: @threads
 
 default(; dpi=200)
 

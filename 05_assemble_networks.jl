@@ -85,12 +85,45 @@ function assemble_networks(
 end
 
 # Assembly based on average
-networks = assemble_networks(reference_layer, P, D, A, cutoffs); # 2 min
+# networks = assemble_networks(reference_layer, P, D, A, cutoffs); # 2 min
 
 # Different assembly options
 networks_thr = assemble_networks(reference_layer, P, D, A, cutoffs; type="avg_thr"); # 30 sec.
-networks_rnd = assemble_networks(reference_layer, P, D, A, cutoffs; type="rnd"); # 2 min
-networks_rnd_thr = assemble_networks(reference_layer, P, D, A, cutoffs; type="rnd_thr"); # 30 sec.
+# networks_rnd = assemble_networks(reference_layer, P, D, A, cutoffs; type="rnd"); # 2 min
+# networks_rnd_thr = assemble_networks(reference_layer, P, D, A, cutoffs; type="rnd_thr"); # 30 sec.
+
+## Network layer
+
+# Work on the networks_thr object for now
+networks = networks_thr
+
+# Create empty objects
+_empty_mat = zeros(Float64, size(networks)[2:3])
+_empty_network = UnipartiteProbabilisticNetwork(_empty_mat, species(P))
+
+# With threads
+networks_vec = fill(_empty_network, size(networks)[1])
+# networks_vec = networks_vec[1:1000]
+@threads for i in eachindex(networks_vec)
+    # Extract a single site
+    local_site = @view networks[i, :, :, :];
+
+    # Extract local interaction matrix
+    local_mat = dropdims(mean(local_site; dims=ndims(local_site)), dims=ndims(local_site))
+
+    # Transform into network
+    networks_vec[i] = UnipartiteProbabilisticNetwork(local_mat, species(P))
+end
+networks_vec
+
+# Transform into layer
+_mat = fill(nothing, size(reference_layer.grid))
+_mat = convert(Matrix{Union{Nothing, UnipartiteProbabilisticNetwork{Float64}}}, _mat)
+_inds = findall(!isnothing, reference_layer.grid)
+_mat[_inds] = networks_vec
+# layer = SimpleSDMResponse(_mat) # crashes, StackOverflowError
+# And VS Code terminal hangs forever on StackOverflowError 😠
+# Julia in a regular terminal doesn't though
 
 ## LCBD values
 
