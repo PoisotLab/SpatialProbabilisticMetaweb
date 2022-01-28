@@ -118,87 +118,10 @@ networks_vec
 
 # Transform into layer
 _mat = fill(nothing, size(reference_layer.grid))
-_mat = convert(Matrix{Union{Nothing, UnipartiteProbabilisticNetwork{Float64}}}, _mat)
+_mat = convert(Matrix{Union{Nothing, eltype(networks_vec)}}, _mat)
 _inds = findall(!isnothing, reference_layer.grid)
 _mat[_inds] = networks_vec
-# layer = SimpleSDMResponse(_mat) # crashes, StackOverflowError
-# And VS Code terminal hangs forever on StackOverflowError 😠
-# Julia in a regular terminal doesn't though
-
-## What's going on?
-
-# Testing in a regular terminal session to avoid hanging on StackOverflowError
-
-# Test on smaller objects
-# SimpleSDMResponse(_mat[1:2, 1:2]) # still crashes
-SimpleSDMResponse([fill(_mat[1], 2, 2); nothing nothing])
-SimpleSDMResponse([fill(_mat[2], 2, 2); nothing nothing])
-SimpleSDMResponse([_mat[1,1] _mat[1,2]; _mat[2,1] _mat[2,2]; nothing nothing])
-# But those work...
-
-# Does converting work?
-convert(Matrix{Union{Nothing,eltype(_mat)}}, _mat) # meh
-
-# Maybe defining zero type will help?
-Base.zero(::Type{UnipartiteProbabilisticNetwork{T}}) where T = UnipartiteProbabilisticNetwork(zeros(T, (2,2)))
-zero(UnipartiteProbabilisticNetwork{Float64})
-Base.zero(::Type{UnipartiteProbabilisticNetwork{T, String}}) where T = zero(UnipartiteProbabilisticNetwork{T})
-zero(UnipartiteProbabilisticNetwork{Float64, String})
-
-# Attempt with similar
-# similar(reference_layer, UnipartiteProbabilisticNetwork{Float64}) # nope
-@which similar(reference_layer, UnipartiteProbabilisticNetwork{Float64})
-
-# Decomposing similar
-layer = reference_layer
-TC = eltype(_mat)
-TC = UnipartiteProbabilisticNetwork{Float64}
-zeros(TC, size(reference_layer))
-emptygrid = convert(Matrix{Union{Nothing,TC}}, zeros(TC, size(layer)))
-emptygrid[findall(isnothing, layer.grid)] .= nothing
-@which SimpleSDMResponse(emptygrid, layer.left, layer.right, layer.bottom, layer.top) # hangs here
-
-# Decomposing SimpleSDMResponse
-grid = emptygrid
-T = eltype(grid)
-l, r, b, t = layer.left, layer.right, layer.bottom, layer.top
-convert(Matrix{Union{Nothing,T}}, grid)
-@which SimpleSDMResponse(convert(Matrix{Union{Nothing,T}}, grid), l, r, b, t) # hangs here
-
-# Re-attempt on smaller object
-minimat = _mat[1:2, 1:2]
-minimat = convert(Matrix{UnipartiteProbabilisticNetwork{Float64}}, minimat)
-SimpleSDMResponse(minimat) nope
-
-# Let's check the exact methods
-_tmp_mat1 = [_mat[1,1] _mat[1,2]; _mat[2,1] _mat[2,2]; nothing nothing]
-_tmp_mat2 = _mat[1:2, 1:2]
-@which SimpleSDMResponse(_tmp_mat1) # works, function at line 60
-@which SimpleSDMResponse(_tmp_mat2) # doesn't work, function at line 70
-# why??
-
-# Let's check the types then
-typeof(_tmp_mat1)
-typeof(_tmp_mat2)
-eltype(_tmp_mat1)
-eltype(_tmp_mat2)
-# So the difference is just that _tmp_mat1 has String??
-
-# Let's try to fix it
-_tmp_mat3 = convert(Matrix{Union{Nothing, UnipartiteProbabilisticNetwork{Float64, String}}}, _mat)[1:2, 1:2]
-typeof(_tmp_mat3) == typeof(_tmp_mat1)
-@which SimpleSDMResponse(_tmp_mat3)
-SimpleSDMResponse(_tmp_mat3)
-# 🤦 of course that was just it
-
-# Let's try it on the full matrix then
-_mat2 = convert(Matrix{Union{Nothing, UnipartiteProbabilisticNetwork{Float64, String}}}, _mat)
-@which SimpleSDMResponse(_mat2)
-SimpleSDMResponse(_mat2)
-layer = SimpleSDMResponse(_mat2, reference_layer)
-conn_layer = broadcast(connectance, layer)
-plot(conn_layer; c=:cividis)
-# IT WORKS AAAAAAAAAAAAHHHH !!!
+layer = SimpleSDMResponse(_mat, reference_layer)
 
 ## LCBD values
 
