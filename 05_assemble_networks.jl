@@ -85,17 +85,17 @@ function assemble_networks(
 end
 
 # Assembly based on average
-# networks = assemble_networks(reference_layer, P, D, A, cutoffs); # 2 min
+networks = assemble_networks(reference_layer, P, D, A, cutoffs); # 2 min
 
 # Different assembly options
-networks_thr = assemble_networks(reference_layer, P, D, A, cutoffs; type="avg_thr"); # 30 sec.
+# networks_thr = assemble_networks(reference_layer, P, D, A, cutoffs; type="avg_thr"); # 30 sec.
 # networks_rnd = assemble_networks(reference_layer, P, D, A, cutoffs; type="rnd"); # 2 min
 # networks_rnd_thr = assemble_networks(reference_layer, P, D, A, cutoffs; type="rnd_thr"); # 30 sec.
 
 ## Network layer
 
 # Work on the networks_thr object for now
-networks = networks_thr
+# networks = networks_thr
 
 # Create empty objects
 _empty_mat = zeros(Float64, size(networks)[2:3])
@@ -124,20 +124,20 @@ _mat[_inds] = networks_vec
 layer = SimpleSDMResponse(_mat, reference_layer)
 
 # Get some network measures
-c = broadcast(connectance, layer)
+Co = broadcast(connectance, layer)
 # o = broadcast(omnivory, layer)
 # tl = broadcast(trophic_level, layer)
-l = broadcast(links, layer)
-lv = broadcast(links_var, layer)
-ld = broadcast(linkage_density, layer)
+L = broadcast(links, layer)
+Lv = broadcast(links_var, layer)
+Ld = broadcast(linkage_density, layer)
 # m = broadcast(find_motif, layer)
 
 # Plot 'em
 plot(
-    plot(c; c=:cividis, title="Connectance"),
-    plot(l; c=:cividis, title="Links"),
-    plot(lv; c=:cividis, title="Link variance"),
-    plot(ld; c=:cividis, title="Linkage density"),
+    plot(Co; c=:cividis, title="Connectance"),
+    plot(L; c=:cividis, title="Links"),
+    plot(Lv; c=:cividis, title="Link variance"),
+    plot(Ld; c=:cividis, title="Linkage density"),
 )
 savefig("figures/network_things.png")
 
