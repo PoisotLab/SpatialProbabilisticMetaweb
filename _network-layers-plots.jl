@@ -135,3 +135,37 @@ bivariatelegend!(
     bv_pal_2...
 )
 savefig(joinpath("figures", "new", "links_richness_bivariate_coeff.png"))
+
+## Compare sampling options
+
+# Links
+L_all = [broadcast(links, l) for l in layers_all]
+clim1 = mapreduce(minimum, min, values(L_all))
+clim2 = mapreduce(maximum, max, values(L_all))
+lims = (clim1, clim2)
+titles = ["Mean" "Mean > cutoff" "Rnd" "Rnd > cutoff"] # for plots later on
+plot(
+    [plot(L; c=:cividis, clim=lims) for L in L_all]...;
+    # [plot(broadcast(links, l); c=:cividis) for l in layers_all]...;
+    title = titles,
+    cbtitle="Links",
+    layout=(2,2),
+    size=(900,600),
+)
+savefig(joinpath("figures", "new", "links_4options_mean.png"))
+
+# Link variance
+Lv_all = [broadcast(links_var, l) for l in layers_all]
+clim1 = mapreduce(minimum, min, values(Lv_all))
+clim2 = mapreduce(maximum, max, values(Lv_all))
+lims = (clim1, clim2)
+titles = ["Mean" "Mean > cutoff" "Rnd" "Rnd > cutoff"] # for plots later on
+plot(
+    # [plot(Lv; c=:cividis, clim=lims) for Lv in Lv_all]...;
+    [plot(Lv; c=:cividis) for Lv in Lv_all]...;
+    title = titles,
+    cbtitle="Link variance",
+    layout=(2,2),
+    size=(900,600),
+)
+savefig(joinpath("figures", "new", "links_4options_var.png"))
