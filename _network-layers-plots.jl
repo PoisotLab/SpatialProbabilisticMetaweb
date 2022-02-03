@@ -50,6 +50,11 @@ Lcv = sqrt(Lv)/L
 plot(Lcv; c=:cividis, title="Link coefficient of variation")
 savefig(joinpath("figures", "new", "links_coeff_var.png"))
 
+# Link inverse-coefficient of variation or signal-to-noise ratio (SNR)
+Lsnr = L/sqrt(Lv)
+plot(Lsnr; c=:cividis, title="Link signal-to-noise ratio")
+savefig(joinpath("figures", "new", "links_coeff_var_inv.png"))
+
 # Links coefficient of variation relationship
 histogram2d(
     L,
