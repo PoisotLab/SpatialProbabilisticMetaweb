@@ -162,6 +162,52 @@ plot(
 )
 savefig("figures/network_things.png")
 
+# Checking network entropy
+H = broadcast(EcologicalNetworks.entropy, layer)
+plot(H; c=:cividis, title="Entropy")
+
+# Information decomposition
+H_D = broadcast(diff_entropy_uniform, layer)
+H_I = broadcast(mutual_information, layer)
+H_V = broadcast(variation_information, layer)
+plot(
+    plot(H; c=:cividis, title="Entropy (H)"),
+    plot(H_D; c=:cividis, title="Difference in entropy vs uniform (D)"),
+    plot(H_I; c=:cividis, title="Mutual information (I)"),
+    plot(H_V; c=:cividis, title="Variation of information (V)");
+    size=(900,600)
+)
+savefig(joinpath("figures", "new", "links_entropy.png"))
+
+# Trivariate visualisation
+begin
+    tri1 = trivariate(
+        H_D,
+        H_I,
+        H_V;
+        title="Information decomposition",
+        frame=:grid,
+        # quantiles=false,
+        # simplex=true,
+    )
+    xaxis!(tri1, "Longitude")
+    yaxis!(tri1, "Latitude")
+    tri2 = trivariatelegend!(
+        H_D,
+        H_I,
+        H_V;
+        inset=(1, bbox(0.02, 0.05, 0.35, 0.35, :top, :right)),
+        subplot=2,
+        red="Difference in entropy (D)",
+        green="Mutual information (I)",
+        blue="Variation of information (V)",
+        annotationfontsize=5,
+        # quantiles=false,
+        # simplex=true,
+    )
+end
+savefig(joinpath("figures", "new", "links_entropy_trivariate.png"))
+
 # ## LCBD values
 
 # # Get the networks LCBD
