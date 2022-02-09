@@ -166,8 +166,7 @@ clim2 = mapreduce(maximum, max, values(Lv_all))
 lims = (clim1, clim2)
 titles = ["Mean" "Mean > cutoff" "Rnd" "Rnd > cutoff"] # for plots later on
 plot(
-    # [plot(Lv; c=:cividis, clim=lims) for Lv in Lv_all]...;
-    [plot(Lv; c=:cividis) for Lv in Lv_all]...;
+    [plot(Lv; c=:cividis, clim=lims) for Lv in Lv_all]...;
     title = titles,
     cbtitle="Link variance",
     layout=(2,2),
