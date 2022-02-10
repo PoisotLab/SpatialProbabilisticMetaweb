@@ -3,6 +3,7 @@ import Pkg; Pkg.activate(".")
 import CSV
 using Chain
 using DataFrames
+using DataFramesMeta
 using Distributions
 using EcologicalNetworks
 using ProgressMeter
