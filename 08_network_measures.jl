@@ -1,6 +1,10 @@
 #### Network measures ####
 
-include("05_assemble_networks.jl")
+include("A0_required.jl")
+
+# Load networks
+# include("05_assemble_networks.jl")
+@load joinpath("data", "jld2", "network_layers.jl")
 
 # Get some network measures
 Co = broadcast(connectance, layer)

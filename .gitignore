@@ -2,3 +2,4 @@ data/sdms/*
 .vscode
 *.code-workspace
 *JuliaSysimage.so
+data/jld2

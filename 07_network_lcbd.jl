@@ -1,6 +1,10 @@
 #### Network LCBD analysis ####
 
-include("05_assemble_networks.jl")
+include("A0_required.jl")
+
+# Load networks
+# include("05_assemble_networks.jl")
+@load joinpath("data", "jld2", "network_simulations.jl")
 
 # Get the networks LCBD
 function networks_to_layer(
