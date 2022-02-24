@@ -34,9 +34,6 @@ lcbd_networks_all
 
 # Others
 Sσ = geotiff(SimpleSDMPredictor, joinpath("data", "results", "richness_uncertainty.tif"))
-L = geotiff(SimpleSDMPredictor, joinpath("data", "results", "links.tif"))
-L_mean = geotiff(SimpleSDMPredictor, joinpath("data", "results", "links_mean.tif"))
-L_std = geotiff(SimpleSDMPredictor, joinpath("data", "results", "links_std.tif"))
 spatialrange = (left=-80.0, right=-50.0, bottom=45.0, top=65.)
 reference_layer = SimpleSDMPredictor(WorldClim, BioClim, 1; spatialrange...)
 
@@ -134,37 +131,6 @@ savefig(joinpath("figures", "lcbd_bivariate_all.png"))
 
 ## Other maps
 
-# Proportion of realized links
-plot(L; c=:cividis, title="Proportion of realized links")
-savefig(joinpath("figures", "links_proportion.png"))
-
-# Sum of the link probabilities
-plot(L_mean; c=:cividis, title="Sum of the link probabilities")
-savefig(joinpath("figures", "links_sum.png"))
-
-# Standard deviation of the link probabilities
-plot(L_std; c=:cividis, title="Standard deviation of the link probabilities")
-savefig(joinpath("figures", "links_std.png"))
-
-# Link probabilities bivariate map
-bivariate(
-    L_mean, L_std;
-    quantiles=true, classes=3, xlab="Longitude", ylab="Latitude", bv_pal_2...
-)
-bivariatelegend!(
-    L_mean,
-    L_std;
-    classes=3,
-    inset=(1, bbox(0.04, 0.05, 0.28, 0.28, :top, :right)),
-    subplot=2,
-    xlab="Sum of the link probabilities",
-    ylab="Std. dev. of link probabilities",
-    guidefontsize=7,
-    bv_pal_2...
-)
-plot!(title=["Links & uncertainty bivariate" ""])
-savefig(joinpath("figures", "links_bivariate.png"))
-
 # Map & compare LCBD values
 plot(
     plot(lcbd_species_all["mean"], leg=false, c=:viridis, title="Species LCBD"),
@@ -195,16 +161,6 @@ histogram2d(
     yaxis=((0, 1), "Species LCBD")
 )
 savefig(joinpath("figures", "relationship_lcbd.png"))
-
-# Links relationship
-histogram2d(
-    rescale(L, collect(0.0:0.05:1.0)),
-    rescale(lcbd_networks_all["mean"], collect(0.0:0.05:1.0));
-    bins=20,
-    xaxis=((0, 1), "Proportion of realized links"),
-    yaxis=((0, 1), "Networks LCBD")
-)
-savefig(joinpath("figures", "relationship_links.png"))
 
 # Richness relationship
 histogram2d(

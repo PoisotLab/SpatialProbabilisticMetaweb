@@ -22,7 +22,6 @@ plot(
     plot(Lv; c=:cividis, title="Link variance"),
     plot(Ld; c=:cividis, title="Linkage density"),
 )
-savefig("figures/network_things.png")
 
 # Checking network entropy
 H = broadcast(EcologicalNetworks.entropy, layer)
@@ -39,7 +38,7 @@ plot(
     plot(H_V; c=:cividis, title="Variation of information (V)");
     size=(900,600)
 )
-savefig(joinpath("figures", "new", "links_entropy.png"))
+savefig(joinpath("figures", "entropy.png"))
 
 # Trivariate visualisation
 begin
@@ -68,7 +67,7 @@ begin
         # simplex=true,
     )
 end
-savefig(joinpath("figures", "new", "links_entropy_trivariate.png"))
+savefig(joinpath("figures", "entropy_trivariate.png"))
 
 ## Species proportions
 
@@ -155,4 +154,4 @@ begin
         # simplex=true,
     )
 end
-savefig(joinpath("figures", "new", "links_proportions_trivariate.png"))
+savefig(joinpath("figures", "proportions_trivariate.png"))

@@ -10,11 +10,11 @@ Sσ = geotiff(SimpleSDMPredictor, joinpath("data", "results", "richness_uncertai
 
 # Links
 plot(L; c=:cividis, title="Expected number of links")
-savefig(joinpath("figures", "new", "links_mean.png"))
+savefig(joinpath("figures", "links_mean.png"))
 
 # Link variance
 plot(Lv; c=:cividis, title="Link variance")
-savefig(joinpath("figures", "new", "links_var.png"))
+savefig(joinpath("figures", "links_var.png"))
 
 # Link bivariate map
 bivariate(
@@ -33,7 +33,7 @@ bivariatelegend!(
     bv_pal_2...
 )
 plot!(title=["Links & uncertainty bivariate" ""])
-savefig(joinpath("figures", "new", "links_bivariate.png"))
+savefig(joinpath("figures", "links_bivariate.png"))
 
 # Links relationship
 histogram2d(
@@ -43,17 +43,17 @@ histogram2d(
     xaxis=("Links"),
     yaxis=("Link variance")
 )
-savefig(joinpath("figures", "new", "links_relationship.png"))
+savefig(joinpath("figures", "links_relationship.png"))
 
 # Link coefficient of variation
 Lcv = sqrt(Lv)/L
 plot(Lcv; c=:cividis, title="Link coefficient of variation")
-savefig(joinpath("figures", "new", "links_coeff_var.png"))
+savefig(joinpath("figures", "links_coeff_var.png"))
 
 # Link inverse-coefficient of variation or signal-to-noise ratio (SNR)
 Lsnr = L/sqrt(Lv)
 plot(Lsnr; c=:cividis, title="Link signal-to-noise ratio")
-savefig(joinpath("figures", "new", "links_coeff_var_inv.png"))
+savefig(joinpath("figures", "links_coeff_var_inv.png"))
 
 # Links coefficient of variation relationship
 histogram2d(
@@ -99,7 +99,7 @@ bivariatelegend!(
     guidefontsize=7,
     bv_pal_2...
 )
-savefig(joinpath("figures", "new", "links_richness_bivariate.png"))
+savefig(joinpath("figures", "bivariate_richness_links.png"))
 
 # Richness-link uncertainty bivariate map
 bivariate(
@@ -117,7 +117,7 @@ bivariatelegend!(
     guidefontsize=7,
     bv_pal_2...
 )
-savefig(joinpath("figures", "new", "links_richness_bivariate_uncertainty.png"))
+savefig(joinpath("figures", "bivariate_richness_links_uncertainty.png"))
 
 # Richness coefficient of variation
 Scv = Sσ/S
@@ -139,7 +139,7 @@ bivariatelegend!(
     guidefontsize=6,
     bv_pal_2...
 )
-savefig(joinpath("figures", "new", "links_richness_bivariate_coeff.png"))
+savefig(joinpath("figures", "bivariate_richness_links_coeff.png"))
 
 ## Compare sampling options
 
@@ -157,7 +157,7 @@ plot(
     layout=(2,2),
     size=(900,600),
 )
-savefig(joinpath("figures", "new", "links_4options_mean.png"))
+savefig(joinpath("figures", "links_mean_all.png"))
 
 # Link variance
 Lv_all = [broadcast(links_var, l) for l in layers_all]
@@ -172,4 +172,4 @@ plot(
     layout=(2,2),
     size=(900,600),
 )
-savefig(joinpath("figures", "new", "links_4options_var.png"))
+savefig(joinpath("figures", "links_var_all.png"))
