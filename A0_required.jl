@@ -12,7 +12,7 @@ using Random
 using Statistics
 using StatsPlots
 using Base.Threads: @threads
-using JLD2
+using JLD2, CodecZlib
 
 default(; dpi=200)
 
