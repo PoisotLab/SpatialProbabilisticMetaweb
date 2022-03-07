@@ -1,4 +1,4 @@
-#### Bivariate maps ####
+#### Plot richness & LCBD results ####
 
 include("A0_required.jl")
 

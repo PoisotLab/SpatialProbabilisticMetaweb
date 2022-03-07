@@ -147,4 +147,4 @@ layer_rnd_thr = network_layer(networks_rnd_thr)
 
 # Export
 @save joinpath("data", "jld2", "network_layers.jld2") layer layer_thr layer_rnd layer_rnd_thr
-@time @save joinpath("data", "jld2", "network_simulations.jld2") {compress=true} networks networks_thr networks_rnd networks_rnd_thr
+@save joinpath("data", "jld2", "network_simulations.jld2") {compress=true} networks networks_thr networks_rnd networks_rnd_thr

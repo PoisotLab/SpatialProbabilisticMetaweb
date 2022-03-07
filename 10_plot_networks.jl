@@ -1,8 +1,14 @@
+#### Plot network measures ####
+
+include("A0_required.jl")
+
 # Objects
-Co
-L
-Lv
-Ld
+@load joinpath("data", "jld2", "network_layers.jld2") layer layer_thr layer_rnd layer_rnd_thr
+layers_all = [layer, layer_thr, layer_rnd, layer_rnd_thr]
+Co = broadcast(connectance, layer)
+L = broadcast(links, layer)
+Lv = broadcast(links_var, layer)
+Ld = broadcast(linkage_density, layer)
 S = geotiff(SimpleSDMPredictor, joinpath("data", "results", "richness_mean.tif"))
 Sσ = geotiff(SimpleSDMPredictor, joinpath("data", "results", "richness_uncertainty.tif"))
 

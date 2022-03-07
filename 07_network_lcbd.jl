@@ -2,9 +2,12 @@
 
 include("A0_required.jl")
 
+# Define reference layer
+spatialrange = (left=-80.0, right=-50.0, bottom=45.0, top=65.0)
+reference_layer = SimpleSDMPredictor(WorldClim, BioClim, 1; spatialrange...)
+
 # Load networks
-# include("05_assemble_networks.jl")
-@load joinpath("data", "jld2", "network_simulations.jl")
+@load joinpath("data", "jld2", "network_simulations.jld2") networks networks_thr networks_rnd networks_rnd_thr
 
 # Get the networks LCBD
 function networks_to_layer(
