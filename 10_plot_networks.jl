@@ -164,6 +164,35 @@ bivariatelegend!(
 )
 savefig(joinpath("figures", "bivariate_richness_links_coeff.png"))
 
+## LCBD & network measures
+
+# Load LCBD results
+include("x_load_results.jl")
+
+# LCBD-richness relationships
+begin
+    scatter(S, lcbd_species_all["mean"], alpha=0.2, label="Species LCBD")
+    scatter!(S, lcbd_networks_all["mean"], alpha=0.2, label="Network LCBD")
+    plot!(xaxis=("Richness (log)", :log), yaxis=("LCBD"), legend=:bottomright)
+end
+savefig(joinpath("figures", "lcbd_relationship_richness.png"))
+
+# LCBD-links relationships
+begin
+    scatter(L, lcbd_species_all["mean"], alpha=0.2, label="Species LCBD")
+    scatter!(L, lcbd_networks_all["mean"], alpha=0.2, label="Network LCBD")
+    plot!(xaxis=("Links (log)", :log), yaxis=("LCBD"), legend=:bottomright)
+end
+savefig(joinpath("figures", "lcbd_relationship_links.png"))
+
+# LCBD-connectance relationships
+begin
+    scatter(Co, lcbd_species_all["mean"], alpha=0.2, label="Species LCBD")
+    scatter!(Co, lcbd_networks_all["mean"], alpha=0.2, label="Network LCBD")
+    plot!(xaxis=("Connectance (log)", :log), yaxis=("LCBD"), legend=:bottomright)
+end
+savefig(joinpath("figures", "lcbd_relationship_connectance.png"))
+
 ## Compare sampling options
 
 # Links
