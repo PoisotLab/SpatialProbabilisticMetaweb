@@ -114,6 +114,75 @@ bivariate(
     S, L;
     quantiles=true, classes=3, xlab="Longitude", ylab="Latitude", bv_pal_2...
 )
+
+# Attempt to extract the attributes
+bivattr = biv.subplots[1][1].plotattributes
+Array(bivattr[:z])
+keys(bivattr) |> collect
+values(bivattr) |> collect
+# As a DataFrame
+bivdf = DataFrame(keys=collect(keys(bivattr)), values=collect(values(bivattr)))
+show(bivdf, allrows=true)
+# Check an element
+@rsubset(bivdf, :keys == Symbol("fillcolor"))
+
+# Attempt to get the bivariate values
+function get_bivariate_values(
+    l1,
+    l2;
+    classes=3,
+    p0=colorant"#e8e8e8ff",
+    p1=colorant"#64acbeff",
+    p2=colorant"#c85a5aff",
+    quantiles=true,
+)
+    SimpleSDMLayers._layers_are_compatible(l1, l2)
+    c1 = LinRange(p0, p1, classes)
+    c2 = LinRange(p0, p2, classes)
+    breakpoints = LinRange(0.0, 1.0, classes + 1)
+    if quantiles
+        q1 = rescale(l1, collect(LinRange(0.0, 1.0, 10classes)))
+        q2 = rescale(l2, collect(LinRange(0.0, 1.0, 10classes)))
+    else
+        q1 = rescale(l1, (0.0, 1.0))
+        q2 = rescale(l2, (0.0, 1.0))
+    end
+    classified = similar(l1, Int)
+    cols = typeof(p0)[]
+    for i in 1:classes
+        if isequal(classes)(i)
+            fi = (v) -> breakpoints[i] < v <= breakpoints[i + 1]
+        else
+            fi = (v) -> breakpoints[i] <= v < breakpoints[i + 1]
+        end
+        m1 = broadcast(fi, q1)
+        for j in 1:classes
+            if isequal(classes)(j)
+                fj = (v) -> breakpoints[j] < v <= breakpoints[j + 1]
+            else
+                fj = (v) -> breakpoints[j] <= v < breakpoints[j + 1]
+            end
+            m2 = broadcast(fj, q2)
+            push!(cols, ColorBlendModes.BlendMultiply(c1[i], c2[j]))
+            m = reduce(*, [m1, m2])
+            replace!(m, false => nothing)
+            if length(m) > 0
+                classified[keys(m)] = fill(length(cols), length(m))
+            end
+        end
+    end
+    replace!(classified, 0 => 1)
+    # @series begin
+    #     seriescolor := vec(cols)
+    #     seriestype := :heatmap
+    #     subplot := 1
+    #     legend --> false
+    #     clims --> (1, classes^2)
+    #     convert(Float16, classified)
+    # end
+end
+@infiltrate get_bivariate_values(l1, l2)
+
 bivariatelegend!(
     S,
     L;
