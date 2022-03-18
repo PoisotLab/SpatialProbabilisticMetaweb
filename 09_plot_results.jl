@@ -52,6 +52,11 @@ plot(
 )
 savefig(joinpath("figures", "richness_all.png"))
 
+# Richness for mean only
+plot(S_all["mean"], c=:cividis, cbtitle="Expected richness")
+plot!(xaxis="Longitude", yaxis="Latitude")
+savefig(joinpath("figures", "richness_mean.png"))
+
 # Univariate richness maps
 plot(
     plot(S_all["mean"], title="Expected richness", c=cgrad([p0, bv_pal_2[2]])),
@@ -129,6 +134,25 @@ end
 plot(biv_plots..., size = (900, 600))
 savefig(joinpath("figures", "lcbd_bivariate_all.png"))
 
+# Bivariate species-networks LCBD for mean only
+bivariate(
+    lcbd_networks_all["mean"], lcbd_species_all["mean"];
+    quantiles=true, bv_pal_4..., classes=3,
+    xaxis="Longitude", yaxis="Latitude"
+)
+bivariatelegend!(
+    lcbd_networks_all["mean"],
+    lcbd_species_all["mean"];
+    classes=3,
+    inset=(1, bbox(0.04, 0.05, 0.28, 0.28, :top, :right)),
+    subplot=2,
+    xlab="Networks LCBD",
+    ylab="Species LCBD",
+    guidefontsize=7,
+    bv_pal_4...
+)
+savefig(joinpath("figures", "lcbd_bivariate_mean.png"))
+
 ## Other maps
 
 # Map & compare LCBD values
@@ -167,7 +191,7 @@ histogram2d(
     rescale(S_all["mean"], collect(0.0:0.05:1.0)),
     rescale(lcbd_networks_all["mean"], collect(0.0:0.05:1.0));
     bins=20,
-    xaxis=((0, 1), "Proportion of realized links"),
+    xaxis=((0, 1), "Richness"),
     yaxis=((0, 1), "Networks LCBD")
 )
 savefig(joinpath("figures", "relationship_richness.png"))
