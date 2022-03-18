@@ -99,6 +99,13 @@ bivariatelegend!(
 
 ## Richness
 
+# Richness-link relationship
+histogram2d(S, L, xlab="Richness", ylab="Links")
+scatter(S, L, xlab="Richness", ylab="Links", alpha=0.1, legend=:none)
+savefig(joinpath("figures", "richness_relationship.png"))
+plot!(xaxis=("Richness (log)", :log), yaxis=("Links (log)", :log))
+savefig(joinpath("figures", "richness_relationship_log.png"))
+
 # Richness-link bivariate map
 bivariate(
     S, L;
