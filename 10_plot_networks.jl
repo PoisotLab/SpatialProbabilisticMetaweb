@@ -109,6 +109,40 @@ savefig(joinpath("figures", "richness_relationship.png"))
 plot!(xaxis=("Richness (log)", :log), yaxis=("Links (log)", :log))
 savefig(joinpath("figures", "richness_relationship_log.png"))
 
+# Extract the bivariate values
+biv_layer, biv_colors = get_bivariate_values(
+    lcbd_networks_all["mean"],
+    lcbd_species_all["mean"];
+    bv_pal_4...
+)
+# plot(convert(Float32, biv_layer), c=biv_colors)
+# Get the specific sites for each group
+sites3 = broadcast(v -> v == 3 ? 1 : nothing, biv_layer)
+sites7 = broadcast(v -> v == 7 ? 1 : nothing, biv_layer)
+sites_mid = broadcast(v -> v != 3 && v != 7 ? 1 : nothing, biv_layer)
+# Plot the two extremas in a different color
+begin
+    plot(xaxis=("Richness (log)", :log), yaxis=("Links (log)", :log), legend=:bottomright)
+    scatter!(S[keys(sites_mid)], L[keys(sites_mid)], label="Middle sites", alpha=0.1, c=:black)
+    scatter!(S[keys(sites3)], L[keys(sites3)], label="Unique species",alpha=0.2, c=biv_colors[3])
+    scatter!(S[keys(sites7)], L[keys(sites7)], label="Unique networks",alpha=0.2, c=biv_colors[7])
+end
+savefig(joinpath("figures", "lcbd_bivariate_scatter.png"))
+
+# Density comparison for richness
+plot(xlab="Richness", ylab="Density")
+density!(S[keys(sites_mid)], label="Middle sites", c=:black)
+density!(S[keys(sites3)], label="Unique species", c=biv_colors[3])
+density!(S[keys(sites7)], label="Unique networks", c=biv_colors[7])
+savefig(joinpath("figures", "lcbd_bivariate_density_richness.png"))
+
+# Density comparison for links
+plot(xlab="Links", ylab="Density")
+density!(L[keys(sites_mid)], label="Middle sites", c=:black)
+density!(L[keys(sites3)], label="Unique species", c=biv_colors[3])
+density!(L[keys(sites7)], label="Unique networks", c=biv_colors[7])
+savefig(joinpath("figures", "lcbd_bivariate_density_links.png"))
+
 # Richness-link bivariate map
 bivariate(
     S, L;
