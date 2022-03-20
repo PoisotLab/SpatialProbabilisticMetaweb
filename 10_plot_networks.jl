@@ -120,6 +120,8 @@ biv_layer, biv_colors = get_bivariate_values(
 sites3 = broadcast(v -> v == 3 ? 1 : nothing, biv_layer)
 sites7 = broadcast(v -> v == 7 ? 1 : nothing, biv_layer)
 sites_mid = broadcast(v -> v != 3 && v != 7 ? 1 : nothing, biv_layer)
+sites = [broadcast(v -> v == i ? true : nothing, biv_layer) for i in 1:9]
+union(keys(sites[3]), keys(sites[6]), keys(sites[9]))
 # Plot the two extremas in a different color
 begin
     plot(xaxis=("Richness (log)", :log), yaxis=("Links (log)", :log), legend=:bottomright)
@@ -142,6 +144,34 @@ density!(L[keys(sites_mid)], label="Middle sites", c=:black)
 density!(L[keys(sites3)], label="Unique species", c=biv_colors[3])
 density!(L[keys(sites7)], label="Unique networks", c=biv_colors[7])
 savefig(joinpath("figures", "lcbd_bivariate_density_links.png"))
+
+# Comparison for all unique species regardless of networks
+begin
+    _unique_spe = union(keys(sites[3]), keys(sites[6]), keys(sites[9]))
+    _non_unique_spe = setdiff(keys(S), _unique_spe)
+    _p1 = plot(xaxis=("Richness (log)", :log), yaxis=("Links (log)", :log), legend=:bottomright)
+    scatter!(S[_non_unique_spe], L[_non_unique_spe], label="Non unique sites", alpha=0.1, c=:black)
+    scatter!(S[_unique_spe], L[_unique_spe], label="Unique species", alpha=0.1, c=biv_colors[3])
+    _p2 = plot(xlab="Richness", ylab="Density")
+    density!(S[_non_unique_spe], label="Non unique sites", c=:black)
+    density!(S[_unique_spe], label="Unique species", c=biv_colors[3])
+    plot(_p1, _p2, size=(800, 400), left_margin=3mm, bottom_margin=3mm)
+end
+savefig(joinpath("figures", "lcbd_bivariate_unique_species.png"))
+
+# Comparison for all unique networks regardless of species
+begin
+    _unique_net = union(keys(sites[7]), keys(sites[8]), keys(sites[9]))
+    _non_unique_net = setdiff(keys(S), _unique_net)
+    _p1 = plot(xaxis=("Richness (log)", :log), yaxis=("Links (log)", :log), legend=:bottomright)
+    scatter!(S[_non_unique_net], L[_non_unique_net], label="Non unique sites", alpha=0.1, c=:black)
+    scatter!(S[_unique_net], L[_unique_net], label="Unique networks", alpha=0.1, c=biv_colors[7])
+    _p2 = plot(xlab="Richness", ylab="Density")
+    density!(S[_non_unique_net], label="Non unique sites", c=:black)
+    density!(S[_unique_net], label="Unique networks", c=biv_colors[7])
+    plot(_p1, _p2, size=(800, 400), left_margin=3mm, bottom_margin=3mm)
+end
+savefig(joinpath("figures", "lcbd_bivariate_unique_networks.png"))
 
 # Richness-link bivariate map
 bivariate(

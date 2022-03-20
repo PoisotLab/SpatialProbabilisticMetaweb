@@ -14,6 +14,7 @@ using StatsPlots
 using Base.Threads: @threads
 using JLD2, CodecZlib
 import ColorBlendModes
+using Plots.PlotMeasures
 
 default(; dpi=200)
 
