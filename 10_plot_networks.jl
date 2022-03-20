@@ -19,13 +19,16 @@ plot(L; c=:cividis, title="Expected number of links")
 savefig(joinpath("figures", "links_mean.png"))
 
 # Links with other color palette
-plot(L; c=:cividis, xaxis="Longitude", yaxis="Latitude")
+plot_options = (
+    cbtitle="Expected number of links", xaxis="Longitude", yaxis="Latitude", size=(650,400)
+)
+plot(L; c=:cividis, plot_options...)
 savefig(joinpath("figures", "links_mean_cividis.png"))
-plot(L; c=:acton, xaxis="Longitude", yaxis="Latitude")
+plot(L; c=:acton, plot_options...)
 savefig(joinpath("figures", "links_mean_acton.png"))
-plot(L; c=:tokyo, xaxis="Longitude", yaxis="Latitude")
+plot(L; c=:tokyo, plot_options...)
 savefig(joinpath("figures", "links_mean_tokyo.png"))
-plot(L; c=:viridis, xaxis="Longitude", yaxis="Latitude")
+plot(L; c=:viridis, plot_options...)
 savefig(joinpath("figures", "links_mean_viridis.png"))
 
 # Link variance

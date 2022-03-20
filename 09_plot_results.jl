@@ -53,7 +53,7 @@ plot(
 savefig(joinpath("figures", "richness_all.png"))
 
 # Richness for mean only
-plot(S_all["mean"], c=:cividis, cbtitle="Expected richness")
+plot(S_all["mean"], c=:cividis, cbtitle="Expected richness", size=(650, 400))
 plot!(xaxis="Longitude", yaxis="Latitude")
 savefig(joinpath("figures", "richness_mean.png"))
 
@@ -164,6 +164,13 @@ plot(
 )
 savefig(joinpath("figures", "lcbd_two-panels.png"))
 
+# Plot separately
+plot_options = (cb=:none, xticks=:none, yticks=:none, frame=:box)
+plot(lcbd_species_all["mean"]; c=:viridis, plot_options...)
+savefig(joinpath("figures", "lcbd_mean_species.png"))
+plot(lcbd_networks_all["mean"]; c=:viridis, plot_options...)
+savefig(joinpath("figures", "lcbd_mean_networks.png"))
+
 # Univariate rescaled LCBD
 plot(
     plot(rescale(lcbd_species_all["mean"], collect(0.0:0.05:1.0)); c=cgrad([p0, bv_pal_4[3]])),
@@ -173,6 +180,15 @@ plot(
     size=(600,600)
 )
 savefig(joinpath("figures", "lcbd_two-panels_rescaled.png"))
+
+# Plot separately
+plot_options = (xaxis="Longitude", yaxis="Latitude", size=(650,400))
+plot(rescale(lcbd_species_all["mean"], collect(0.0:0.05:1.0)); c=cgrad([p0, bv_pal_4[3]]))
+plot!(; cbtitle= "Species LCBD (rescaled)", plot_options...)
+savefig(joinpath("figures", "lcbd_mean_rescaled_species.png"))
+plot(rescale(lcbd_networks_all["mean"], collect(0.0:0.05:1.0)); c=cgrad([p0, bv_pal_4[2]]))
+plot!(; cbtitle= "Network LCBD (rescaled)", plot_options...)
+savefig(joinpath("figures", "lcbd_mean_rescaled_networks.png"))
 
 ## Relationship
 
