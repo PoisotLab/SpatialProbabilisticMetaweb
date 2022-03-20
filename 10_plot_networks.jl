@@ -109,6 +109,93 @@ savefig(joinpath("figures", "richness_relationship.png"))
 plot!(xaxis=("Richness (log)", :log), yaxis=("Links (log)", :log))
 savefig(joinpath("figures", "richness_relationship_log.png"))
 
+# Richness-link bivariate map
+bivariate(
+    S, L;
+    quantiles=true, classes=3, xlab="Longitude", ylab="Latitude", bv_pal_2...
+)
+bivariatelegend!(
+    S,
+    L;
+    classes=3,
+    inset=(1, bbox(0.04, 0.05, 0.28, 0.28, :top, :right)),
+    subplot=2,
+    xlab="Richness",
+    ylab="Links",
+    guidefontsize=7,
+    bv_pal_2...
+)
+savefig(joinpath("figures", "bivariate_richness_links.png"))
+
+# Richness-link uncertainty bivariate map
+bivariate(
+    broadcast(v -> v^2, Sσ), Lv;
+    quantiles=true, classes=3, xlab="Longitude", ylab="Latitude", bv_pal_2...
+)
+bivariatelegend!(
+    broadcast(v -> v^2, Sσ),
+    Lv;
+    classes=3,
+    inset=(1, bbox(0.04, 0.05, 0.28, 0.28, :top, :right)),
+    subplot=2,
+    xlab="Richness variance",
+    ylab="Link variance",
+    guidefontsize=7,
+    bv_pal_2...
+)
+savefig(joinpath("figures", "bivariate_richness_links_variance.png"))
+
+# Richness coefficient of variation
+Scv = Sσ/S
+plot(Scv; c=:cividis, title="Richness coefficient of variation")
+
+# Richness-link coefficient of variation bivariate map
+bivariate(
+    Scv, Lcv;
+    quantiles=true, classes=3, xlab="Longitude", ylab="Latitude", bv_pal_2...
+)
+bivariatelegend!(
+    Scv,
+    Lcv;
+    classes=3,
+    inset=(1, bbox(0.04, 0.05, 0.28, 0.28, :top, :right)),
+    subplot=2,
+    xlab="Richness coefficient of variation",
+    ylab="Link coefficient of variation",
+    guidefontsize=6,
+    bv_pal_2...
+)
+savefig(joinpath("figures", "bivariate_richness_links_coeff.png"))
+
+## LCBD & network measures
+
+# Load LCBD results
+include("x_load_results.jl")
+
+# LCBD-richness relationships
+begin
+    scatter(S, lcbd_species_all["mean"], alpha=0.2, label="Species LCBD")
+    scatter!(S, lcbd_networks_all["mean"], alpha=0.2, label="Network LCBD")
+    plot!(xaxis=("Richness (log)", :log), yaxis=("LCBD"), legend=:bottomright)
+end
+savefig(joinpath("figures", "lcbd_relationship_richness.png"))
+
+# LCBD-links relationships
+begin
+    scatter(L, lcbd_species_all["mean"], alpha=0.2, label="Species LCBD")
+    scatter!(L, lcbd_networks_all["mean"], alpha=0.2, label="Network LCBD")
+    plot!(xaxis=("Links (log)", :log), yaxis=("LCBD"), legend=:bottomright)
+end
+savefig(joinpath("figures", "lcbd_relationship_links.png"))
+
+# LCBD-connectance relationships
+begin
+    scatter(Co, lcbd_species_all["mean"], alpha=0.2, label="Species LCBD")
+    scatter!(Co, lcbd_networks_all["mean"], alpha=0.2, label="Network LCBD")
+    plot!(xaxis=("Connectance (log)", :log), yaxis=("LCBD"), legend=:bottomright)
+end
+savefig(joinpath("figures", "lcbd_relationship_connectance.png"))
+
 # Extract the bivariate values
 biv_layer, biv_colors = get_bivariate_values(
     lcbd_networks_all["mean"],
@@ -172,93 +259,6 @@ begin
     plot(_p1, _p2, size=(800, 400), left_margin=3mm, bottom_margin=3mm)
 end
 savefig(joinpath("figures", "lcbd_bivariate_unique_networks.png"))
-
-# Richness-link bivariate map
-bivariate(
-    S, L;
-    quantiles=true, classes=3, xlab="Longitude", ylab="Latitude", bv_pal_2...
-)
-bivariatelegend!(
-    S,
-    L;
-    classes=3,
-    inset=(1, bbox(0.04, 0.05, 0.28, 0.28, :top, :right)),
-    subplot=2,
-    xlab="Richness",
-    ylab="Links",
-    guidefontsize=7,
-    bv_pal_2...
-)
-savefig(joinpath("figures", "bivariate_richness_links.png"))
-
-# Richness-link uncertainty bivariate map
-bivariate(
-    broadcast(v -> v^2, Sσ), Lv;
-    quantiles=true, classes=3, xlab="Longitude", ylab="Latitude", bv_pal_2...
-)
-bivariatelegend!(
-    broadcast(v -> v^2, Sσ),
-    Lv;
-    classes=3,
-    inset=(1, bbox(0.04, 0.05, 0.28, 0.28, :top, :right)),
-    subplot=2,
-    xlab="Richness variance",
-    ylab="Link variance",
-    guidefontsize=7,
-    bv_pal_2...
-)
-savefig(joinpath("figures", "bivariate_richness_links_uncertainty.png"))
-
-# Richness coefficient of variation
-Scv = Sσ/S
-plot(Scv; c=:cividis, title="Richness coefficient of variation")
-
-# Richness-link coefficient of variation bivariate map
-bivariate(
-    Scv, Lcv;
-    quantiles=true, classes=3, xlab="Longitude", ylab="Latitude", bv_pal_2...
-)
-bivariatelegend!(
-    Scv,
-    Lcv;
-    classes=3,
-    inset=(1, bbox(0.04, 0.05, 0.28, 0.28, :top, :right)),
-    subplot=2,
-    xlab="Richness coefficient of variation",
-    ylab="Link coefficient of variation",
-    guidefontsize=6,
-    bv_pal_2...
-)
-savefig(joinpath("figures", "bivariate_richness_links_coeff.png"))
-
-## LCBD & network measures
-
-# Load LCBD results
-include("x_load_results.jl")
-
-# LCBD-richness relationships
-begin
-    scatter(S, lcbd_species_all["mean"], alpha=0.2, label="Species LCBD")
-    scatter!(S, lcbd_networks_all["mean"], alpha=0.2, label="Network LCBD")
-    plot!(xaxis=("Richness (log)", :log), yaxis=("LCBD"), legend=:bottomright)
-end
-savefig(joinpath("figures", "lcbd_relationship_richness.png"))
-
-# LCBD-links relationships
-begin
-    scatter(L, lcbd_species_all["mean"], alpha=0.2, label="Species LCBD")
-    scatter!(L, lcbd_networks_all["mean"], alpha=0.2, label="Network LCBD")
-    plot!(xaxis=("Links (log)", :log), yaxis=("LCBD"), legend=:bottomright)
-end
-savefig(joinpath("figures", "lcbd_relationship_links.png"))
-
-# LCBD-connectance relationships
-begin
-    scatter(Co, lcbd_species_all["mean"], alpha=0.2, label="Species LCBD")
-    scatter!(Co, lcbd_networks_all["mean"], alpha=0.2, label="Network LCBD")
-    plot!(xaxis=("Connectance (log)", :log), yaxis=("LCBD"), legend=:bottomright)
-end
-savefig(joinpath("figures", "lcbd_relationship_connectance.png"))
 
 ## Compare sampling options
 
