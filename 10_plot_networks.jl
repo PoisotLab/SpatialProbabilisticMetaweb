@@ -263,7 +263,7 @@ clim2 = mapreduce(maximum, max, values(L_all))
 lims = (clim1, clim2)
 titles = ["Mean" "Mean > cutoff" "Rnd" "Rnd > cutoff"] # for plots later on
 plot(
-    [plot(L; c=:cividis, clim=lims) for L in L_all]...;
+    [plot(L; c=:acton, clim=lims) for L in L_all]...;
     # [plot(broadcast(links, l); c=:cividis) for l in layers_all]...;
     title = titles,
     cbtitle="Links",
@@ -279,15 +279,10 @@ clim2 = mapreduce(maximum, max, values(Lv_all))
 lims = (clim1, clim2)
 titles = ["Mean" "Mean > cutoff" "Rnd" "Rnd > cutoff"] # for plots later on
 plot(
-    [plot(Lv; c=:cividis, clim=lims) for Lv in Lv_all]...;
+    [plot(Lv; c=:acton, clim=lims) for Lv in Lv_all]...;
     title = titles,
     cbtitle="Link variance",
     layout=(2,2),
     size=(900,600),
 )
 savefig(joinpath("figures", "links_var_all.png"))
-
-### Empty plot
-
-plot(L, c=:lightgrey)
-plot(convert(Float32, broadcast(!iszero, L)), c=:lightgrey)
