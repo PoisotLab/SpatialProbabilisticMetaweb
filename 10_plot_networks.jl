@@ -286,3 +286,14 @@ plot(
     size=(900,600),
 )
 savefig(joinpath("figures", "links_var_all.png"))
+
+## Quebec background
+spatialrange = (left=-80.0, right=-50.0, bottom=45.0, top=65.0)
+plot(;
+    frame=:box,
+    xlim=(spatialrange.left, spatialrange.right),
+    ylim=(spatialrange.bottom, spatialrange.top),
+    dpi=600,
+)
+plot!(worldshape(50), c=:lightgrey, lc=:lightgrey, grid=:none, frame=:none)
+savefig("qcbackground.png")
