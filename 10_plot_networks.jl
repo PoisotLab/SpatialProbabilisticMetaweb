@@ -15,21 +15,18 @@ Sσ = geotiff(SimpleSDMPredictor, joinpath("data", "results", "richness_uncertai
 ## Some plots
 
 # Links
-plot(L; c=:cividis, title="Expected number of links")
+plot(L; c=:acton, title="Expected number of links")
 savefig(joinpath("figures", "links_mean.png"))
 
 # Links with other color palette
-plot(L; c=:cividis, xaxis="Longitude", yaxis="Latitude")
-savefig(joinpath("figures", "links_mean_cividis.png"))
-plot(L; c=:acton, xaxis="Longitude", yaxis="Latitude")
+plot_options = (
+    cbtitle="Expected number of links", xaxis="Longitude", yaxis="Latitude", size=(650,400)
+)
+plot(L; c=:acton, plot_options...)
 savefig(joinpath("figures", "links_mean_acton.png"))
-plot(L; c=:tokyo, xaxis="Longitude", yaxis="Latitude")
-savefig(joinpath("figures", "links_mean_tokyo.png"))
-plot(L; c=:viridis, xaxis="Longitude", yaxis="Latitude")
-savefig(joinpath("figures", "links_mean_viridis.png"))
 
 # Link variance
-plot(Lv; c=:cividis, title="Link variance")
+plot(Lv; c=:acton, title="Link variance")
 savefig(joinpath("figures", "links_var.png"))
 
 # Link bivariate map
@@ -101,9 +98,9 @@ bivariatelegend!(
 
 # Richness-link relationship
 histogram2d(S, L, xlab="Richness", ylab="Links")
-scatter(S, L, xlab="Richness", ylab="Links", alpha=0.1, legend=:none)
+scatter(S, L, xlab="Richness", ylab="Links", alpha=0.1, legend=:none, c=:black)
 savefig(joinpath("figures", "richness_relationship.png"))
-plot!(xaxis=("Richness (log)", :log), yaxis=("Links (log)", :log))
+plot!(xaxis=("Richness (log)", :log), yaxis=("Links (log)", :log), c=:black)
 savefig(joinpath("figures", "richness_relationship_log.png"))
 
 # Richness-link bivariate map
@@ -140,7 +137,7 @@ bivariatelegend!(
     guidefontsize=7,
     bv_pal_2...
 )
-savefig(joinpath("figures", "bivariate_richness_links_uncertainty.png"))
+savefig(joinpath("figures", "bivariate_richness_links_variance.png"))
 
 # Richness coefficient of variation
 Scv = Sσ/S
@@ -193,6 +190,70 @@ begin
 end
 savefig(joinpath("figures", "lcbd_relationship_connectance.png"))
 
+# Extract the bivariate values
+biv_layer, biv_colors = get_bivariate_values(
+    lcbd_networks_all["mean"],
+    lcbd_species_all["mean"];
+    bv_pal_4...
+)
+# plot(convert(Float32, biv_layer), c=biv_colors)
+# Get the specific sites for each group
+sites3 = broadcast(v -> v == 3 ? 1 : nothing, biv_layer)
+sites7 = broadcast(v -> v == 7 ? 1 : nothing, biv_layer)
+sites_mid = broadcast(v -> v != 3 && v != 7 ? 1 : nothing, biv_layer)
+sites = [broadcast(v -> v == i ? true : nothing, biv_layer) for i in 1:9]
+union(keys(sites[3]), keys(sites[6]), keys(sites[9]))
+# Plot the two extremas in a different color
+begin
+    plot(xaxis=("Richness (log)", :log), yaxis=("Links (log)", :log), legend=:bottomright)
+    scatter!(S[keys(sites_mid)], L[keys(sites_mid)], label="Middle sites", alpha=0.1, c=:black)
+    scatter!(S[keys(sites3)], L[keys(sites3)], label="Unique species",alpha=0.2, c=biv_colors[3])
+    scatter!(S[keys(sites7)], L[keys(sites7)], label="Unique networks",alpha=0.2, c=biv_colors[7])
+end
+savefig(joinpath("figures", "lcbd_bivariate_scatter.png"))
+
+# Density comparison for richness
+plot(xlab="Richness", ylab="Density")
+density!(S[keys(sites_mid)], label="Middle sites", c=:black)
+density!(S[keys(sites3)], label="Unique species", c=biv_colors[3])
+density!(S[keys(sites7)], label="Unique networks", c=biv_colors[7])
+savefig(joinpath("figures", "lcbd_bivariate_density_richness.png"))
+
+# Density comparison for links
+plot(xlab="Links", ylab="Density")
+density!(L[keys(sites_mid)], label="Middle sites", c=:black)
+density!(L[keys(sites3)], label="Unique species", c=biv_colors[3])
+density!(L[keys(sites7)], label="Unique networks", c=biv_colors[7])
+savefig(joinpath("figures", "lcbd_bivariate_density_links.png"))
+
+# Comparison for all unique species regardless of networks
+begin
+    _unique_spe = union(keys(sites[3]), keys(sites[6]), keys(sites[9]))
+    _non_unique_spe = setdiff(keys(S), _unique_spe)
+    _p1 = plot(xaxis=("Richness (log)", :log), yaxis=("Links (log)", :log), legend=:bottomright)
+    scatter!(S[_non_unique_spe], L[_non_unique_spe], label="Non unique sites", alpha=0.1, c=:black)
+    scatter!(S[_unique_spe], L[_unique_spe], label="Unique species", alpha=0.1, c=biv_colors[3])
+    _p2 = plot(xlab="Richness", ylab="Density")
+    density!(S[_non_unique_spe], label="Non unique sites", c=:black)
+    density!(S[_unique_spe], label="Unique species", c=biv_colors[3])
+    plot(_p1, _p2, size=(800, 400), left_margin=3mm, bottom_margin=3mm)
+end
+savefig(joinpath("figures", "lcbd_bivariate_unique_species.png"))
+
+# Comparison for all unique networks regardless of species
+begin
+    _unique_net = union(keys(sites[7]), keys(sites[8]), keys(sites[9]))
+    _non_unique_net = setdiff(keys(S), _unique_net)
+    _p1 = plot(xaxis=("Richness (log)", :log), yaxis=("Links (log)", :log), legend=:bottomright)
+    scatter!(S[_non_unique_net], L[_non_unique_net], label="Non unique sites", alpha=0.1, c=:black)
+    scatter!(S[_unique_net], L[_unique_net], label="Unique networks", alpha=0.1, c=biv_colors[7])
+    _p2 = plot(xlab="Richness", ylab="Density")
+    density!(S[_non_unique_net], label="Non unique sites", c=:black)
+    density!(S[_unique_net], label="Unique networks", c=biv_colors[7])
+    plot(_p1, _p2, size=(800, 400), left_margin=3mm, bottom_margin=3mm)
+end
+savefig(joinpath("figures", "lcbd_bivariate_unique_networks.png"))
+
 ## Compare sampling options
 
 # Links
@@ -202,7 +263,7 @@ clim2 = mapreduce(maximum, max, values(L_all))
 lims = (clim1, clim2)
 titles = ["Mean" "Mean > cutoff" "Rnd" "Rnd > cutoff"] # for plots later on
 plot(
-    [plot(L; c=:cividis, clim=lims) for L in L_all]...;
+    [plot(L; c=:acton, clim=lims) for L in L_all]...;
     # [plot(broadcast(links, l); c=:cividis) for l in layers_all]...;
     title = titles,
     cbtitle="Links",
@@ -218,10 +279,21 @@ clim2 = mapreduce(maximum, max, values(Lv_all))
 lims = (clim1, clim2)
 titles = ["Mean" "Mean > cutoff" "Rnd" "Rnd > cutoff"] # for plots later on
 plot(
-    [plot(Lv; c=:cividis, clim=lims) for Lv in Lv_all]...;
+    [plot(Lv; c=:acton, clim=lims) for Lv in Lv_all]...;
     title = titles,
     cbtitle="Link variance",
     layout=(2,2),
     size=(900,600),
 )
 savefig(joinpath("figures", "links_var_all.png"))
+
+## Quebec background
+spatialrange = (left=-80.0, right=-50.0, bottom=45.0, top=65.0)
+plot(;
+    frame=:box,
+    xlim=(spatialrange.left, spatialrange.right),
+    ylim=(spatialrange.bottom, spatialrange.top),
+    dpi=600,
+)
+plot!(worldshape(50), c=:lightgrey, lc=:lightgrey, grid=:none, frame=:none)
+savefig("qcbackground.png")
