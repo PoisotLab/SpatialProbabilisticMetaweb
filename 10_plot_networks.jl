@@ -15,24 +15,18 @@ Sσ = geotiff(SimpleSDMPredictor, joinpath("data", "results", "richness_uncertai
 ## Some plots
 
 # Links
-plot(L; c=:cividis, title="Expected number of links")
+plot(L; c=:acton, title="Expected number of links")
 savefig(joinpath("figures", "links_mean.png"))
 
 # Links with other color palette
 plot_options = (
     cbtitle="Expected number of links", xaxis="Longitude", yaxis="Latitude", size=(650,400)
 )
-plot(L; c=:cividis, plot_options...)
-savefig(joinpath("figures", "links_mean_cividis.png"))
 plot(L; c=:acton, plot_options...)
 savefig(joinpath("figures", "links_mean_acton.png"))
-plot(L; c=:tokyo, plot_options...)
-savefig(joinpath("figures", "links_mean_tokyo.png"))
-plot(L; c=:viridis, plot_options...)
-savefig(joinpath("figures", "links_mean_viridis.png"))
 
 # Link variance
-plot(Lv; c=:cividis, title="Link variance")
+plot(Lv; c=:acton, title="Link variance")
 savefig(joinpath("figures", "links_var.png"))
 
 # Link bivariate map
