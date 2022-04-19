@@ -9,6 +9,7 @@ using EcologicalNetworks
 using ProgressMeter
 using SimpleSDMLayers
 using Random
+using Shapefile
 using Statistics
 using StatsPlots
 using Base.Threads: @threads

@@ -26,7 +26,7 @@ plot(L; c=:acton, plot_options...)
 savefig(joinpath("figures", "links_mean_acton.png"))
 
 # Link variance
-plot(Lv; c=:acton, title="Link variance")
+plot(Lv; c=:acton, cb_title="Link variance")
 savefig(joinpath("figures", "links_var.png"))
 
 # Link bivariate map
