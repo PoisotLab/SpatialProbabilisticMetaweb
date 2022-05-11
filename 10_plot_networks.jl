@@ -7,6 +7,7 @@ include("A0_required.jl")
 layers_all = [layer, layer_thr, layer_rnd, layer_rnd_thr]
 Co = broadcast(connectance, layer)
 L = broadcast(links, layer)
+L_all = [broadcast(links, l) for l in layers_all]
 Lv = broadcast(links_var, layer)
 Ld = broadcast(linkage_density, layer)
 S = geotiff(SimpleSDMPredictor, joinpath("data", "results", "richness_mean.tif"))
@@ -24,6 +25,22 @@ plot_options = (
 )
 plot(L; c=:acton, plot_options...)
 savefig(joinpath("figures", "links_mean_acton.png"))
+
+# Links for all options
+clim1 = mapreduce(minimum, min, values(L_all))
+clim2 = mapreduce(maximum, max, values(L_all))
+L_all_plots = []
+lims = (clim1, clim2)
+plot(
+    [plot(L; c=:acton, clim=lims) for L in L_all]...;
+    cbtitle="Expected number of links",
+    xaxis="Latitude",
+    yaxis="Longitude",
+    layout=(2,2),
+    size=(1000,600),
+    left_margin=3mm
+)
+savefig(joinpath("figures", "links_all.png"))
 
 # Link variance
 plot(Lv; c=:acton, cb_title="Link variance")
