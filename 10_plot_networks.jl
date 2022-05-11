@@ -223,9 +223,9 @@ union(keys(sites[3]), keys(sites[6]), keys(sites[9]))
 # Plot the two extremas in a different color
 begin
     plot(xaxis=("Richness (log)", :log), yaxis=("Links (log)", :log), legend=:bottomright)
-    scatter!(S[keys(sites_mid)], L[keys(sites_mid)], label="Middle sites", alpha=0.1, c=:black)
-    scatter!(S[keys(sites3)], L[keys(sites3)], label="Unique species",alpha=0.2, c=biv_colors[3])
-    scatter!(S[keys(sites7)], L[keys(sites7)], label="Unique networks",alpha=0.2, c=biv_colors[7])
+    scatter!(S[keys(S)], L[keys(S)], label="All sites", alpha=0.1, c=:black)
+    scatter!(S[keys(sites3)], L[keys(sites3)], label="Unique species only",alpha=0.2, c=biv_colors[3])
+    scatter!(S[keys(sites7)], L[keys(sites7)], label="Unique networks only",alpha=0.2, c=biv_colors[7])
 end
 savefig(joinpath("figures", "lcbd_bivariate_scatter.png"))
 

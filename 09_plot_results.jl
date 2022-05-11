@@ -51,6 +51,19 @@ plot(
     size=(900,600),
 )
 savefig(joinpath("figures", "richness_all.png"))
+# For committee document
+plot(
+    [plot(S_all[opt]; c=:cividis, clim=lims) for opt in options]...;
+    cbtitle="Species richness",
+    layout=(2,2),
+    size=(1000,600),
+    xaxis="Latitude",
+    yaxis="Longitude",
+    left_margin=3mm
+)
+savefig(joinpath("figures", "richness_all_committee.png"))
+plot!(title = ["a)" "b)" "c)" "d)"], titlepos=:left)
+savefig(joinpath("figures", "richness_all_committee_lettered.png"))
 
 # Richness for mean only
 plot(S_all["mean"], c=:cividis, cbtitle="Expected richness", size=(650, 400))
