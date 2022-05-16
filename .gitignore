@@ -3,3 +3,4 @@ data/sdms/*
 *.code-workspace
 JuliaSysimage.so
 data/jld2
+shapefiles/canada/
