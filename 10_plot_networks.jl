@@ -313,4 +313,4 @@ plot(;
     dpi=600,
 )
 plot!(worldshape(50), c=:lightgrey, lc=:lightgrey, grid=:none, frame=:none)
-savefig("qcbackground.png")
+savefig("figures", "x_background_qc.png")

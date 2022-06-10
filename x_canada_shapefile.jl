@@ -9,11 +9,11 @@ end
 plot(canada, c=:lightgrey, dpi=200,
      grid=false, axis=false, ticks=false,
      bg_colour=:transparent, fg_colour=:black)
-savefig("x_background_ca.png")
+savefig("figures", "x_background_ca.png")
 plot(canada, c=:lightgrey, dpi=200,
      grid=false, axis=false, ticks=false,
      bg_colour=:transparent, fg_colour=:white)
-savefig("x_background_ca_white.png")
+savefig("figures", "x_background_ca_white.png")
 
 
 # Alternative
