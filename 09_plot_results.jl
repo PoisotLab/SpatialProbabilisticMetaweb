@@ -70,6 +70,11 @@ plot(S_all["mean"], c=:cividis, cbtitle="Expected richness", size=(650, 400))
 plot!(xaxis="Longitude", yaxis="Latitude")
 savefig(joinpath("figures", "richness_mean.png"))
 
+# Richness variance for mean only
+plot(Sσ, c=:cividis, cbtitle="Richness variance", size=(650, 400))
+plot!(xaxis="Longitude", yaxis="Latitude")
+savefig(joinpath("figures", "richness_var.png"))
+
 # Univariate richness maps
 plot(
     plot(S_all["mean"], title="Expected richness", c=cgrad([p0, bv_pal_2[2]])),
