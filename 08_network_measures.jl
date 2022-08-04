@@ -14,6 +14,10 @@ Lv = broadcast(links_var, layer)
 Ld = broadcast(linkage_density, layer)
 # m = broadcast(find_motif, layer)
 
+# Export the link layers
+geotiff(joinpath("data", "results", "links_mean.tif"), L)
+geotiff(joinpath("data", "results", "links_var.tif"), Lv)
+
 # Plot 'em
 plot(
     plot(Co; c=:cividis, title="Connectance"),
