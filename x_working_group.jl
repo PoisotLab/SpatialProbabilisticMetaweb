@@ -9,7 +9,7 @@ include("A0_required.jl")
 ## Generate the Spatial Probabilistic Metaweb
 # As a layer in a JLD2 file
 spatial_metaweb = layer
-@save joinpath("data", "spatial_probabilistic_metaweb.jld2") spatial_metaweb
+@save joinpath("data", "jld2", "working_group", "spatial_probabilistic_metaweb.jld2") spatial_metaweb
 
 # As a 3D matrix in a JLD2 file
 # Which we then convert as a layer
@@ -20,7 +20,7 @@ include("04_aggregate_sdms.jl")
 
 # Combine in single stack
 occurrence_probabilities = map(l -> broadcast(mean, l), collect(values(D)))
-geotiff(joinpath("data", "jld2", "occurrence_probabilities.tif"), occurrence_probabilities)
+geotiff(joinpath("data", "jld2", "working_group", "occurrence_probabilities.tif"), occurrence_probabilities)
 
 # Matrix with co-occurrence probabilities
 sites = keys(reference_layer)
@@ -46,14 +46,14 @@ cooccurrence_layer[keys(reference_layer)] = cooccurrence_stack
 # Pairwise combinations
 cooccurrence_vec = reduce(hcat, vec.(cooccurrence_stack))
 
-# Export objects
-@save joinpath("data", "jld2", "cooccurrence_3D.jld2") cooccurrence
-@save joinpath("data", "jld2", "cooccurrence_layer.jld2") cooccurrence_layer
-@save joinpath("data", "jld2", "cooccurrence_vec.jld2") cooccurrence_vec
+# Export objects (2.5 GB each)
+# @save joinpath("data", "jld2", "working_group", "cooccurrence_3D.jld2") cooccurrence
+# @save joinpath("data", "jld2", "working_group", "cooccurrence_layer.jld2") cooccurrence_layer
+# @save joinpath("data", "jld2", "working_group", "cooccurrence_vec.jld2") cooccurrence_vec
 
 ## Generate the uncertainty layer
 occurrence_uncertainties = map(l -> broadcast(var, l), collect(values(D)))
-geotiff(joinpath("data", "jld2", "occurrence_uncertainties.tif"), occurrence_uncertainties)
+geotiff(joinpath("data", "jld2", "working_group", "occurrence_uncertainties.tif"), occurrence_uncertainties)
 
 ## Export species list
-CSV.write(joinpath("data", "jld2", "species_list.csv"), DataFrame(sp = sp), writeheader=false)
+CSV.write(joinpath("data", "jld2", "working_group", "species_list.csv"), DataFrame(sp = sp), writeheader=false)
