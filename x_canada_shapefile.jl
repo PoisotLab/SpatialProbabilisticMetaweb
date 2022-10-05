@@ -23,7 +23,14 @@ can_data = JSON.parsefile(borders)
 polys = can_data["geometry"]["coordinates"]
 canada_poly = SimpleSDMLayers._format_polygon.(polys)
 
+# Reference layer at 10 arcmin
 coords = (left=-145.0, right=-50.0, bottom=40.0)
-layer = SimpleSDMPredictor(WorldClim, BioClim, 1; coords...)
-@time layer_mask = mask(canada_poly, layer) # 140 sec.
-plot(layer_mask)
+reflayer = SimpleSDMPredictor(WorldClim, BioClim, 1; coords...)
+@time reflayer_mask = mask(canada_poly, reflayer) # 140 sec.
+plot(reflayer_mask)
+geotiff(joinpath("data", "input", "canada_ref_10.tif"), similar(reflayer_mask))
+
+# Reference layer at 2.5 arcmin
+reflayer2 = SimpleSDMPredictor(WorldClim, BioClim, 1; resolution=2.5, coords...)
+@time reflayer2_mask = mask(canada_poly, reflayer2) # 40 min
+geotiff(joinpath("data", "input", "canada_ref_2.tif"), similar(reflayer2_mask))
