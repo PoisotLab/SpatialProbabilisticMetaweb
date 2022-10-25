@@ -25,3 +25,37 @@ occ3 <- read_tsv("./data/occurrences/all_occurrences_problems.csv")
 all(occ3 == problem_occ, na.rm = TRUE)
 occ3 == problem_occ %>% View()
 occ3[which(occ3 != problem_occ)
+
+## Temporary workaround
+# Keep only basic columns, separate by species, export to separate files
+
+# First use a smaller set
+# occ_mini <- head(occ, 1000)
+
+# Now select only the same columns as in your initial analyses
+# occ_select <- occ_mini |>
+occ_select <- occ |>
+  select(species, decimalLatitude, decimalLongitude) |>
+  rename(name = species,
+         latitude = decimalLatitude,
+         longitude = decimalLongitude)
+
+# Separate by species
+# occ_select %>%
+#   group_by(name) %>%
+#   # summarize(test = length(name)) %>%
+#   group_split()
+
+# Get species names
+sp_list <- unique(occ_select$name)
+
+# Export as separate files
+for (sp in sp_list) {
+  sp_name <- str_replace(sp, " ", "_")
+  sp_path <- file.path("data", "occurrences2", paste0(sp_name, ".csv"))
+  occ_select |>
+    filter(name == sp) |>
+    write_tsv(sp_path)
+}
+# 67 MB
+# 1,579,706 obs
