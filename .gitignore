@@ -4,4 +4,4 @@ data/sdms/*
 JuliaSysimage.so
 data/jld2
 shapefiles/canada/
-data/occurrences/all_occurrences.csv
+data/occurrences/all_occurrences*.csv
