@@ -6,3 +6,4 @@ data/jld2
 shapefiles/canada/
 data/occurrences/*.csv
 data/occurrences/subset/all_occurrences*.csv
+data/presence_absence/*.tif
