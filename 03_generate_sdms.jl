@@ -1,22 +1,22 @@
 include("A0_required.jl")
 
 # bioclim variables
-layers = SimpleSDMPredictor(WorldClim, BioClim, 1:19; left=-180., right=-40., bottom=18., top=89.)
+layers = SimpleSDMPredictor(
+    WorldClim, BioClim, 1:19; resolution=2.5, left=-180.0, right=-40.0, bottom=18.0, top=89.0
+)
 all_values = hcat([layer[keys(layer)] for layer in layers]...)
 
 ispath(joinpath("data", "sdms")) || mkpath(joinpath("data", "sdms"))
 
 df = [DataFrame(species = String[], occurrences = Int64[], AUC = Float64[], J = Float64[], cutoff = Float64[]) for i in 1:Threads.nthreads()]
 
-pa_files = readdir(joinpath("data", "presence_absence", "coarser"); join=true)
+pa_files = readdir(joinpath("data", "presence_absence"); join=true)
 filter!(contains(".tif"), pa_files)
-# p = Progress(length(pa_files))
 
-# @time "total multi" Threads.@threads for i in 1:length(pa_files)
-# @time "total multi" Threads.@threads for i in 1:2
-# @time "total single" for i in 1:2
-@time "total single" for i in 1:length(pa_files)
-    @time "Species $i" begin
+p = Progress(length(pa_files))
+# Threads.@threads for i in 1:length(pa_files)
+for i in 1:length(pa_files)
+    Random.seed!(i)
     tree_store = EvoTreeGaussian(;
         loss=:gaussian,
         metric=:gaussian,
@@ -32,7 +32,7 @@ filter!(contains(".tif"), pa_files)
     )
 
     pa_file = pa_files[i]
-    spname = replace(split(pa_file, "/")[2], ".tif" => "")
+    spname = replace(split(pa_file, "/")[3], ".tif" => "")
 
     pr = geotiff(SimpleSDMResponse, pa_file, 1)
     ab = geotiff(SimpleSDMResponse, pa_file, 2)
@@ -45,7 +45,7 @@ filter!(contains(".tif"), pa_files)
         var = similar(sdm)
         geotiff(joinpath("data", "sdms", spname*"_model.tif"),sdm)
         geotiff(joinpath("data", "sdms", spname*"_error.tif"),var)
-        # next!(p)
+        next!(p)
         continue
     end
 
@@ -105,8 +105,7 @@ filter!(contains(".tif"), pa_files)
     sdm = mask(range_mask, distribution)/maximum(mask(range_mask, distribution))
     geotiff(joinpath("data", "sdms", spname*"_model.tif"),distribution)
     geotiff(joinpath("data", "sdms", spname*"_error.tif"),uncertainty)
-    # next!(p)
+    next!(p)
     end
 end
-
 CSV.write(joinpath("data", "input", "sdm_fit_results.csv"), vcat(df...))

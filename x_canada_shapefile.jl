@@ -34,3 +34,12 @@ geotiff(joinpath("data", "input", "canada_ref_10.tif"), similar(reflayer_mask))
 reflayer2 = SimpleSDMPredictor(WorldClim, BioClim, 1; resolution=2.5, coords...)
 @time reflayer2_mask = mask(canada_poly, reflayer2) # 40 min
 geotiff(joinpath("data", "input", "canada_ref_2.tif"), similar(reflayer2_mask))
+
+## Testing on the model layers
+# Clip the layers to Canada
+layer = geotiff(SimpleSDMPredictor, "data/sdms/Aeorestes_cinereus_model.tif")
+reference_layer = geotiff(SimpleSDMPredictor, joinpath("data", "input", "canada_ref_2.tif"); top=89.0)
+layer_can = clip(layer, reference_layer)
+layer_can = mask(replace(reference_layer, 0.0 => 1.0), layer_can)
+plot(layer_can)
+geotiff("data/sdms/Aeorestes_cinereus_model_can.tif", layer_can)
