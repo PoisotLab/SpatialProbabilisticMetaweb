@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --account=ctb-tpoisot
-#SBATCH --ntasks=1
-#SBATCH --mem-per-cpu=8000M
+#SBATCH --ntasks=16
+#SBATCH --mem-per-cpu=4000M
 #SBATCH --time=00:60:00
 #SBATCH --job-name=test1
 #SBATCH --output=test1-%J.out
