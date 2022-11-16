@@ -6,11 +6,13 @@ using DataFrames
 using DataFramesMeta
 using Distributions
 using EcologicalNetworks
+using EvoTrees
 using ProgressMeter
-using SimpleSDMLayers
 using Random
 using Shapefile
+using SimpleSDMLayers
 using Statistics
+using StatsBase
 using StatsPlots
 using Base.Threads: @threads
 using JLD2, CodecZlib

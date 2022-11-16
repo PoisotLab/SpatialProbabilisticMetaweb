@@ -1,6 +1,7 @@
 using SimpleSDMLayers
 using GBIF
 using DataFramesMeta
+using StatsBase
 import CSV
 
 # Download and parse the metaweb
@@ -79,8 +80,29 @@ end
 [spkey.key] # copy paste this in curl command
 
 ## Read the downloaded data
-# df = DataFrame(CSV.File(joinpath("data", "occurrences", "all_occurrences.csv")))
-df = DataFrame(CSV.File(joinpath("data", "occurrences", "all_occurrences.csv"), limit=100))
-df = DataFrame(CSV.File(joinpath("data", "occurrences", "all_occurrences.csv"), limit=100, delim="\t"))
-# df = DataFrame(CSV.File(joinpath("data", "occurrences", "all_occurrences.csv"); stringtype=String))
-df = DataFrame(CSV.File(joinpath("data", "occurrences", "all_occurrences.csv"), select=[:species, :decimalLatitude, :decimalLongitude]))
+
+# Read a smaller dataset to precompile
+df = DataFrame(CSV.File(joinpath("data/input/canadian_thresholded.csv")))
+
+# Attempt to read the complete dataset (should all fail)
+occ_path = joinpath("data", "occurrences", "subset", "all_occurrences.csv")
+df = DataFrame(CSV.File(occ_path))
+df = DataFrame(CSV.File(occ_path; stringtype=String))
+df = DataFrame(CSV.File(occ_path, delim="\t", types=Dict(:gbifID => String)))
+df = DataFrame(CSV.File(occ_path, delim="\t", types=Dict(:gbifID => String), quotechar='"'))
+df = DataFrame(CSV.File(occ_path, select=[:species, :decimalLatitude, :decimalLongitude]))
+
+# Attempt with fewer rows
+df = DataFrame(CSV.File(occ_path, limit=100))
+df = DataFrame(CSV.File(occ_path, limit=100, delim="\t"))
+df = DataFrame(CSV.File(occ_path, limit=100, delim="\t", types=Dict(:gbifID => String)))
+df = DataFrame(CSV.File(occ_path, limit=1_000)) # not reading the right number of rows...
+df = DataFrame(CSV.File(occ_path, limit=11_800)) # when it stops working
+
+# Attempt with dataset exported with R
+df = DataFrame(CSV.File(joinpath("data", "occurrences", "subset", "all_occurrences2.csv"), delim="\t"))
+# Not 100_000 rows??
+# Same with R though...
+
+# Attempt with problem dataset
+df = DataFrame(CSV.File(joinpath("data", "occurrences", "subset", "all_occurrences_problems.csv"), delim="\t"))

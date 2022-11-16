@@ -1,13 +1,9 @@
-using SimpleSDMLayers
-using EvoTrees
-using StatsBase
-using StatsPlots
-using ProgressMeter
-using DataFrames
-import CSV
+include("A0_required.jl")
 
 # bioclim variables
-layers = SimpleSDMPredictor(WorldClim, BioClim, 1:19; left=-180., right=-40., bottom=18., top=89.)
+layers = SimpleSDMPredictor(
+    WorldClim, BioClim, 1:19; resolution=2.5, left=-180.0, right=-40.0, bottom=18.0, top=89.0
+)
 all_values = hcat([layer[keys(layer)] for layer in layers]...)
 
 ispath(joinpath("data", "sdms")) || mkpath(joinpath("data", "sdms"))
@@ -15,18 +11,20 @@ ispath(joinpath("data", "sdms")) || mkpath(joinpath("data", "sdms"))
 df = [DataFrame(species = String[], occurrences = Int64[], AUC = Float64[], J = Float64[], cutoff = Float64[]) for i in 1:Threads.nthreads()]
 
 pa_files = readdir(joinpath("data", "presence_absence"); join=true)
+filter!(contains(".tif"), pa_files)
+
 p = Progress(length(pa_files))
-
-Threads.@threads for i in 1:length(pa_files)
-
+# Threads.@threads for i in 1:length(pa_files)
+for i in 1:length(pa_files)
+    Random.seed!(i)
     tree_store = EvoTreeGaussian(;
         loss=:gaussian,
         metric=:gaussian,
         nrounds=100,
         nbins=100,
-        λ=0.0,
-        γ=0.0,
-        η=0.1,
+        lambda=0.0,
+        gamma=0.0,
+        eta=0.1,
         max_depth=7,
         min_weight=1.0,
         rowsample=0.5,
@@ -34,7 +32,7 @@ Threads.@threads for i in 1:length(pa_files)
     )
 
     pa_file = pa_files[i]
-    spname = replace(split(pa_file, "/")[2], ".tif" => "")
+    spname = replace(split(pa_file, "/")[3], ".tif" => "")
 
     pr = geotiff(SimpleSDMResponse, pa_file, 1)
     ab = geotiff(SimpleSDMResponse, pa_file, 2)
@@ -108,6 +106,6 @@ Threads.@threads for i in 1:length(pa_files)
     geotiff(joinpath("data", "sdms", spname*"_model.tif"),distribution)
     geotiff(joinpath("data", "sdms", spname*"_error.tif"),uncertainty)
     next!(p)
+    end
 end
-
 CSV.write(joinpath("data", "input", "sdm_fit_results.csv"), vcat(df...))
