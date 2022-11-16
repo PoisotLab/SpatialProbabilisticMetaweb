@@ -13,11 +13,8 @@ import CSV
     )
 @time all_values = hcat([layer[keys(layer)] for layer in layers]...)
 
-# (Temporary) Set working directory on cluster
-# cd("./projects/def-tpoisot/2022-SpatialProbabilisticMetaweb/")
-
 # Verify that output path exists
-ispath(joinpath("data", "sdms")) || mkpath(joinpath("data", "sdms"))
+isdir(joinpath("data", "sdms")) || mkpath(joinpath("data", "sdms"))
 
 # Empty DataFrame to collect model statistics
 df = [DataFrame(species = String[], occurrences = Int64[], AUC = Float64[], J = Float64[], cutoff = Float64[]) for i in 1:Threads.nthreads()]
@@ -28,9 +25,7 @@ filter!(contains(".tif"), pa_files)
 
 # Run SDMs, one species per loop
 p = Progress(length(pa_files))
-@time Threads.@threads for i in 1:length(pa_files)
-# @time for i in 1:3
-# for i in 1:length(pa_files)
+Threads.@threads for i in 1:length(pa_files)
     # Seed for reproducibility
     Random.seed!(i)
 
@@ -134,6 +129,7 @@ p = Progress(length(pa_files))
     sdm = mask(range_mask, distribution)/maximum(mask(range_mask, distribution))
     geotiff(joinpath("data", "sdms", spname*"_model.tif"),distribution)
     geotiff(joinpath("data", "sdms", spname*"_error.tif"),uncertainty)
+
     next!(p)
 end
 
