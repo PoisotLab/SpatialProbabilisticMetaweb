@@ -29,13 +29,13 @@ reflayer = SimpleSDMPredictor(WorldClim, BioClim, 1; coords...)
 @time reflayer_mask = mask(canada_poly, reflayer) # 140 sec.
 reflayer_mask = replace(reflayer_mask, 0.0 => 1.0)
 plot(reflayer_mask)
-geotiff(joinpath("data", "input", "canada_ref_10.tif"), similar(reflayer_mask))
+geotiff(joinpath("data", "input", "canada_ref_10.tif"), reflayer_mask)
 
 # Reference layer at 2.5 arcmin
 reflayer2 = SimpleSDMPredictor(WorldClim, BioClim, 1; resolution=2.5, coords...)
 @time reflayer2_mask = mask(canada_poly, reflayer2) # 40 min
 reflayer2_mask = replace(reflayer2_mask, 0.0 => 1.0)
-geotiff(joinpath("data", "input", "canada_ref_2.tif"), similar(reflayer2_mask))
+geotiff(joinpath("data", "input", "canada_ref_2.tif"), reflayer2_mask)
 
 ## Testing on the model layers
 # Clip the layers to Canada
