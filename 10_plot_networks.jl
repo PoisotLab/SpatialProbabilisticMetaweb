@@ -3,7 +3,8 @@
 include("A0_required.jl")
 
 # Objects
-@load joinpath("xtras", "jld2", "network_layers.jld2") layer layer_thr layer_rnd layer_rnd_thr
+# @load joinpath("xtras", "jld2", "network_layers.jld2") layer layer_thr layer_rnd layer_rnd_thr
+include("05_assemble_networks.jl")
 layers_all = [layer, layer_thr, layer_rnd, layer_rnd_thr]
 Co = broadcast(connectance, layer)
 L = broadcast(links, layer)

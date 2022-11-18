@@ -7,7 +7,8 @@ spatialrange = (left=-80.0, right=-50.0, bottom=45.0, top=65.0)
 reference_layer = SimpleSDMPredictor(WorldClim, BioClim, 1; spatialrange...)
 
 # Load networks
-@load joinpath("xtras", "jld2", "network_simulations.jld2") networks networks_thr networks_rnd networks_rnd_thr
+# @load joinpath("xtras", "jld2", "network_simulations.jld2") networks networks_thr networks_rnd networks_rnd_thr
+include("05_assemble_networks.jl")
 
 # Get the networks LCBD
 function networks_to_layer(networks::Array{Bool, 4}, reference_layer::SimpleSDMLayer)
