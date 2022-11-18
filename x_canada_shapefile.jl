@@ -40,8 +40,8 @@ geotiff(joinpath("data", "input", "canada_ref_2.tif"), reflayer2_mask)
 ## Testing on the model layers
 # Clip the layers to Canada
 layer = geotiff(SimpleSDMPredictor, "data/sdms/Aeorestes_cinereus_model.tif")
-reference_layer = geotiff(SimpleSDMPredictor, joinpath("data", "input", "canada_ref_2.tif"); top=89.0)
+reference_layer = geotiff(SimpleSDMPredictor, joinpath("data", "input", "canada_ref_2.tif"))
 layer_can = clip(layer, reference_layer)
 layer_can = mask(reference_layer, layer_can)
 plot(layer_can)
-geotiff("data/sdms/Aeorestes_cinereus_model_can.tif", layer_can)
+# geotiff("data/sdms/Aeorestes_cinereus_model_can.tif", layer_can)
