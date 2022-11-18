@@ -7,7 +7,7 @@ D # Truncated Normal distribution per pixel
 ## Metaweb
 
 # Download and parse the metaweb
-mw_path = joinpath("data", "input", "canadian_thresholded.csv")
+mw_path = joinpath("data", "input", "canadian_thresholded_reconciled.csv")
 mw_output = DataFrame(CSV.File(mw_path; stringtype=String))
 sp = collect(keys(μ))
 S = fill(0.0, length(sp), length(sp))
