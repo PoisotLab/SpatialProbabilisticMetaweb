@@ -3,7 +3,7 @@
 include("A0_required.jl")
 
 # Load networks
-@load joinpath("data", "jld2", "network_layers.jld2") layer
+@load joinpath("xtras", "jld2", "network_layers.jld2") layer
 
 # Get some network measures
 Co = broadcast(connectance, layer)

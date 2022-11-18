@@ -3,8 +3,8 @@
 include("A0_required.jl")
 
 ## Check what the data looks like
-# @load joinpath("data", "jld2", "network_layers.jld2") layer layer_thr layer_rnd layer_rnd_thr # 350 MB file
-# @load joinpath("data", "jld2", "network_simulations.jld2") networks networks_thr networks_rnd networks_rnd_thr # 60 MB file
+# @load joinpath("xtras", "jld2", "network_layers.jld2") layer layer_thr layer_rnd layer_rnd_thr # 350 MB file
+# @load joinpath("xtras", "jld2", "network_simulations.jld2") networks networks_thr networks_rnd networks_rnd_thr # 60 MB file
 
 ## Generate the Spatial Probabilistic Metaweb
 # As a layer in a JLD2 file
