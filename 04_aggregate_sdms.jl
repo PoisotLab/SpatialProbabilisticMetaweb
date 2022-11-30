@@ -2,14 +2,25 @@
 
 include("A0_required.jl")
 
+# Option to run for QC only
+# QC = true
+if (@isdefined QC) && QC == true
+    ref_path = joinpath("data", "input", "quebec_ref_10.tif");
+    sdm_path = joinpath("xtras", "sdms");
+    @info "Running for Quebec at 10 arcmin resolution"
+else
+    ref_path = joinpath("data", "input", "canada_ref_2.tif");
+    sdm_path = joinpath("data", "sdms");
+end
+
 ## Probabilistic distributions
 
 # Define reference layer
-reference_layer = geotiff(SimpleSDMPredictor, joinpath("data", "input", "canada_ref_2.tif"))
+reference_layer = geotiff(SimpleSDMPredictor, ref_path)
 spatialrange = boundingbox(reference_layer)
 
 # Select files to load
-map_files = readdir(joinpath("data", "sdms"); join=true)
+map_files = readdir(sdm_path; join=true)
 
 # Load predictions mean & variance layers
 μ = Dict{String,SimpleSDMPredictor}()

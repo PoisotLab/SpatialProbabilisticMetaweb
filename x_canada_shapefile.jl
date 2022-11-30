@@ -37,6 +37,12 @@ reflayer2 = SimpleSDMPredictor(WorldClim, BioClim, 1; resolution=2.5, coords...)
 reflayer2_mask = replace(reflayer2_mask, 0.0 => 1.0)
 geotiff(joinpath("data", "input", "canada_ref_2.tif"), reflayer2_mask)
 
+# Export a similar reference layer for Quebec (as in earlier analyses)
+qc_coords = (left=-80.0, right=-50.0, bottom=45.0, top=65.0)
+qclayer = SimpleSDMPredictor(WorldClim, BioClim, 1; qc_coords...)
+qclayer = replace(similar(qclayer), 0.0 => 1.0)
+geotiff(joinpath("data", "input", "quebec_ref_10.tif"), qclayer)
+
 ## Testing on the model layers
 # Clip the layers to Canada
 layer = geotiff(SimpleSDMPredictor, "data/sdms/Aeorestes_cinereus_model.tif")

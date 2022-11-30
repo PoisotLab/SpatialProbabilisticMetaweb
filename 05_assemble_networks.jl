@@ -6,8 +6,14 @@ D # Truncated Normal distribution per pixel
 
 ## Metaweb
 
-# Download and parse the metaweb
-mw_path = joinpath("data", "input", "canadian_thresholded_reconciled.csv")
+# Load the previous non-reconciled metaweb if dealing with QC data
+if (@isdefined QC) && QC == true
+    mw_path = joinpath("data", "input", "canadian_thresholded.csv")
+else
+    mw_path = joinpath("data", "input", "canadian_thresholded_reconciled.csv")
+end
+
+# Parse the metaweb
 mw_output = DataFrame(CSV.File(mw_path; stringtype=String))
 sp = collect(keys(μ))
 S = fill(0.0, length(sp), length(sp))
