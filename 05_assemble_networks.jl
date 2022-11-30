@@ -1,5 +1,6 @@
 ## Probabilistic distributions
 
+# QC = true
 include("04_aggregate_sdms.jl")
 
 D # Truncated Normal distribution per pixel
@@ -9,8 +10,10 @@ D # Truncated Normal distribution per pixel
 # Load the previous non-reconciled metaweb if dealing with QC data
 if (@isdefined QC) && QC == true
     mw_path = joinpath("data", "input", "canadian_thresholded.csv")
+    results_path = joinpath("xtras", "input", "sdm_fit_results.csv")
 else
     mw_path = joinpath("data", "input", "canadian_thresholded_reconciled.csv")
+    results_path = joinpath("data", "input", "sdm_fit_results.csv")
 end
 
 # Parse the metaweb
@@ -25,15 +28,10 @@ for r in eachrow(mw_output)
 end
 
 # Interaction matrix
-A = zeros(Float64, richness(P), richness(P))
-for (i,si) in enumerate(species(P))
-    for (j,sj) in enumerate(species(P))
-        A[i,j] = P[si,sj]
-    end
-end
+A = adjacency(P)
 
 # Prepare cutoff values for all species
-sdm_results = CSV.read(joinpath("data", "input", "sdm_fit_results.csv"), DataFrame)
+sdm_results = CSV.read(results_path, DataFrame)
 sdm_results.species = replace.(sdm_results.species, "_" => " ")
 cutoffs = Dict{String, Float64}()
 for r in eachrow(sdm_results)
@@ -94,9 +92,11 @@ end
 networks = assemble_networks(reference_layer, P, D, A, cutoffs); # 2 min
 
 # Different assembly options
+#=
 networks_thr = assemble_networks(reference_layer, P, D, A, cutoffs; type="avg_thr"); # 30 sec.
 networks_rnd = assemble_networks(reference_layer, P, D, A, cutoffs; type="rnd"); # 2 min
 networks_rnd_thr = assemble_networks(reference_layer, P, D, A, cutoffs; type="rnd_thr"); # 30 sec.
+=#
 
 ## Network layer
 
@@ -129,9 +129,8 @@ function network_layer(networks)
     networks_vec
 
     # Transform into layer (option 1)
-    # layer = similar(reference_layer, UnipartiteProbabilisticNetwork{Float64, String})
-    layer = similar(reference_layer, eltype(networks_vec))
-    layer[keys(layer)] = networks_vec
+    # layer = similar(reference_layer, eltype(networks_vec))
+    # layer[keys(layer)] = networks_vec
 
     # Transform into layer (option 2)
     _mat = fill(nothing, size(reference_layer.grid));
@@ -145,9 +144,11 @@ end
 
 # Convert all options
 layer = network_layer(networks)
+#=
 layer_thr = network_layer(networks_thr)
 layer_rnd = network_layer(networks_rnd)
 layer_rnd_thr = network_layer(networks_rnd_thr)
+=#
 
 ## Export everything to JLD2
 
