@@ -11,6 +11,7 @@ using ProgressMeter
 using Random
 using Shapefile
 using SimpleSDMLayers
+using SparseArrays
 using Statistics
 using StatsBase
 using StatsPlots

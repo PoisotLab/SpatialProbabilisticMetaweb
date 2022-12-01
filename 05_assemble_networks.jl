@@ -1,6 +1,6 @@
 ## Probabilistic distributions
 
-# QC = true
+QC = true
 include("04_aggregate_sdms.jl")
 
 D # Truncated Normal distribution per pixel
@@ -27,9 +27,6 @@ for r in eachrow(mw_output)
     P[from, to] = r.score
 end
 
-# Interaction matrix
-A = adjacency(P)
-
 # Prepare cutoff values for all species
 sdm_results = CSV.read(results_path, DataFrame)
 sdm_results.species = replace.(sdm_results.species, "_" => " ")
@@ -51,7 +48,6 @@ function assemble_networks(
     reference_layer::SimpleSDMLayer,
     P::UnipartiteProbabilisticNetwork,
     D::Dict{String, SimpleSDMResponse},
-    A::Matrix,
     cutoffs::Dict{String, Float64};
     type::String="avg",
     n_itr::Int64=10,
@@ -61,9 +57,13 @@ function assemble_networks(
         throw(ArgumentError("type must be avg, avg_thr, rnd, or rnd_thr"))
 
     sites = keys(reference_layer)
-    networks = zeros(Bool, length(sites), size(P)..., n_itr)
+    A = adjacency(P)
+    possible_interactions = findall(!iszero, A)
+    networks = zeros(Bool, length(sites), length(possible_interactions), n_itr)
     p = Progress(length(sites))
     Threads.@threads for i in eachindex(sites)
+    # for i in eachindex(sites)
+        # @infiltrate
         site = sites[i]
         s = [D[s][site] for s in species(P)]
         c = [cutoffs[s] for s in species(P)]
@@ -78,10 +78,11 @@ function assemble_networks(
             Random.seed!(seed + 1)
             pcooc = @. (rand(s) > c) * (rand(s) > c)'
         end
-        for j in 1:size(networks, 4)
+        for j in 1:size(networks, 3)
             Random.seed!(seed + j*i)
             prob_network = UnipartiteProbabilisticNetwork(pcooc .* A, species(P))
-            networks[i, :, :, j] .= adjacency(rand(prob_network))
+            networks[i, :, j] .= adjacency(rand(prob_network))[possible_interactions]
+
         end
         next!(p)
     end
@@ -89,13 +90,13 @@ function assemble_networks(
 end
 
 # Assembly based on average
-networks = assemble_networks(reference_layer, P, D, A, cutoffs); # 2 min
+@time networks = assemble_networks(reference_layer, P, D, cutoffs); # 2 min
 
 # Different assembly options
 #=
-networks_thr = assemble_networks(reference_layer, P, D, A, cutoffs; type="avg_thr"); # 30 sec.
-networks_rnd = assemble_networks(reference_layer, P, D, A, cutoffs; type="rnd"); # 2 min
-networks_rnd_thr = assemble_networks(reference_layer, P, D, A, cutoffs; type="rnd_thr"); # 30 sec.
+networks_thr = assemble_networks(reference_layer, P, D, cutoffs; type="avg_thr"); # 30 sec.
+networks_rnd = assemble_networks(reference_layer, P, D, cutoffs; type="rnd"); # 2 min
+networks_rnd_thr = assemble_networks(reference_layer, P, D, cutoffs; type="rnd_thr"); # 30 sec.
 =#
 
 ## Network layer
@@ -108,20 +109,25 @@ Base.zero(::Type{UnipartiteProbabilisticNetwork{T}}) where T = UnipartiteProbabi
 Base.zero(::Type{UnipartiteProbabilisticNetwork{T, String}}) where T = zero(UnipartiteProbabilisticNetwork{T})
 
 # Define function
-function network_layer(networks)
+function network_layer(networks, P)
     # Create empty objects
-    _empty_mat = zeros(Float64, size(networks)[2:3])
-    _empty_network = UnipartiteProbabilisticNetwork(_empty_mat, species(P))
+    A = adjacency(P)
+    _empty_mat = sparse(A)
+    _empty_network = UnipartiteProbabilisticNetwork(sparse(A), species(P))
+    possible_interactions = findall(!iszero, A)
 
     # With threads
     networks_vec = fill(_empty_network, size(networks)[1])
     # networks_vec = networks_vec[1:1000]
-    @threads for i in eachindex(networks_vec)
+    # @threads for i in eachindex(networks_vec)
+    for i in eachindex(networks_vec)
         # Extract a single site
-        local_site = @view networks[i, :, :, :];
+        local_site = @view networks[i, :, :];
 
         # Extract local interaction matrix
-        local_mat = dropdims(mean(local_site; dims=ndims(local_site)), dims=ndims(local_site))
+        local_int = dropdims(mean(local_site; dims=ndims(local_site)), dims=ndims(local_site))
+        local_mat = copy(_empty_mat)
+        local_mat[possible_interactions] = local_int
 
         # Transform into network
         networks_vec[i] = UnipartiteProbabilisticNetwork(local_mat, species(P))
@@ -143,7 +149,7 @@ function network_layer(networks)
 end
 
 # Convert all options
-layer = network_layer(networks)
+@time layer = network_layer(networks, P)
 #=
 layer_thr = network_layer(networks_thr)
 layer_rnd = network_layer(networks_rnd)
