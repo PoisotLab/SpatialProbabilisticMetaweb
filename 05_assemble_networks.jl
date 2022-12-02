@@ -1,6 +1,6 @@
 ## Probabilistic distributions
 
-# QC = true
+QC = true
 include("04_aggregate_sdms.jl")
 
 D # Truncated Normal distribution per pixel
@@ -46,6 +46,21 @@ cutoffs
 
 ## Networks in space
 
+# FOR I IN REGIONS
+
+# Divide into smaller regions
+spatialrange
+new_coords = (
+    left=(spatialrange.left + (spatialrange.right - spatialrange.left)/2),
+    top=(spatialrange.top - (spatialrange.top - spatialrange.bottom)/2)
+)
+mini_reference_layer = clip(reference_layer; new_coords...)
+mini_D = Dict{String, SimpleSDMResponse}()
+for sp in String.(keys(D))
+    mini_D[sp] = clip(D[sp]; new_coords...)
+end
+mini_D
+
 # Get a preliminary map
 function assemble_networks(
     reference_layer::SimpleSDMLayer,
@@ -89,7 +104,16 @@ function assemble_networks(
 end
 
 # Assembly based on average
-networks = assemble_networks(reference_layer, P, D, A, cutoffs); # 2 min
+networks = assemble_networks(mini_reference_layer, P, mini_D, A, cutoffs); # 2 min
+bitnetworks = convert(BitArray, networks);
+varinfo(r"networks")
+Base.summarysize(networks)
+
+Base.summarysize(zero(Bool)) # 1
+Base.summarysize(zero(Int8)) # 1
+Base.summarysize(zero(Float16)) # 2
+Base.summarysize(BitSet(1)) # 64
+
 
 # Different assembly options
 #=
@@ -108,9 +132,17 @@ Base.zero(::Type{UnipartiteProbabilisticNetwork{T}}) where T = UnipartiteProbabi
 Base.zero(::Type{UnipartiteProbabilisticNetwork{T, String}}) where T = zero(UnipartiteProbabilisticNetwork{T})
 
 # Define function
-function network_layer(networks)
+function network_layer(networks, reference_layer)
+    # Create sparse array
+    M = 100;
+    N = 1000;
+    nz = 2000; # number of nonzeros
+    I = rand(1:M, nz); # dummy I indices
+    J = rand(1:N, nz); # dummy J indices
+    V = randn(nz); # dummy matrix values
+    _empty_mat = sparse(I, J, V, M, N)
+
     # Create empty objects
-    _empty_mat = zeros(Float64, size(networks)[2:3])
     _empty_network = UnipartiteProbabilisticNetwork(_empty_mat, species(P))
 
     # With threads
@@ -143,7 +175,7 @@ function network_layer(networks)
 end
 
 # Convert all options
-layer = network_layer(networks)
+layer = network_layer(networks, mini_reference_layer)
 #=
 layer_thr = network_layer(networks_thr)
 layer_rnd = network_layer(networks_rnd)
