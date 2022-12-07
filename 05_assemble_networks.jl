@@ -27,9 +27,6 @@ for r in eachrow(mw_output)
     P[from, to] = r.score
 end
 
-# Interaction matrix
-A = adjacency(P)
-
 # Prepare cutoff values for all species
 sdm_results = CSV.read(results_path, DataFrame)
 sdm_results.species = replace.(sdm_results.species, "_" => " ")
@@ -51,7 +48,6 @@ function assemble_networks(
     reference_layer::SimpleSDMLayer,
     P::UnipartiteProbabilisticNetwork,
     D::Dict{String, SimpleSDMResponse},
-    A::Matrix,
     cutoffs::Dict{String, Float64};
     type::String="avg",
     n_itr::Int64=10,
@@ -60,6 +56,9 @@ function assemble_networks(
 )
     type in ["avg", "avg_thr", "rnd", "rnd_thr"] ||
         throw(ArgumentError("type must be avg, avg_thr, rnd, or rnd_thr"))
+
+    # Adjacency matrix
+    A = adjacency(P)
 
     # Global BitArray to collect all values
     n_sites_total = length(reference_layer)
@@ -96,7 +95,7 @@ function assemble_networks(
         sites = keys(mini_reference_layer)
         networks = zeros(Bool, length(sites), size(P)..., n_itr)
         p = Progress(length(sites))
-        Threads.@threads for i in eachindex(sites)
+        @threads for i in eachindex(sites)
             site = sites[i]
             s = [mini_D[s][site] for s in species(P)]
             c = [cutoffs[s] for s in species(P)]
@@ -133,22 +132,13 @@ function assemble_networks(
 end
 
 # Assembly based on average
-@time networks = assemble_networks(reference_layer, P, D, A, cutoffs); # 2 min
-bitnetworks = convert(BitArray, networks);
-varinfo(r"networks")
-Base.summarysize(networks)
-
-Base.summarysize(zero(Bool)) # 1
-Base.summarysize(zero(Int8)) # 1
-Base.summarysize(zero(Float16)) # 2
-Base.summarysize(BitSet(1)) # 64
-
+networks = assemble_networks(reference_layer, P, D, cutoffs); # 2.5 min
 
 # Different assembly options
 #=
-networks_thr = assemble_networks(reference_layer, P, D, A, cutoffs; type="avg_thr"); # 30 sec.
-networks_rnd = assemble_networks(reference_layer, P, D, A, cutoffs; type="rnd"); # 2 min
-networks_rnd_thr = assemble_networks(reference_layer, P, D, A, cutoffs; type="rnd_thr"); # 30 sec.
+networks_thr = assemble_networks(reference_layer, P, D, cutoffs; type="avg_thr"); # 30 sec.
+networks_rnd = assemble_networks(reference_layer, P, D, cutoffs; type="rnd"); # 2 min
+networks_rnd_thr = assemble_networks(reference_layer, P, D, cutoffs; type="rnd_thr"); # 30 sec.
 =#
 
 ## Network layer
