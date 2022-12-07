@@ -152,16 +152,8 @@ Base.zero(::Type{UnipartiteProbabilisticNetwork{T, String}}) where T = zero(Unip
 
 # Define function
 function network_layer(networks, reference_layer)
-    # Create sparse array
-    M = 100;
-    N = 1000;
-    nz = 2000; # number of nonzeros
-    I = rand(1:M, nz); # dummy I indices
-    J = rand(1:N, nz); # dummy J indices
-    V = randn(nz); # dummy matrix values
-    _empty_mat = sparse(I, J, V, M, N)
-
     # Create empty objects
+    _empty_mat = zeros(Float64, size(networks)[2:3])
     _empty_network = UnipartiteProbabilisticNetwork(_empty_mat, species(P))
 
     # With threads
@@ -194,7 +186,7 @@ function network_layer(networks, reference_layer)
 end
 
 # Convert all options
-layer = network_layer(networks, mini_reference_layer)
+layer = network_layer(networks, reference_layer)
 #=
 layer_thr = network_layer(networks_thr)
 layer_rnd = network_layer(networks_rnd)
