@@ -1,6 +1,14 @@
 #### Plot network measures ####
 
+# QC = true
 include("A0_required.jl")
+
+# Load the previous sdm results if dealing with QC data
+if (@isdefined QC) && QC == true
+    results_path = joinpath("xtras", "results")
+else
+    results_path = joinpath("data", "results")
+end
 
 # Objects
 # @load joinpath("xtras", "jld2", "network_layers.jld2") layer layer_thr layer_rnd layer_rnd_thr
@@ -11,8 +19,8 @@ L = broadcast(links, layer)
 L_all = [broadcast(links, l) for l in layers_all]
 Lv = broadcast(links_var, layer)
 Ld = broadcast(linkage_density, layer)
-S = geotiff(SimpleSDMPredictor, joinpath("data", "results", "richness_mean.tif"))
-Sσ = geotiff(SimpleSDMPredictor, joinpath("data", "results", "richness_uncertainty.tif"))
+S = geotiff(SimpleSDMPredictor, joinpath(results_path, "richness_mean.tif"))
+Sσ = geotiff(SimpleSDMPredictor, joinpath(results_path, "richness_uncertainty.tif"))
 
 ## Some plots
 
