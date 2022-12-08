@@ -3,8 +3,8 @@
 #SBATCH --cpus-per-task=32
 #SBATCH --mem-per-cpu=8000M
 #SBATCH --time=00:30:00
-#SBATCH --job-name=job_sdms
-#SBATCH --output=job_sdms-%J.out
+#SBATCH --job-name=03_generate_sdms
+#SBATCH --output=jobs/job_03_generate_sdms-%J.out
 
 module load StdEnv/2020
 module load julia/1.8.1
