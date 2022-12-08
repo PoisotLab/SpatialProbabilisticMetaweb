@@ -1,6 +1,16 @@
 #### Richness & LCBD analysis ####
 
+# QC = true
 include("04_aggregate_sdms.jl")
+
+# Load the previous sdm results if dealing with QC data
+if (@isdefined QC) && QC == true
+    fit_path = joinpath("xtras", "input", "sdm_fit_results.csv")
+    results_path = joinpath("xtras", "results")
+else
+    fit_path = joinpath("data", "input", "sdm_fit_results.csv")
+    results_path = joinpath("data", "results")
+end
 
 ## Richness
 
@@ -20,7 +30,7 @@ Sr = reduce(+, Srands)
 
 # Option 3-4: Convert to presence absence data based on cutoff value
 # Prepare cutoff values for all species
-sdm_results = CSV.read(joinpath("data", "input", "sdm_fit_results.csv"), DataFrame)
+sdm_results = CSV.read(fit_path, DataFrame)
 sdm_results.species = replace.(sdm_results.species, "_" => " ")
 cutoffs = Dict{String, Float64}()
 for r in eachrow(sdm_results)
@@ -41,11 +51,12 @@ Srands_cut = [broadcast(>(cutoffs[sp]), S) for (sp, S) in zip(spp, Srands)]
 Sμ_cut, Sr_cut = [reduce(+, convert.(Float32, S)) for S in (Smeans_cut, Srands_cut)]
 
 # Export results
-geotiff(joinpath("data", "results", "richness_mean.tif"), Sμ)
-geotiff(joinpath("data", "results", "richness_uncertainty.tif"), Sσ)
-geotiff(joinpath("data", "results", "richness_rand.tif"), Sr)
-geotiff(joinpath("data", "results", "richness_mean_thr.tif"), Sμ_cut)
-geotiff(joinpath("data", "results", "richness_rand_thr.tif"), Sr_cut)
+isdir(results_path) || mkpath(results_path)
+geotiff(joinpath(results_path, "richness_mean.tif"), Sμ)
+geotiff(joinpath(results_path, "richness_uncertainty.tif"), Sσ)
+geotiff(joinpath(results_path, "richness_rand.tif"), Sr)
+geotiff(joinpath(results_path, "richness_mean_thr.tif"), Sμ_cut)
+geotiff(joinpath(results_path, "richness_rand_thr.tif"), Sr_cut)
 
 ## LCBD values
 
@@ -64,11 +75,8 @@ for S in (Smeans, Srands, Smeans_cut, Srands_cut)
     push!(lcbd_layers, lcbd_species)
 end
 
-# Select the first one as the main result
-lcbd_species = lcbd_layers[1]
-
 # Export results
-geotiff(joinpath("data", "results", "lcbd_species_mean.tif"), lcbd_layers[1])
-geotiff(joinpath("data", "results", "lcbd_species_rand.tif"), lcbd_layers[2])
-geotiff(joinpath("data", "results", "lcbd_species_mean_thr.tif"), lcbd_layers[3])
-geotiff(joinpath("data", "results", "lcbd_species_rand_thr.tif"), lcbd_layers[4])
+geotiff(joinpath(results_path, "lcbd_species_mean.tif"), lcbd_layers[1])
+geotiff(joinpath(results_path, "lcbd_species_rand.tif"), lcbd_layers[2])
+geotiff(joinpath(results_path, "lcbd_species_mean_thr.tif"), lcbd_layers[3])
+geotiff(joinpath(results_path, "lcbd_species_rand_thr.tif"), lcbd_layers[4])

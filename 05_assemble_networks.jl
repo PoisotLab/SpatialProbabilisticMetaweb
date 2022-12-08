@@ -10,10 +10,10 @@ D # Truncated Normal distribution per pixel
 # Load the previous non-reconciled metaweb if dealing with QC data
 if (@isdefined QC) && QC == true
     mw_path = joinpath("data", "input", "canadian_thresholded.csv")
-    results_path = joinpath("xtras", "input", "sdm_fit_results.csv")
+    fit_path = joinpath("xtras", "input", "sdm_fit_results.csv")
 else
     mw_path = joinpath("data", "input", "canadian_thresholded_reconciled.csv")
-    results_path = joinpath("data", "input", "sdm_fit_results.csv")
+    fit_path = joinpath("data", "input", "sdm_fit_results.csv")
 end
 
 # Parse the metaweb
@@ -28,7 +28,7 @@ for r in eachrow(mw_output)
 end
 
 # Prepare cutoff values for all species
-sdm_results = CSV.read(results_path, DataFrame)
+sdm_results = CSV.read(fit_path, DataFrame)
 sdm_results.species = replace.(sdm_results.species, "_" => " ")
 cutoffs = Dict{String, Float64}()
 for r in eachrow(sdm_results)

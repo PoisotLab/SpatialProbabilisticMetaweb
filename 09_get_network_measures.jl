@@ -1,6 +1,14 @@
 #### Network measures ####
 
+# QC = true
 include("A0_required.jl")
+
+# Load the previous sdm results if dealing with QC data
+if (@isdefined QC) && QC == true
+    results_path = joinpath("xtras", "results")
+else
+    results_path = joinpath("data", "results")
+end
 
 # Load networks
 # @load joinpath("xtras", "jld2", "network_layers.jld2") layer
@@ -16,8 +24,8 @@ Ld = broadcast(linkage_density, layer)
 # m = broadcast(find_motif, layer)
 
 # Export the link layers
-geotiff(joinpath("data", "results", "links_mean.tif"), L)
-geotiff(joinpath("data", "results", "links_var.tif"), Lv)
+geotiff(joinpath(results_path, "links_mean.tif"), L)
+geotiff(joinpath(results_path, "links_var.tif"), Lv)
 
 # Plot 'em
 plot(
