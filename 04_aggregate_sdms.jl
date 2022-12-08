@@ -1,6 +1,6 @@
 #### Aggregate SDMs ####
 
-include("A0_required.jl")
+include("A0_required.jl");
 
 # Option to run for QC only
 # QC = true
@@ -11,6 +11,7 @@ if (@isdefined QC) && QC == true
 else
     ref_path = joinpath("data", "input", "canada_ref_2.tif");
     sdm_path = joinpath("data", "sdms");
+    @info "Running for Canada at 2.5 arcmin resolution"
 end
 
 ## Probabilistic distributions

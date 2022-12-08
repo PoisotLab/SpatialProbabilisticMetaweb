@@ -1,7 +1,7 @@
 #### Richness & LCBD analysis ####
 
 # QC = true
-include("04_aggregate_sdms.jl")
+include("04_aggregate_sdms.jl");
 
 # Load the previous sdm results if dealing with QC data
 if (@isdefined QC) && QC == true
@@ -61,18 +61,15 @@ geotiff(joinpath(results_path, "richness_rand_thr.tif"), Sr_cut)
 ## LCBD values
 
 # Get LCBD values for all 4 assembly options
-lcbd_layers = []
-for S in (Smeans, Srands, Smeans_cut, Srands_cut)
+lcbd_layers = fill(similar(reference_layer), 4)
+for (i, S) in enumerate([Smeans, Srands, Smeans_cut, Srands_cut])
+    @assert length(unique(length.(S))) == 1
+
     # Y matrix
-    Y = zeros(Float64, (length(reference_layer), length(S)))
-    for i in eachindex(S)
-        Y[:,i] = S[i][keys(reference_layer)]
-    end
+    Y = reduce(hcat, collect.(S))
 
     # LCBD
-    lcbd_species = similar(reference_layer)
-    lcbd_species[keys(reference_layer)] = LCBD(hellinger(Y))[1]
-    push!(lcbd_layers, lcbd_species)
+    lcbd_layers[i][keys(reference_layer)] = LCBD(hellinger(Y))[1]
 end
 
 # Export results
