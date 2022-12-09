@@ -9,7 +9,7 @@ function LCBD(Y)
     return LCBDi, SCBDj, BDtotal
 end
 
-function hellinger(Y::Matrix{T}) where {T <: Number}
+function hellinger(Y::AbstractMatrix{T}) where {T <: Number}
     yi = sum(Y; dims=2)
     return sqrt.(Y ./ yi)
 end

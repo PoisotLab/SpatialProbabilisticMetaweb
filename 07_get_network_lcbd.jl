@@ -25,14 +25,16 @@ function networks_to_layer(networks::BitArray{4}, P, reference_layer::SimpleSDML
     # Get non-zero interactions
     inds_possible = findall(!iszero, adjacency(P))
     # Sum interactions over all iterations
-    freq_by_site = dropdims(sum(networks; dims=(4)), dims=(4));
+    freq_by_site = dropdims(mapreduce(Int8, +, networks, dims=4); dims=4);
 
     # Create a site x non-zero interactions matrix
-    Z = freq_by_site[:, inds_possible]
+    Z = @view freq_by_site[:, inds_possible]
     # Remove species without interactions
-    Zfull = Z[:, findall(!iszero, vec(sum(Z; dims=1)))]
+    inds_full_sp = findall(!iszero, vec(sum(Z; dims=1)))
     # Remove sites without interactions
-    Zfull = Zfull[findall(!iszero, vec(sum(Zfull; dims=2))), :]
+    inds_full_sites = findall(!iszero, vec(sum(Z; dims=2)))
+    # Smaller matrix
+    Zfull = @view Z[inds_full_sites, inds_full_sp]
 
     # Network LCBD
     lcbd_networks = similar(reference_layer)
