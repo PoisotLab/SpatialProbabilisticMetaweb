@@ -58,6 +58,13 @@ geotiff(joinpath(results_path, "richness_rand.tif"), Sr)
 geotiff(joinpath(results_path, "richness_mean_thr.tif"), Sμ_cut)
 geotiff(joinpath(results_path, "richness_rand_thr.tif"), Sr_cut)
 
+# Export the layers of all species to debut
+Soptions = [Smeans, Srands, Smeans_cut, Srands_cut]
+Snames = ["Smeans", "Srands", "Smeans_cut", "Srands_cut"]
+@threads for i in eachindex(Soptions)
+    geotiff(joinpath(results_path, "$(Snames[i]).tif"), convert.(Float64, Soptions[i]))
+end
+
 ## LCBD values
 
 # Get LCBD values for all 4 assembly options
