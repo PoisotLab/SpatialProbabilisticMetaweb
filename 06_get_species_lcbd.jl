@@ -58,13 +58,6 @@ geotiff(joinpath(results_path, "richness_rand.tif"), Sr)
 geotiff(joinpath(results_path, "richness_mean_thr.tif"), Sμ_cut)
 geotiff(joinpath(results_path, "richness_rand_thr.tif"), Sr_cut)
 
-# Export the layers of all species to debut
-Soptions = [Smeans, Srands, Smeans_cut, Srands_cut]
-Snames = ["Smeans", "Srands", "Smeans_cut", "Srands_cut"]
-@threads for i in eachindex(Soptions)
-    geotiff(joinpath(results_path, "$(Snames[i]).tif"), convert.(Float64, Soptions[i]))
-end
-
 ## LCBD values
 
 # Get LCBD values for all 4 assembly options
@@ -74,6 +67,14 @@ for (i, S) in enumerate([Smeans, Srands, Smeans_cut, Srands_cut])
 
     # Y matrix
     Y = reduce(hcat, collect.(S))
+
+    # Temporary fix for bug with negative values
+    inds_neg = findall(<(0.0), Y) # 2 values only
+    if length(inds_neg) > 0
+        @info "$(length(inds_neg)) negative values were replaced by zero"
+        @info Y[inds_neg]
+        Y[inds_neg] .= 0.0
+    end
 
     # LCBD
     lcbd_layers[i][keys(reference_layer)] = LCBD(hellinger(Y))[1]
