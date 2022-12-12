@@ -68,6 +68,14 @@ for (i, S) in enumerate([Smeans, Srands, Smeans_cut, Srands_cut])
     # Y matrix
     Y = reduce(hcat, collect.(S))
 
+    # Temporary fix for bug with negative values
+    inds_neg = findall(<(0.0), Y) # 2 values only
+    if length(inds_neg) > 0
+        @info "$(length(inds_neg)) negative values were replaced by zero"
+        @info Y[inds_neg]
+        Y[inds_neg] .= 0.0
+    end
+
     # LCBD
     lcbd_layers[i][keys(reference_layer)] = LCBD(hellinger(Y))[1]
 end
