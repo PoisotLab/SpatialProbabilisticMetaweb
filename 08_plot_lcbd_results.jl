@@ -1,14 +1,16 @@
 #### Plot richness & LCBD results ####
 
 # QC = true
-include("A0_required.jl")
+include("A0_required.jl");
 
 # Load the previous sdm results if dealing with QC data
 if (@isdefined QC) && QC == true
+    ref_path = joinpath("data", "input", "quebec_ref_10.tif");
     results_path = joinpath("xtras", "results")
 else
+    ref_path = joinpath("data", "input", "canada_ref_2.tif");
     results_path = joinpath("data", "results")
-end
+end;
 
 ## Load data
 
@@ -31,19 +33,22 @@ for opt in options
     lcbd_species_all[opt] = geotiff(SimpleSDMPredictor, path)
 end
 lcbd_species_all
+# Temporarily replace values in the layer with NaNs
+lcbd_species_all["rand_thr"] = replace(lcbd_species_all["rand_thr"], NaN => 0.0)
 
 # Networks LCBD layers
 lcbd_networks_all = Dict{String, SimpleSDMPredictor}()
 for opt in options
-    path = joinpath(results_path, "lcbd_networks_$(opt).tif")
+    # path = joinpath(results_path, "lcbd_networks_$(opt).tif")
+    path = joinpath(results_path, "lcbd_networks_mean.tif")
     lcbd_networks_all[opt] = geotiff(SimpleSDMPredictor, path)
 end
 lcbd_networks_all
 
 # Others
 Sσ = geotiff(SimpleSDMPredictor, joinpath(results_path, "richness_uncertainty.tif"))
-spatialrange = (left=-80.0, right=-50.0, bottom=45.0, top=65.)
-reference_layer = SimpleSDMPredictor(WorldClim, BioClim, 1; spatialrange...)
+reference_layer = geotiff(SimpleSDMPredictor, ref_path)
+spatialrange = boundingbox(reference_layer)
 
 ## Richness plots
 
@@ -93,6 +98,7 @@ plot(
 savefig(joinpath("figures", "richness_two-panels.png"))
 
 # Bivariate richness map
+begin
 bivariate(
     S_all["mean"], Sσ;
     quantiles=true, classes=3, xlab="Longitude", ylab="Latitude", bv_pal_2...
@@ -101,7 +107,8 @@ bivariatelegend!(
     S_all["mean"],
     Sσ;
     classes=3,
-    inset=(1, bbox(0.04, 0.05, 0.28, 0.28, :top, :right)),
+    # inset=(1, bbox(0.0, 0.17, 0.10, 0.28, :top, :right)),
+    inset=(1, bbox(0.80, 0.02, 0.13, 0.28, :top, :right)),
     subplot=2,
     xlab="Expected richness",
     ylab="Std. dev. of richness",
@@ -109,6 +116,7 @@ bivariatelegend!(
     bv_pal_2...
 )
 plot!(title=["Richness & uncertainty bivariate" ""])
+end
 savefig(joinpath("figures", "richness_bivariate.png"))
 
 ## Species LCBD plots
@@ -148,7 +156,7 @@ for (i, opt) in enumerate(options)
         lcbd_networks_all[opt],
         lcbd_species_all[opt];
         classes=3,
-        inset=(1, bbox(0.04, 0.05, 0.28, 0.28, :top, :right)),
+        inset=(1, bbox(0.80, 0.02, 0.13, 0.28, :top, :right)),
         subplot=2,
         xlab="Networks LCBD",
         ylab="Species LCBD",
@@ -170,7 +178,7 @@ bivariatelegend!(
     lcbd_networks_all["mean"],
     lcbd_species_all["mean"];
     classes=3,
-    inset=(1, bbox(0.04, 0.05, 0.28, 0.28, :top, :right)),
+    inset=(1, bbox(0.80, 0.02, 0.13, 0.28, :top, :right)),
     subplot=2,
     xlab="Networks LCBD",
     ylab="Species LCBD",
@@ -191,10 +199,17 @@ plot(
 savefig(joinpath("figures", "lcbd_two-panels.png"))
 
 # Plot separately
-plot_options = (cb=:none, xticks=:none, yticks=:none, frame=:box)
-plot(lcbd_species_all["mean"]; c=:viridis, plot_options...)
+# plot_options = (cb=:none, xticks=:none, yticks=:none, frame=:box)
+plot_options = (c=:viridis, xaxis="Longitude", yaxis="Latitude")
+plot(
+    lcbd_species_all["mean"]/maximum(lcbd_species_all["mean"]);
+    cbtitle="Relative species LCBD", plot_options...
+)
 savefig(joinpath("figures", "lcbd_mean_species.png"))
-plot(lcbd_networks_all["mean"]; c=:viridis, plot_options...)
+plot(
+    lcbd_networks_all["mean"]/maximum(lcbd_networks_all["mean"]);
+    cbtitle="Relative network LCBD", plot_options...
+)
 savefig(joinpath("figures", "lcbd_mean_networks.png"))
 
 # Univariate rescaled LCBD
