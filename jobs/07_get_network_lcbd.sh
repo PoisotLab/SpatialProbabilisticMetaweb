@@ -2,8 +2,8 @@
 #SBATCH --account=ctb-tpoisot
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=64
-#SBATCH --mem=180G
-#SBATCH --time=02:30:00
+#SBATCH --mem=140G
+#SBATCH --time=03:15:00
 #SBATCH --job-name=07_get_network_lcbd.jl
 #SBATCH --output=jobs/job_07_get_network_lcbd-%J.out
 
