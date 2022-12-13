@@ -18,12 +18,13 @@ reference_layer = geotiff(SimpleSDMPredictor, ref_path)
 lcbd_layers = fill(similar(reference_layer), 4)
 
 # Get LCBD values for all 4 assembly options
-for (i, opt) in enumerate(lcbd_options)
+for (i, opt) in enumerate(lcbd_options[4])
+    @infiltrate
     # Load the layers
     D = Dict{String, SimpleSDMResponse}()
     p = Progress(length(spnames))
     @threads for j in eachindex(spnames)
-        D[spnames[j]] = geotiff(SimpleSDMPredictor, joinpath("xtras", "results", "$(results_options[i]).tif"), j)
+        D[spnames[j]] = geotiff(SimpleSDMPredictor, joinpath("xtras", "results", "$(results_options[4]).tif"), j)
         # Names won't match but whatever
         # This way is faster and can run in parallel
         next!(p)
