@@ -85,7 +85,7 @@ end
 df = DataFrame(CSV.File(joinpath("data/input/canadian_thresholded.csv")))
 
 # Attempt to read the complete dataset (should all fail)
-occ_path = joinpath("data", "occurrences", "subset", "all_occurrences.csv")
+occ_path = joinpath("xtras", "occurrences", "all_occurrences.csv")
 df = DataFrame(CSV.File(occ_path))
 df = DataFrame(CSV.File(occ_path; stringtype=String))
 df = DataFrame(CSV.File(occ_path, delim="\t", types=Dict(:gbifID => String)))
@@ -100,9 +100,9 @@ df = DataFrame(CSV.File(occ_path, limit=1_000)) # not reading the right number o
 df = DataFrame(CSV.File(occ_path, limit=11_800)) # when it stops working
 
 # Attempt with dataset exported with R
-df = DataFrame(CSV.File(joinpath("data", "occurrences", "subset", "all_occurrences2.csv"), delim="\t"))
+df = DataFrame(CSV.File(joinpath("xtras", "occurrences", "all_occurrences2.csv"), delim="\t"))
 # Not 100_000 rows??
 # Same with R though...
 
 # Attempt with problem dataset
-df = DataFrame(CSV.File(joinpath("data", "occurrences", "subset", "all_occurrences_problems.csv"), delim="\t"))
+df = DataFrame(CSV.File(joinpath("xtras", "occurrences", "all_occurrences_problems.csv"), delim="\t"))

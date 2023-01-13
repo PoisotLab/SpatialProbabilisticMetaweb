@@ -1,20 +1,33 @@
 #### Aggregate SDMs ####
 
-include("A0_required.jl")
+include("A0_required.jl");
+
+# Option to run for QC only
+# QC = true
+if (@isdefined QC) && QC == true
+    ref_path = joinpath("data", "input", "quebec_ref_10.tif");
+    sdm_path = joinpath("xtras", "sdms");
+    @info "Running for Quebec at 10 arcmin resolution"
+else
+    ref_path = joinpath("data", "input", "canada_ref_2.tif");
+    sdm_path = joinpath("data", "sdms");
+    @info "Running for Canada at 2.5 arcmin resolution"
+end
 
 ## Probabilistic distributions
 
 # Define reference layer
-spatialrange = (left=-80., right=-50., bottom=45., top=65.)
-reference_layer = SimpleSDMPredictor(WorldClim, BioClim, 1; spatialrange...)
+reference_layer = geotiff(SimpleSDMPredictor, ref_path)
+spatialrange = boundingbox(reference_layer)
 
 # Select files to load
-map_files = readdir(joinpath("data", "sdms"); join=true)
+map_files = readdir(sdm_path; join=true)
 
 # Load predictions mean & variance layers
 μ = Dict{String,SimpleSDMPredictor}()
 σ = Dict{String,SimpleSDMPredictor}()
-for map_file in map_files
+p = Progress(length(map_files))
+@threads for map_file in map_files
     sp_name = @chain map_file begin
         basename
         replace("_error.tif" => "")
@@ -23,9 +36,12 @@ for map_file in map_files
     end
     if contains(map_file, "error.tif")
         σ[sp_name] = geotiff(SimpleSDMPredictor, map_file; spatialrange...)
+        σ[sp_name] = mask(reference_layer, σ[sp_name])
     else
         μ[sp_name] = geotiff(SimpleSDMPredictor, map_file; spatialrange...)
+        μ[sp_name] = mask(reference_layer, μ[sp_name])
     end
+    next!(p)
 end
 
 # We need a few zero types for distributions, which will allow to use them in cell of layers
@@ -35,11 +51,13 @@ Base.zero(::Type{Truncated{Normal{T}, Continuous, T}}) where {T} = Truncated(zer
 
 # Create layers of Truncated Normal distributions given the mean & variance
 D = Dict{String, SimpleSDMResponse}()
-for sp in String.(keys(μ))
+p = Progress(length(μ))
+@threads for sp in String.(keys(μ))
     _t = similar(μ[sp], Truncated{Normal{Float64}, Continuous, Float64})
     for site in keys(μ[sp])
         _t[site] = Truncated(Normal(Float64(μ[sp][site]), Float64(σ[sp][site])), 0.0, 1.0)
     end
     D[sp] = _t
+    next!(p)
 end
 GC.gc()
