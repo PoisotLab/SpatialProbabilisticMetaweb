@@ -14,6 +14,55 @@ end
 # @load joinpath("xtras", "jld2", "network_layers.jld2") layer
 include("05_assemble_networks.jl")
 
+## Network layer
+
+# Work on the networks_thr object for now
+# networks = networks_thr
+
+# Define some zero types
+Base.zero(::Type{UnipartiteProbabilisticNetwork{T}}) where T = UnipartiteProbabilisticNetwork(zeros(T, (2,2)))
+Base.zero(::Type{UnipartiteProbabilisticNetwork{T, String}}) where T = zero(UnipartiteProbabilisticNetwork{T})
+
+# Define function
+function network_layer(networks, reference_layer)
+    # Create empty objects
+    _empty_mat = zeros(Float64, size(networks)[2:3])
+    _empty_network = UnipartiteProbabilisticNetwork(_empty_mat, species(P))
+
+    # With threads
+    networks_vec = fill(_empty_network, size(networks)[1])
+    # networks_vec = networks_vec[1:1000]
+    @threads for i in eachindex(networks_vec)
+        # Extract a single site
+        local_site = @view networks[i, :, :, :];
+
+        # Extract local interaction matrix
+        local_mat = dropdims(mean(local_site; dims=ndims(local_site)), dims=ndims(local_site))
+
+        # Transform into network
+        networks_vec[i] = UnipartiteProbabilisticNetwork(local_mat, species(P))
+    end
+    networks_vec
+
+    # Transform into layer (option 1)
+    # layer = similar(reference_layer, eltype(networks_vec))
+    # layer[keys(layer)] = networks_vec
+
+    # Transform into layer (option 2)
+    _mat = fill(nothing, size(reference_layer.grid));
+    _mat = convert(Matrix{Union{Nothing, eltype(networks_vec)}}, _mat);
+    _inds = findall(!isnothing, reference_layer.grid);
+    _mat[_inds] = networks_vec;
+    layer = SimpleSDMResponse(_mat, reference_layer);
+
+    return layer
+end
+
+# Convert all options
+layer = network_layer(networks, reference_layer)
+
+## Network properties
+
 # Get some network measures
 Co = broadcast(connectance, layer)
 # o = broadcast(omnivory, layer)
