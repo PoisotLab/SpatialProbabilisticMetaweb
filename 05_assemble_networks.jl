@@ -52,7 +52,7 @@ function assemble_networks(
     type::String="avg",
     n_itr::Int64=10,
     seed::Int64=42,
-    n_regions::Tuple{Int64, Int64}=(3,3)
+    n_regions::Tuple{Int64, Int64}=(2,3)
 )
     type in ["avg", "avg_thr", "rnd", "rnd_thr"] ||
         throw(ArgumentError("type must be avg, avg_thr, rnd, or rnd_thr"))
@@ -76,10 +76,10 @@ function assemble_networks(
     for j in 1:n_lat, i in 1:n_lon
         # Subset layers for the subregion
         new_coords = (
-            left=(spatialrange.left + (j-1)*lon_step),
-            right=(spatialrange.left + j*lon_step),
-            bottom=(spatialrange.bottom + (i-1)*lat_step),
-            top=(spatialrange.bottom + i*lat_step)
+            left=(spatialrange.left + (i-1)*lon_step),
+            right=(spatialrange.left + i*lon_step),
+            bottom=(spatialrange.bottom + (j-1)*lat_step),
+            top=(spatialrange.bottom + j*lat_step)
         )
         mini_reference_layer = clip(reference_layer; new_coords...)
         mini_D = Dict{String, SimpleSDMResponse}()
