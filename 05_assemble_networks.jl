@@ -52,7 +52,7 @@ function assemble_networks(
     type::String="avg",
     n_itr::Int64=10,
     seed::Int64=42,
-    n_regions::Tuple{Int64, Int64}=(2,3)
+    n_regions::Tuple{Int64, Int64}=(3,3)
 )
     type in ["avg", "avg_thr", "rnd", "rnd_thr"] ||
         throw(ArgumentError("type must be avg, avg_thr, rnd, or rnd_thr"))
@@ -64,22 +64,27 @@ function assemble_networks(
     n_sites_total = length(reference_layer)
     networks_bit = BitArray(undef, n_sites_total, size(P)..., n_itr);
 
-    # Divide into smaller regions
+    # Define global range
     spatialrange = boundingbox(reference_layer)
-    n_lat = n_regions[1]
-    n_lon = n_regions[2]
     lat_range = spatialrange.top - spatialrange.bottom
     lon_range = spatialrange.right - spatialrange.left
-    lat_step = lat_range/n_lat
-    lon_step = lon_range/n_lon
 
+    # Divide into smaller regions
+    n_lat = n_regions[1]
+    n_lon = n_regions[2]
+    lat_step = floor(lat_range/n_lat)
+    lon_step = floor(lon_range/n_lon)
+    lat_lims = (spatialrange.bottom .+ collect(0:(n_lat-1)) .* lat_step..., spatialrange.top)
+    lon_lims = (spatialrange.left .+ collect(0:(n_lon-1)) .* lon_step..., spatialrange.right)
+
+    # Get the networks one subregion at the time
     for j in 1:n_lat, i in 1:n_lon
-        # Subset layers for the subregion
+        # Subset distribution layers to the subregion
         new_coords = (
-            left=(spatialrange.left + (i-1)*lon_step),
-            right=(spatialrange.left + i*lon_step),
-            bottom=(spatialrange.bottom + (j-1)*lat_step),
-            top=(spatialrange.bottom + j*lat_step)
+            left=lon_lims[i],
+            right=lon_lims[i+1],
+            bottom=lat_lims[j],
+            top=lat_lims[j+1]
         )
         mini_reference_layer = clip(reference_layer; new_coords...)
         mini_D = Dict{String, SimpleSDMResponse}()
@@ -88,7 +93,7 @@ function assemble_networks(
         end
         mini_D
 
-        # Corresponding indices in the Global BitArray
+        # Get corresponding indices in the Global BitArray
         inds_region = indexin(keys(mini_reference_layer), keys(reference_layer))
 
         # Networkify it
@@ -99,6 +104,7 @@ function assemble_networks(
             site = sites[i]
             s = [mini_D[s][site] for s in species(P)]
             c = [cutoffs[s] for s in species(P)]
+            # Apply cooccurrence probability options
             if type == "avg"
                 pcooc = @. mean(s) * mean(s)'
             elseif type == "avg_thr"
@@ -110,6 +116,7 @@ function assemble_networks(
                 Random.seed!(seed + 1)
                 pcooc = @. (rand(s) > c) * (rand(s) > c)'
             end
+            # Extract local network and interactions
             for j in 1:size(networks, 4)
                 Random.seed!(seed + j*i)
                 prob_network = UnipartiteProbabilisticNetwork(pcooc .* A, species(P))
