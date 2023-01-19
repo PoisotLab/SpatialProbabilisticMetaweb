@@ -56,14 +56,20 @@ layer = network_layer(networks, reference_layer)
 
 ## Network properties
 
-# Get some network measures
-Co = broadcast(connectance, layer)
-L = broadcast(links, layer)
-Lv = broadcast(links_var, layer)
-Ld = broadcast(linkage_density, layer)
-# o = broadcast(omnivory, layer)
-# tl = broadcast(trophic_level, layer)
-# m = broadcast(find_motif, layer)
+function get_network_properties(layer)
+    # Get some network measures
+    Co = broadcast(connectance, layer)
+    L = broadcast(links, layer)
+    Lv = broadcast(links_var, layer)
+    Ld = broadcast(linkage_density, layer)
+    # o = broadcast(omnivory, layer)
+    # tl = broadcast(trophic_level, layer)
+    # m = broadcast(find_motif, layer)
+
+    return (Co = Co, L = L, Lv = Lv, Ld = Ld)
+end
+
+Co, L, Lv, Ld = get_network_properties(layer)
 
 # Export the link layers
 geotiff(joinpath(results_path, "links_mean.tif"), L)
