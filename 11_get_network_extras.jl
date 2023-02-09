@@ -1,6 +1,6 @@
 #### Extra network measures ###
 
-QC = true
+# CAN = true
 
 # Load initial network measures
 include("09_get_network_measures.jl")

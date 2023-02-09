@@ -1,6 +1,6 @@
 ## Probabilistic distributions
 
-# QC = true
+# CAN = true
 include("04_aggregate_sdms.jl");
 
 D # Truncated Normal distribution per pixel
@@ -8,12 +8,12 @@ D # Truncated Normal distribution per pixel
 ## Metaweb
 
 # Load the previous non-reconciled metaweb if dealing with QC data
-if (@isdefined QC) && QC == true
-    mw_path = joinpath("data", "input", "canadian_thresholded.csv")
-    fit_path = joinpath("xtras", "input", "sdm_fit_results.csv")
-else
+if (@isdefined CAN) && CAN == true
     mw_path = joinpath("data", "input", "canadian_thresholded_reconciled.csv")
     fit_path = joinpath("data", "input", "sdm_fit_results.csv")
+else
+    mw_path = joinpath("data", "input", "canadian_thresholded.csv")
+    fit_path = joinpath("xtras", "input", "sdm_fit_results.csv")
 end
 
 # Parse the metaweb

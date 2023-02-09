@@ -1,13 +1,13 @@
 #### Plot network measures ####
 
-# QC = true
+# CAN = true
 include("A0_required.jl")
 
-# Load the previous sdm results if dealing with QC data
-if (@isdefined QC) && QC == true
-    results_path = joinpath("xtras", "results")
-else
+# Load the corresponding sdm results if dealing with QC or CAN data
+if (@isdefined CAN) && CAN == true
     results_path = joinpath("data", "results")
+else
+    results_path = joinpath("xtras", "results")
 end
 
 # Objects

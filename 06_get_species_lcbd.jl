@@ -1,15 +1,15 @@
 #### Richness & LCBD analysis ####
 
-# QC = true
+# CAN = true
 include("04_aggregate_sdms.jl");
 
-# Load the previous sdm results if dealing with QC data
-if (@isdefined QC) && QC == true
-    fit_path = joinpath("xtras", "input", "sdm_fit_results.csv")
-    results_path = joinpath("xtras", "results")
-else
+# Load the corresponding sdm results if dealing with QC or CAN data
+if (@isdefined CAN) && CAN == true
     fit_path = joinpath("data", "input", "sdm_fit_results.csv")
     results_path = joinpath("data", "results")
+else
+    fit_path = joinpath("xtras", "input", "sdm_fit_results.csv")
+    results_path = joinpath("xtras", "results")
 end
 
 ## Richness
