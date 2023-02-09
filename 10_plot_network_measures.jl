@@ -73,7 +73,8 @@ bivariatelegend!(
     L,
     Lv;
     classes=3,
-    inset=(1, bbox(0.04, 0.05, 0.28, 0.28, :top, :right)),
+    # inset=(1, bbox(0.04, 0.05, 0.28, 0.28, :top, :right)),
+    inset=(1, bbox(0.80, 0.02, 0.13, 0.28, :top, :right)),
     subplot=2,
     xlab="Links",
     ylab="Link variance",
@@ -121,7 +122,8 @@ bivariatelegend!(
     L,
     Lcv;
     classes=3,
-    inset=(1, bbox(0.04, 0.05, 0.28, 0.28, :top, :right)),
+    # inset=(1, bbox(0.04, 0.05, 0.28, 0.28, :top, :right)),
+    inset=(1, bbox(0.80, 0.02, 0.13, 0.28, :top, :right)),
     subplot=2,
     xlab="Links",
     ylab="Link coefficient of variation",
@@ -147,7 +149,8 @@ bivariatelegend!(
     S,
     L;
     classes=3,
-    inset=(1, bbox(0.04, 0.05, 0.28, 0.28, :top, :right)),
+    # inset=(1, bbox(0.04, 0.05, 0.28, 0.28, :top, :right)),
+    inset=(1, bbox(0.80, 0.02, 0.13, 0.28, :top, :right)),
     subplot=2,
     xlab="Richness",
     ylab="Links",
@@ -165,7 +168,8 @@ bivariatelegend!(
     broadcast(v -> v^2, Sσ),
     Lv;
     classes=3,
-    inset=(1, bbox(0.04, 0.05, 0.28, 0.28, :top, :right)),
+    # inset=(1, bbox(0.04, 0.05, 0.28, 0.28, :top, :right)),
+    inset=(1, bbox(0.80, 0.02, 0.13, 0.28, :top, :right)),
     subplot=2,
     xlab="Richness variance",
     ylab="Link variance",
@@ -187,7 +191,8 @@ bivariatelegend!(
     Scv,
     Lcv;
     classes=3,
-    inset=(1, bbox(0.04, 0.05, 0.28, 0.28, :top, :right)),
+    # inset=(1, bbox(0.04, 0.05, 0.28, 0.28, :top, :right)),
+    inset=(1, bbox(0.80, 0.02, 0.13, 0.28, :top, :right)),
     subplot=2,
     xlab="Richness coefficient of variation",
     ylab="Link coefficient of variation",
