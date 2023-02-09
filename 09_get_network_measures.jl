@@ -139,15 +139,6 @@ end
 # Get network properties
 Co, L, Lv, Ld = get_network_properties(networks, reference_layer)
 
-# Plot 'em
-plot(
-    plot(Co; c=:cividis, title="Connectance"),
-    plot(L; c=:cividis, title="Links"),
-    plot(Lv; c=:cividis, title="Link variance"),
-    plot(Ld; c=:cividis, title="Linkage density");
-    size=(900,600)
-)
-
 # Export the link layers
 geotiff(joinpath(results_path, "links_mean.tif"), L)
 geotiff(joinpath(results_path, "links_var.tif"), Lv)

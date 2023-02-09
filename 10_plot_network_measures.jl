@@ -22,6 +22,15 @@ Ld = broadcast(linkage_density, layer)
 S = geotiff(SimpleSDMPredictor, joinpath(results_path, "richness_mean.tif"))
 Sσ = geotiff(SimpleSDMPredictor, joinpath(results_path, "richness_uncertainty.tif"))
 
+# Basic plots
+plot(
+    plot(Co; c=:cividis, title="Connectance"),
+    plot(L; c=:cividis, title="Links"),
+    plot(Lv; c=:cividis, title="Link variance"),
+    plot(Ld; c=:cividis, title="Linkage density");
+    size=(900,600)
+)
+
 ## Some plots
 
 # Links
