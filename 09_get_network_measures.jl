@@ -139,6 +139,55 @@ end
 # Get network properties
 Co, L, Lv, Ld = get_network_properties(networks, reference_layer)
 
+# Compare region option with previous single region one
+@time begin
+    Co, L, Lv, Ld = get_network_properties(networks, reference_layer)
+end;
+# 9.610701 seconds (2.37 M allocations: 4.162 GiB, 27.12% gc time)
+# 10.2 GB baseline, no additional memory used...
+@time begin
+    layer = network_layer(networks, reference_layer)
+    Co = broadcast(connectance, layer)
+    L = broadcast(links, layer)
+    Lv = broadcast(links_var, layer)
+    Ld = broadcast(linkage_density, layer)
+    # layer = nothing
+    GC.gc()
+end;
+# 8.551374 seconds (831.05 k allocations: 2.956 GiB, 3.92% gc time)
+# 10.2 GB baseline, no additional memory used either...
+
+# Investigate
+varinfo(r"layer")
+varinfo(r"networks")
+# Why is layer smaller than networks?
+n_obs_layer = @chain begin
+    broadcast(adjacency, layer)
+    broadcast(length, _)
+    collect
+    sum
+end
+n_obs_networks = length(networks) # 10x larger, makes sense as it's Integers, not Floats
+# Test new object
+# Base.summarysize(fill(0, n_obs_networks)) #
+layer_nvalues = fill(0.0, n_obs_layer)
+varinfo(r"layer")
+# Why is layer so much smaller in memory??
+# With Sparse
+using SparseArrays
+layer_nvalues_sparse = sparse(layer_nvalues)
+varinfo(r"layer")
+# n_def = collect(broadcast(l -> length(l)/26_569, layer))
+n_def = Int64(sum(collect(broadcast(l -> connectance(l > 0.0), layer)) * 26_569))
+layer_nvalues_sparse[1:n_def] .= 1.0
+layer_nvalues_sparse
+networks_with_layer_name = networks # just to have it in the same varinfo output
+varinfo(r"layer")
+# Recap:
+# - layer has a similar size as layer_nvalues_sparse, a SparseVector with the same number of defined vales
+# - layer is 2x smaller than networks, the BitArray representation
+# - layer is 20x smaller than layer_nvalues, Vector{Float64} with the same number of values
+
 # Plot 'em
 plot(
     plot(Co; c=:cividis, title="Connectance"),
