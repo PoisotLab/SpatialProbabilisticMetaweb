@@ -2,16 +2,16 @@
 
 include("A0_required.jl");
 
-# Option to run for QC only
-# QC = true
-if (@isdefined QC) && QC == true
-    ref_path = joinpath("data", "input", "quebec_ref_10.tif");
-    sdm_path = joinpath("xtras", "sdms");
-    @info "Running for Quebec at 10 arcmin resolution"
-else
+# Option to run for CAN
+# CAN = true
+if (@isdefined CAN) && CAN == true
     ref_path = joinpath("data", "input", "canada_ref_2.tif");
     sdm_path = joinpath("data", "sdms");
     @info "Running for Canada at 2.5 arcmin resolution"
+else
+    ref_path = joinpath("data", "input", "quebec_ref_10.tif");
+    sdm_path = joinpath("xtras", "sdms");
+    @info "Running for Quebec at 10 arcmin resolution"
 end
 
 ## Probabilistic distributions

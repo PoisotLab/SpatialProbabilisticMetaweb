@@ -1,6 +1,6 @@
 ## Probabilistic distributions
 
-# QC = true
+# CAN = true
 include("04_aggregate_sdms.jl");
 
 D # Truncated Normal distribution per pixel
@@ -8,12 +8,12 @@ D # Truncated Normal distribution per pixel
 ## Metaweb
 
 # Load the previous non-reconciled metaweb if dealing with QC data
-if (@isdefined QC) && QC == true
-    mw_path = joinpath("data", "input", "canadian_thresholded.csv")
-    fit_path = joinpath("xtras", "input", "sdm_fit_results.csv")
-else
+if (@isdefined CAN) && CAN == true
     mw_path = joinpath("data", "input", "canadian_thresholded_reconciled.csv")
     fit_path = joinpath("data", "input", "sdm_fit_results.csv")
+else
+    mw_path = joinpath("data", "input", "canadian_thresholded.csv")
+    fit_path = joinpath("xtras", "input", "sdm_fit_results.csv")
 end
 
 # Parse the metaweb
@@ -64,22 +64,27 @@ function assemble_networks(
     n_sites_total = length(reference_layer)
     networks_bit = BitArray(undef, n_sites_total, size(P)..., n_itr);
 
-    # Divide into smaller regions
+    # Define global range
     spatialrange = boundingbox(reference_layer)
-    n_lat = n_regions[1]
-    n_lon = n_regions[2]
     lat_range = spatialrange.top - spatialrange.bottom
     lon_range = spatialrange.right - spatialrange.left
-    lat_step = lat_range/n_lat
-    lon_step = lon_range/n_lon
 
+    # Divide into smaller regions
+    n_lat = n_regions[1]
+    n_lon = n_regions[2]
+    lat_step = floor(lat_range/n_lat)
+    lon_step = floor(lon_range/n_lon)
+    lat_lims = (spatialrange.bottom .+ collect(0:(n_lat-1)) .* lat_step..., spatialrange.top)
+    lon_lims = (spatialrange.left .+ collect(0:(n_lon-1)) .* lon_step..., spatialrange.right)
+
+    # Get the networks one subregion at the time
     for j in 1:n_lat, i in 1:n_lon
-        # Subset layers for the subregion
+        # Subset distribution layers to the subregion
         new_coords = (
-            left=(spatialrange.left + (j-1)*lon_step),
-            right=(spatialrange.left + j*lon_step),
-            bottom=(spatialrange.bottom + (i-1)*lat_step),
-            top=(spatialrange.bottom + i*lat_step)
+            left=lon_lims[i],
+            right=lon_lims[i+1],
+            bottom=lat_lims[j],
+            top=lat_lims[j+1]
         )
         mini_reference_layer = clip(reference_layer; new_coords...)
         mini_D = Dict{String, SimpleSDMResponse}()
@@ -88,7 +93,7 @@ function assemble_networks(
         end
         mini_D
 
-        # Corresponding indices in the Global BitArray
+        # Get corresponding indices in the Global BitArray
         inds_region = indexin(keys(mini_reference_layer), keys(reference_layer))
 
         # Networkify it
@@ -99,6 +104,7 @@ function assemble_networks(
             site = sites[i]
             s = [mini_D[s][site] for s in species(P)]
             c = [cutoffs[s] for s in species(P)]
+            # Apply cooccurrence probability options
             if type == "avg"
                 pcooc = @. mean(s) * mean(s)'
             elseif type == "avg_thr"
@@ -110,6 +116,7 @@ function assemble_networks(
                 Random.seed!(seed + 1)
                 pcooc = @. (rand(s) > c) * (rand(s) > c)'
             end
+            # Extract local network and interactions
             for j in 1:size(networks, 4)
                 Random.seed!(seed + j*i)
                 prob_network = UnipartiteProbabilisticNetwork(pcooc .* A, species(P))
@@ -140,64 +147,3 @@ networks_thr = assemble_networks(reference_layer, P, D, cutoffs; type="avg_thr")
 networks_rnd = assemble_networks(reference_layer, P, D, cutoffs; type="rnd"); # 2 min
 networks_rnd_thr = assemble_networks(reference_layer, P, D, cutoffs; type="rnd_thr"); # 30 sec.
 =#
-
-# ## Network layer
-
-# # Work on the networks_thr object for now
-# # networks = networks_thr
-
-# # Define some zero types
-# Base.zero(::Type{UnipartiteProbabilisticNetwork{T}}) where T = UnipartiteProbabilisticNetwork(zeros(T, (2,2)))
-# Base.zero(::Type{UnipartiteProbabilisticNetwork{T, String}}) where T = zero(UnipartiteProbabilisticNetwork{T})
-
-# # Define function
-# function network_layer(networks, reference_layer)
-#     # Create empty objects
-#     _empty_mat = zeros(Float64, size(networks)[2:3])
-#     _empty_network = UnipartiteProbabilisticNetwork(_empty_mat, species(P))
-
-#     # With threads
-#     networks_vec = fill(_empty_network, size(networks)[1])
-#     # networks_vec = networks_vec[1:1000]
-#     @threads for i in eachindex(networks_vec)
-#         # Extract a single site
-#         local_site = @view networks[i, :, :, :];
-
-#         # Extract local interaction matrix
-#         local_mat = dropdims(mean(local_site; dims=ndims(local_site)), dims=ndims(local_site))
-
-#         # Transform into network
-#         networks_vec[i] = UnipartiteProbabilisticNetwork(local_mat, species(P))
-#     end
-#     networks_vec
-
-#     # Transform into layer (option 1)
-#     # layer = similar(reference_layer, eltype(networks_vec))
-#     # layer[keys(layer)] = networks_vec
-
-#     # Transform into layer (option 2)
-#     _mat = fill(nothing, size(reference_layer.grid));
-#     _mat = convert(Matrix{Union{Nothing, eltype(networks_vec)}}, _mat);
-#     _inds = findall(!isnothing, reference_layer.grid);
-#     _mat[_inds] = networks_vec;
-#     layer = SimpleSDMResponse(_mat, reference_layer);
-
-#     return layer
-# end
-
-# # Convert all options
-# layer = network_layer(networks, reference_layer)
-# #=
-# layer_thr = network_layer(networks_thr)
-# layer_rnd = network_layer(networks_rnd)
-# layer_rnd_thr = network_layer(networks_rnd_thr)
-# =#
-
-# ## Export everything to JLD2
-
-# # Export
-# #=
-# isdir(joinpath("xtras", "jld2")) || mkpath(joinpath("xtras", "jld2"))
-# @save joinpath("xtras", "jld2", "network_layers.jld2") layer layer_thr layer_rnd layer_rnd_thr
-# @save joinpath("xtras", "jld2", "network_simulations.jld2") {compress=true} networks networks_thr networks_rnd networks_rnd_thr
-# =#

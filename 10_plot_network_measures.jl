@@ -1,13 +1,13 @@
 #### Plot network measures ####
 
-# QC = true
+# CAN = true
 include("A0_required.jl")
 
-# Load the previous sdm results if dealing with QC data
-if (@isdefined QC) && QC == true
-    results_path = joinpath("xtras", "results")
-else
+# Load the corresponding sdm results if dealing with QC or CAN data
+if (@isdefined CAN) && CAN == true
     results_path = joinpath("data", "results")
+else
+    results_path = joinpath("xtras", "results")
 end
 
 # Objects
@@ -21,6 +21,15 @@ Lv = broadcast(links_var, layer)
 Ld = broadcast(linkage_density, layer)
 S = geotiff(SimpleSDMPredictor, joinpath(results_path, "richness_mean.tif"))
 Sσ = geotiff(SimpleSDMPredictor, joinpath(results_path, "richness_uncertainty.tif"))
+
+# Basic plots
+plot(
+    plot(Co; c=:cividis, title="Connectance"),
+    plot(L; c=:cividis, title="Links"),
+    plot(Lv; c=:cividis, title="Link variance"),
+    plot(Ld; c=:cividis, title="Linkage density");
+    size=(900,600)
+)
 
 ## Some plots
 

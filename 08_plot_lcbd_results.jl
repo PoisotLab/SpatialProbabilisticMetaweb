@@ -1,15 +1,15 @@
 #### Plot richness & LCBD results ####
 
-# QC = true
+# CAN = true
 include("A0_required.jl");
 
-# Load the previous sdm results if dealing with QC data
-if (@isdefined QC) && QC == true
-    ref_path = joinpath("data", "input", "quebec_ref_10.tif");
-    results_path = joinpath("xtras", "results")
-else
+# Load the corresponding sdm results if dealing with QC or CAN data
+if (@isdefined CAN) && CAN == true
     ref_path = joinpath("data", "input", "canada_ref_2.tif");
     results_path = joinpath("data", "results")
+else
+    ref_path = joinpath("data", "input", "quebec_ref_10.tif");
+    results_path = joinpath("xtras", "results")
 end;
 
 ## Load data

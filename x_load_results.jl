@@ -1,14 +1,13 @@
 ## Load data
 
-# QC = true
+# CAN = true
 
-# Load the previous sdm results if dealing with QC data
-if (@isdefined QC) && QC == true
-    results_path = joinpath("xtras", "results")
-else
+# Load the corresponding sdm results if dealing with QC or CAN data
+if (@isdefined CAN) && CAN == true
     results_path = joinpath("data", "results")
+else
+    results_path = joinpath("xtras", "results")
 end
-
 
 # Define names for the 4 sampling options
 options = ["mean", "mean_thr", "rand", "rand_thr"]
