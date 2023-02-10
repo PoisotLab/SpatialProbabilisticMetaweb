@@ -2,8 +2,8 @@
 #SBATCH --account=ctb-tpoisot
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=64
-#SBATCH --mem=250G
-#SBATCH --time=04:00:00
+#SBATCH --mem=140G
+#SBATCH --time=03:20:00
 #SBATCH --job-name=09_get_network_measures.jl
 #SBATCH --output=jobs/job_09_get_network_measures-%J.out
 
