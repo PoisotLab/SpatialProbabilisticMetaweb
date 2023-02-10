@@ -1,6 +1,6 @@
 #### Plot network measures ####
 
-# CAN = true
+CAN = true
 include("A0_required.jl")
 
 # Load the corresponding sdm results if dealing with QC or CAN data
@@ -11,14 +11,10 @@ else
 end
 
 # Objects
-# @load joinpath("xtras", "jld2", "network_layers.jld2") layer layer_thr layer_rnd layer_rnd_thr
-include("05_assemble_networks.jl")
-# layers_all = [layer, layer_thr, layer_rnd, layer_rnd_thr]
-Co = broadcast(connectance, layer)
-L = broadcast(links, layer)
-# L_all = [broadcast(links, l) for l in layers_all]
-Lv = broadcast(links_var, layer)
-Ld = broadcast(linkage_density, layer)
+Co = geotiff(SimpleSDMPredictor, joinpath(results_path, "connectance.tif"))
+L = geotiff(SimpleSDMPredictor, joinpath(results_path, "links_mean.tif"))
+Lv = geotiff(SimpleSDMPredictor, joinpath(results_path, "links_var.tif"))
+Ld = geotiff(SimpleSDMPredictor, joinpath(results_path, "links_density.tif"))
 S = geotiff(SimpleSDMPredictor, joinpath(results_path, "richness_mean.tif"))
 Sσ = geotiff(SimpleSDMPredictor, joinpath(results_path, "richness_uncertainty.tif"))
 
@@ -43,22 +39,7 @@ plot_options = (
 )
 plot(L; c=:acton, plot_options...)
 savefig(joinpath("figures", "links_mean_acton.png"))
-
-# Links for all options
-# clim1 = mapreduce(minimum, min, values(L_all))
-# clim2 = mapreduce(maximum, max, values(L_all))
-# L_all_plots = []
-# lims = (clim1, clim2)
-# plot(
-#     [plot(L; c=:acton, clim=lims) for L in L_all]...;
-#     cbtitle="Expected number of links",
-#     xaxis="Latitude",
-#     yaxis="Longitude",
-#     layout=(2,2),
-#     size=(1000,600),
-#     left_margin=3mm
-# )
-# savefig(joinpath("figures", "links_all.png"))
+# Weird horizontal line but at least it's not displayed on the PNG file
 
 # Link variance
 plot(Lv; c=:acton, cb_title="Link variance")
@@ -296,21 +277,24 @@ savefig(joinpath("figures", "lcbd_bivariate_unique_networks.png"))
 
 ## Compare sampling options
 
-# Links
+# layers_all = [layer, layer_thr, layer_rnd, layer_rnd_thr]
 # L_all = [broadcast(links, l) for l in layers_all]
+
+# Links for all options
 # clim1 = mapreduce(minimum, min, values(L_all))
 # clim2 = mapreduce(maximum, max, values(L_all))
+# L_all_plots = []
 # lims = (clim1, clim2)
-# titles = ["Mean" "Mean > cutoff" "Rnd" "Rnd > cutoff"] # for plots later on
 # plot(
 #     [plot(L; c=:acton, clim=lims) for L in L_all]...;
-#     # [plot(broadcast(links, l); c=:cividis) for l in layers_all]...;
-#     title = titles,
-#     cbtitle="Links",
+#     cbtitle="Expected number of links",
+#     xaxis="Latitude",
+#     yaxis="Longitude",
 #     layout=(2,2),
-#     size=(900,600),
+#     size=(1000,600),
+#     left_margin=3mm
 # )
-# savefig(joinpath("figures", "links_mean_all.png"))
+# savefig(joinpath("figures", "links_all.png"))
 
 # Link variance
 # Lv_all = [broadcast(links_var, l) for l in layers_all]
@@ -326,14 +310,3 @@ savefig(joinpath("figures", "lcbd_bivariate_unique_networks.png"))
 #     size=(900,600),
 # )
 # savefig(joinpath("figures", "links_var_all.png"))
-
-## Quebec background
-spatialrange = (left=-80.0, right=-50.0, bottom=45.0, top=65.0)
-plot(;
-    frame=:box,
-    xlim=(spatialrange.left, spatialrange.right),
-    ylim=(spatialrange.bottom, spatialrange.top),
-    dpi=600,
-)
-plot!(worldshape(50), c=:lightgrey, lc=:lightgrey, grid=:none, frame=:none)
-savefig("figures", "x_background_qc.png")
