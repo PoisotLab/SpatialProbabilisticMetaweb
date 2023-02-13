@@ -95,22 +95,22 @@ histogram2d(
 )
 
 # Link bivariate map
-bivariate(
-    L, Lcv;
-    quantiles=true, classes=3, xlab="Longitude", ylab="Latitude", bv_pal_2...
-)
-bivariatelegend!(
-    L,
-    Lcv;
-    classes=3,
-    # inset=(1, bbox(0.04, 0.05, 0.28, 0.28, :top, :right)),
-    inset=(1, bbox(0.80, 0.02, 0.13, 0.28, :top, :right)),
-    subplot=2,
-    xlab="Links",
-    ylab="Link coefficient of variation",
-    guidefontsize=7,
-    bv_pal_2...
-)
+# bivariate(
+#     L, Lcv;
+#     quantiles=true, classes=3, xlab="Longitude", ylab="Latitude", bv_pal_2...
+# )
+# bivariatelegend!(
+#     L,
+#     Lcv;
+#     classes=3,
+#     # inset=(1, bbox(0.04, 0.05, 0.28, 0.28, :top, :right)),
+#     inset=(1, bbox(0.80, 0.02, 0.13, 0.28, :top, :right)),
+#     subplot=2,
+#     xlab="Links",
+#     ylab="Link coefficient of variation",
+#     guidefontsize=7,
+#     bv_pal_2...
+# )
 
 ## Richness
 
@@ -164,23 +164,23 @@ Scv = Sσ/S
 plot(Scv; c=:cividis, title="Richness coefficient of variation")
 
 # Richness-link coefficient of variation bivariate map
-bivariate(
-    Scv, Lcv;
-    quantiles=true, classes=3, xlab="Longitude", ylab="Latitude", bv_pal_2...
-)
-bivariatelegend!(
-    Scv,
-    Lcv;
-    classes=3,
-    # inset=(1, bbox(0.04, 0.05, 0.28, 0.28, :top, :right)),
-    inset=(1, bbox(0.80, 0.02, 0.13, 0.28, :top, :right)),
-    subplot=2,
-    xlab="Richness coefficient of variation",
-    ylab="Link coefficient of variation",
-    guidefontsize=6,
-    bv_pal_2...
-)
-savefig(joinpath("figures", "bivariate_richness_links_coeff.png"))
+# bivariate(
+#     Scv, Lcv;
+#     quantiles=true, classes=3, xlab="Longitude", ylab="Latitude", bv_pal_2...
+# )
+# bivariatelegend!(
+#     Scv,
+#     Lcv;
+#     classes=3,
+#     # inset=(1, bbox(0.04, 0.05, 0.28, 0.28, :top, :right)),
+#     inset=(1, bbox(0.80, 0.02, 0.13, 0.28, :top, :right)),
+#     subplot=2,
+#     xlab="Richness coefficient of variation",
+#     ylab="Link coefficient of variation",
+#     guidefontsize=6,
+#     bv_pal_2...
+# )
+# savefig(joinpath("figures", "bivariate_richness_links_coeff.png"))
 
 ## LCBD & network measures
 
