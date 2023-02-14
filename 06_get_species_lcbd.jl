@@ -61,7 +61,7 @@ geotiff(joinpath(results_path, "richness_rand_thr.tif"), Sr_cut)
 ## LCBD values
 
 # Get LCBD values for all 4 assembly options
-lcbd_layers = fill(similar(reference_layer), 4)
+lcbd_layers = [similar(reference_layer) for i in 1:4]
 for (i, S) in enumerate([Smeans, Srands, Smeans_cut, Srands_cut])
     @assert length(unique(length.(S))) == 1
 
@@ -81,6 +81,7 @@ for (i, S) in enumerate([Smeans, Srands, Smeans_cut, Srands_cut])
 end
 
 # Export results
+isdir(results_path) || mkpath(results_path)
 geotiff(joinpath(results_path, "lcbd_species_mean.tif"), lcbd_layers[1])
 geotiff(joinpath(results_path, "lcbd_species_rand.tif"), lcbd_layers[2])
 geotiff(joinpath(results_path, "lcbd_species_mean_thr.tif"), lcbd_layers[3])
