@@ -50,6 +50,7 @@ lcbd_networks = networks_to_layer(networks, P, reference_layer)
 # lcbd_networks_rnd_thr = networks_to_layer(networks_rnd_thr, P, reference_layer)
 
 # Export
+isdir(results_path) || mkpath(results_path)
 geotiff(joinpath(results_path, "lcbd_networks_mean.tif"), lcbd_networks)
 # geotiff(joinpath(results_path, "lcbd_networks_rand.tif"), lcbd_networks_rnd)
 # geotiff(joinpath(results_path, "lcbd_networks_mean_thr.tif"), lcbd_networks_thr)

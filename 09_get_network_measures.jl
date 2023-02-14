@@ -60,6 +60,7 @@ Lv = broadcast(links_var, layer)
 Ld = broadcast(linkage_density, layer)
 
 # Export the measures layers
+isdir(results_path) || mkpath(results_path)
 geotiff(joinpath(results_path, "connectance.tif"), Co)
 geotiff(joinpath(results_path, "links_mean.tif"), L)
 geotiff(joinpath(results_path, "links_var.tif"), Lv)
