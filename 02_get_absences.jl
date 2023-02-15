@@ -1,13 +1,27 @@
 include("A0_required.jl")
 
+# Option to run for CAN
+# CAN = true
+if (@isdefined CAN) && CAN == true
+    res = 2.5;
+    occ_path = joinpath("data", "occurrences");
+    pa_path = joinpath("data", "presence_absence");
+    @info "Running for Canada at 2.5 arcmin resolution"
+else
+    res = 10.0;
+    occ_path = joinpath("xtras", "occurrences");
+    pa_path = joinpath("xtras", "presence_absence");
+    @info "Running for Quebec at 10 arcmin resolution"
+end
+
 reference_layer = SimpleSDMPredictor(
-    WorldClim, BioClim, 1; resolution = 2.5, left=-180.0, right=-40.0, bottom=18.0, top=89.0
+    WorldClim, BioClim, 1; resolution = res, left=-180.0, right=-40.0, bottom=18.0, top=89.0
 )
 
-occfiles = readdir(joinpath("data", "occurrences"); join=true)
-filter!(contains(".csv"), occfiles) # remove subfolder
+occfiles = readdir(occ_path; join=true)
+filter!(!contains("all_occurrences"), occfiles) # remove backup files for QC data
 
-ispath(joinpath("data", "presence_absence")) || mkpath(joinpath("data", "presence_absence"))
+ispath(pa_path) || mkpath(pa_path)
 
 p = Progress(length(occfiles))
 

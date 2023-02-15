@@ -1,26 +1,35 @@
-# Load required packagess
-using SimpleSDMLayers
-using EvoTrees
-using StatsBase
-# using StatsPlots
-using ProgressMeter
-using DataFrames
-import CSV
+include("A0_required.jl")
+
+# Option to run for CAN
+# CAN = true
+if (@isdefined CAN) && CAN == true
+    res = 2.5;
+    pa_path = joinpath("data", "presence_absence");
+    sdm_path = joinpath("data", "sdms");
+    input_path = joinpath("data", "input");
+    @info "Running for Canada at 2.5 arcmin resolution"
+else
+    res = 10.0;
+    pa_path = joinpath("xtras", "presence_absence");
+    sdm_path = joinpath("xtras", "sdms");
+    input_path = joinpath("xtras", "input");
+    @info "Running for Quebec at 10 arcmin resolution"
+end
 
 # Load all BIOCLIM variables
-@time layers = SimpleSDMPredictor(
-    WorldClim, BioClim, 1:19; resolution=2.5, left=-180.0, right=-40.0, bottom=18.0, top=89.0
+layers = SimpleSDMPredictor(
+    WorldClim, BioClim, 1:19; resolution=res, left=-180.0, right=-40.0, bottom=18.0, top=89.0
     )
-@time all_values = hcat([layer[keys(layer)] for layer in layers]...)
+all_values = hcat([layer[keys(layer)] for layer in layers]...)
 
 # Verify that output path exists
-isdir(joinpath("data", "sdms")) || mkpath(joinpath("data", "sdms"))
+isdir(sdm_path) || mkpath(sdm_path)
 
 # Empty DataFrame to collect model statistics
 df = [DataFrame(species = String[], occurrences = Int64[], AUC = Float64[], J = Float64[], cutoff = Float64[]) for i in 1:Threads.nthreads()]
 
 # List all species files
-pa_files = readdir(joinpath("data", "presence_absence"); join=true)
+pa_files = readdir(pa_path; join=true)
 filter!(contains(".tif"), pa_files)
 
 # Run SDMs, one species per loop
@@ -59,8 +68,8 @@ Threads.@threads for i in 1:length(pa_files)
         sdm = similar(layers[1])
         sdm[keys(sdm)] = fill(length(pr)/length(sdm), length(sdm))
         var = similar(sdm)
-        geotiff(joinpath("data", "sdms", spname*"_model.tif"),sdm)
-        geotiff(joinpath("data", "sdms", spname*"_error.tif"),var)
+        geotiff(joinpath(sdm_path, spname*"_model.tif"),sdm)
+        geotiff(joinpath(sdm_path, spname*"_error.tif"),var)
         next!(p)
         continue
     end
@@ -127,11 +136,11 @@ Threads.@threads for i in 1:length(pa_files)
     # Finalize layers
     range_mask = broadcast(v -> v >= τ, distribution)
     sdm = mask(range_mask, distribution)/maximum(mask(range_mask, distribution))
-    geotiff(joinpath("data", "sdms", spname*"_model.tif"),distribution)
-    geotiff(joinpath("data", "sdms", spname*"_error.tif"),uncertainty)
+    geotiff(joinpath(sdm_path, spname*"_model.tif"),distribution)
+    geotiff(joinpath(sdm_path, spname*"_error.tif"),uncertainty)
 
     next!(p)
 end
 
 # Export model statistics
-CSV.write(joinpath("data", "input", "sdm_fit_results.csv"), vcat(df...))
+CSV.write(joinpath(input_path, "sdm_fit_results.csv"), vcat(df...))
