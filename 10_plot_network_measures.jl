@@ -306,7 +306,7 @@ savefig(joinpath("figures", "lcbd_bivariate_unique_networks.png"))
 #     size=(1000,600),
 #     left_margin=3mm
 # )
-# savefig(joinpath("figures", "links_all.png"))
+# savefig(joinpath("figures", "sampling_options", "links_all.png"))
 
 # Link variance
 # Lv_all = [broadcast(links_var, l) for l in layers_all]
@@ -321,4 +321,4 @@ savefig(joinpath("figures", "lcbd_bivariate_unique_networks.png"))
 #     layout=(2,2),
 #     size=(900,600),
 # )
-# savefig(joinpath("figures", "links_var_all.png"))
+# savefig(joinpath("figures", "sampling_options", "links_var_all.png"))

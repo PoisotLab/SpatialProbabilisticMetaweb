@@ -63,7 +63,7 @@ plot(
     layout=(2,2),
     size=(900,600),
 )
-savefig(joinpath("figures", "richness_all.png"))
+savefig(joinpath("figures", "sampling_options", "richness_all.png"))
 # For committee document
 plot(
     [plot(S_all[opt]; c=:cividis, clim=lims) for opt in options]...;
@@ -74,9 +74,9 @@ plot(
     yaxis="Longitude",
     left_margin=3mm
 )
-savefig(joinpath("figures", "richness_all_committee.png"))
+savefig(joinpath("figures", "sampling_options", "richness_all_committee.png"))
 plot!(title = ["a)" "b)" "c)" "d)"], titlepos=:left)
-savefig(joinpath("figures", "richness_all_committee_lettered.png"))
+savefig(joinpath("figures", "sampling_options", "richness_all_committee_lettered.png"))
 
 # Richness for mean only
 plot(S_all["mean"], c=:cividis, cbtitle="Expected richness", size=(650, 400))
@@ -129,7 +129,7 @@ plot(
     layout=(2,2),
     size=(900,600),
 )
-savefig(joinpath("figures", "lcbd_species_all.png"))
+savefig(joinpath("figures", "sampling_options", "lcbd_species_all.png"))
 
 # Networks LCBD plots
 
@@ -143,7 +143,7 @@ for opt in options
     push!(netw_plots, p)
 end
 plot(netw_plots..., size = (900, 600), title=titles, cbtitle="Relative networks LCBD")
-savefig(joinpath("figures", "lcbd_networks_all.png"))
+savefig(joinpath("figures", "sampling_options", "lcbd_networks_all.png"))
 
 # Bivariate species-networks LCBD
 biv_plots = []
@@ -166,7 +166,7 @@ for (i, opt) in enumerate(options)
     push!(biv_plots, bp)
 end
 plot(biv_plots..., size = (900, 600))
-savefig(joinpath("figures", "lcbd_bivariate_all.png"))
+savefig(joinpath("figures", "sampling_options", "lcbd_bivariate_all.png"))
 
 # Bivariate species-networks LCBD for mean only
 bivariate(
