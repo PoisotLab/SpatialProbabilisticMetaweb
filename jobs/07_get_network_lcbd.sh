@@ -3,7 +3,7 @@
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=64
 #SBATCH --mem=140G
-#SBATCH --time=03:15:00
+#SBATCH --time=02:00:00
 #SBATCH --job-name=07_get_network_lcbd.jl
 #SBATCH --output=jobs/job_07_get_network_lcbd-%J.out
 

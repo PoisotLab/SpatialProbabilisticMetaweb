@@ -3,7 +3,7 @@
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=64
 #SBATCH --mem=140G
-#SBATCH --time=03:20:00
+#SBATCH --time=02:15:00
 #SBATCH --job-name=09_get_network_measures.jl
 #SBATCH --output=jobs/job_09_get_network_measures-%J.out
 
