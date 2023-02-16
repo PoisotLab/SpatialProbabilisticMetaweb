@@ -1,5 +1,8 @@
 include("A0_required.jl")
 
+# Option to use job array
+# JOBARRAY = true
+
 # Option to run for CAN
 # CAN = true
 if (@isdefined CAN) && CAN == true
@@ -21,13 +24,30 @@ reference_layer = SimpleSDMPredictor(
 occfiles = readdir(occ_path; join=true)
 filter!(!contains("all_occurrences"), occfiles) # remove backup files for QC data
 
+# Divide files if using job array
+if (@isdefined JOBARRAY) && JOBARRAY == true
+    _jobid = parse(Int64, get(ENV, "SLURM_ARRAY_TASK_ID", "1"))
+    _jobcount = parse(Int64, get(ENV, "SLURM_ARRAY_TASK_COUNT", "1"))
+
+    _ntot = length(occfiles)
+    _nfiles = floor(Int64, _ntot/_jobcount)
+    _idx = [[(x*_nfiles + 1) for x in 0:(_jobcount-1)]..., _ntot]
+
+    _idx1 = _idx[_jobid]
+    _idx2 = _idx[_jobid+1]
+
+    jobfiles = occfiles[_idx1:_idx2]
+else
+    jobfiles = occfiles
+end
+
 ispath(pa_path) || mkpath(pa_path)
 
 p = Progress(length(occfiles))
 
-@time Threads.@threads for i in 1:length(occfiles)
+Threads.@threads for i in 1:length(jobfiles)
     pres = similar(reference_layer, Bool)
-    df = DataFrame(CSV.File(occfiles[i]; stringtype=String))
+    df = DataFrame(CSV.File(jobfiles[i]; stringtype=String))
     for r in eachrow(df)
         if !isnothing(pres[r.longitude, r.latitude])
             pres[r.longitude, r.latitude] = true
@@ -35,7 +55,7 @@ p = Progress(length(occfiles))
     end
     Random.seed!(i)
     abs = rand(WithinRadius, pres)
-    outfile = replace(replace(occfiles[i], "occurrences" => "presence_absence"), ".csv" => ".tif")
+    outfile = replace(replace(jobfiles[i], "occurrences" => "presence_absence"), ".csv" => ".tif")
     geotiff(outfile, [convert(Float32, replace(pres, false => nothing)), convert(Float32, replace(abs, false => nothing))])
-    next!(p)
+    # next!(p)
 end
