@@ -118,7 +118,7 @@ histogram2d(
 
 # Richness-link relationship
 histogram2d(S, L, xlab="Richness", ylab="Links")
-scatter(S, L, xlab="Richness", ylab="Links", alpha=0.1, legend=:none, c=:black)
+scatter(S, L, xlab="Richness", ylab="Links", alpha=0.1, legend=:none, c=:black);
 savefig(joinpath("figures", "richness_relationship.png"))
 plot!(xaxis=("Richness (log)", :log), yaxis=("Links (log)", :log), c=:black)
 savefig(joinpath("figures", "richness_relationship_log.png"))
@@ -200,7 +200,7 @@ begin
     scatter(S, lcbd_species_all["mean"], alpha=0.2, label="Species LCBD")
     scatter!(S, lcbd_networks_all["mean"], alpha=0.2, label="Network LCBD")
     plot!(xaxis=("Richness (log)", :log), yaxis=("LCBD"), legend=:bottomright)
-end
+end;
 savefig(joinpath("figures", "lcbd_relationship_richness.png"))
 
 # LCBD-links relationships
@@ -208,7 +208,7 @@ begin
     scatter(L, lcbd_species_all["mean"], alpha=0.2, label="Species LCBD")
     scatter!(L, lcbd_networks_all["mean"], alpha=0.2, label="Network LCBD")
     plot!(xaxis=("Links (log)", :log), yaxis=("LCBD"), legend=:bottomright)
-end
+end;
 savefig(joinpath("figures", "lcbd_relationship_links.png"))
 
 # LCBD-connectance relationships
@@ -216,7 +216,7 @@ begin
     scatter(Co, lcbd_species_all["mean"], alpha=0.2, label="Species LCBD")
     scatter!(Co, lcbd_networks_all["mean"], alpha=0.2, label="Network LCBD")
     plot!(xaxis=("Connectance (log)", :log), yaxis=("LCBD"), legend=:bottomright)
-end
+end;
 savefig(joinpath("figures", "lcbd_relationship_connectance.png"))
 
 # Extract the bivariate values
@@ -238,7 +238,7 @@ begin
     scatter!(S[keys(S)], L[keys(S)], label="All sites", alpha=0.1, c=:black)
     scatter!(S[keys(sites3)], L[keys(sites3)], label="Unique species only",alpha=0.2, c=biv_colors[3])
     scatter!(S[keys(sites7)], L[keys(sites7)], label="Unique networks only",alpha=0.2, c=biv_colors[7])
-end
+end;
 savefig(joinpath("figures", "lcbd_bivariate_scatter.png"))
 
 # Density comparison for richness
@@ -270,7 +270,7 @@ begin
     density!(S[_non_unique_spe], label="Non unique sites", c=:black)
     density!(S[_unique_spe], label="Unique species", c=biv_colors[3])
     plot(_p1, _p2, size=(800, 400), left_margin=3mm, bottom_margin=3mm)
-end
+end;
 savefig(joinpath("figures", "lcbd_bivariate_unique_species.png"))
 
 # Comparison for all unique networks regardless of species
@@ -284,7 +284,7 @@ begin
     density!(S[_non_unique_net], label="Non unique sites", c=:black)
     density!(S[_unique_net], label="Unique networks", c=biv_colors[7])
     plot(_p1, _p2, size=(800, 400), left_margin=3mm, bottom_margin=3mm)
-end
+end;
 savefig(joinpath("figures", "lcbd_bivariate_unique_networks.png"))
 
 ## Compare sampling options
