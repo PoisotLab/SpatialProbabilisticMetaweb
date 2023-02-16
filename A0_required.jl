@@ -1,6 +1,7 @@
 import Pkg; Pkg.activate(".")
 
 import CSV
+using ArchGDAL
 using Chain
 using DataFrames
 using DataFramesMeta
