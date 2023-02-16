@@ -22,7 +22,7 @@ plot(
     plot(H_V; c=:cividis, title="Variation of information (V)");
     size=(900,600)
 )
-savefig(joinpath("figures", "entropy.png"))
+savefig(joinpath("figures", "xtras", "entropy.png"))
 
 # Trivariate visualisation
 begin
@@ -51,7 +51,7 @@ begin
         # simplex=true,
     )
 end
-savefig(joinpath("figures", "entropy_trivariate.png"))
+savefig(joinpath("figures", "xtras", "entropy_trivariate.png"))
 
 ## Species proportions
 
@@ -138,4 +138,4 @@ begin
         # simplex=true,
     )
 end
-savefig(joinpath("figures", "proportions_trivariate.png"))
+savefig(joinpath("figures", "xtras", "proportions_trivariate.png"))
