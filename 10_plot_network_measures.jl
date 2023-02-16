@@ -46,23 +46,25 @@ plot(Lv; c=:acton, cb_title="Link variance")
 savefig(joinpath("figures", "links_var.png"))
 
 # Link bivariate map
-bivariate(
-    L, Lv;
-    quantiles=true, classes=3, xlab="Longitude", ylab="Latitude", bv_pal_2...
-)
-bivariatelegend!(
-    L,
-    Lv;
-    classes=3,
-    # inset=(1, bbox(0.04, 0.05, 0.28, 0.28, :top, :right)),
-    inset=(1, bbox(0.80, 0.02, 0.13, 0.28, :top, :right)),
-    subplot=2,
-    xlab="Links",
-    ylab="Link variance",
-    guidefontsize=7,
-    bv_pal_2...
-)
-plot!(title=["Links & uncertainty bivariate" ""])
+begin
+    bivariate(
+        L, Lv;
+        quantiles=true, classes=3, xlab="Longitude", ylab="Latitude", bv_pal_2...
+    )
+    bivariatelegend!(
+        L,
+        Lv;
+        classes=3,
+        # inset=(1, bbox(0.04, 0.05, 0.28, 0.28, :top, :right)),
+        inset=(1, bbox(0.80, 0.02, 0.13, 0.28, :top, :right)),
+        subplot=2,
+        xlab="Links",
+        ylab="Link variance",
+        guidefontsize=7,
+        bv_pal_2...
+    )
+    plot!(title=["Links & uncertainty bivariate" ""])
+end
 savefig(joinpath("figures", "links_bivariate.png"))
 
 # Links relationship
@@ -122,41 +124,45 @@ plot!(xaxis=("Richness (log)", :log), yaxis=("Links (log)", :log), c=:black)
 savefig(joinpath("figures", "richness_relationship_log.png"))
 
 # Richness-link bivariate map
-bivariate(
-    S, L;
-    quantiles=true, classes=3, xlab="Longitude", ylab="Latitude", bv_pal_2...
-)
-bivariatelegend!(
-    S,
-    L;
-    classes=3,
-    # inset=(1, bbox(0.04, 0.05, 0.28, 0.28, :top, :right)),
-    inset=(1, bbox(0.80, 0.02, 0.13, 0.28, :top, :right)),
-    subplot=2,
-    xlab="Richness",
-    ylab="Links",
-    guidefontsize=7,
-    bv_pal_2...
-)
+begin
+    bivariate(
+        S, L;
+        quantiles=true, classes=3, xlab="Longitude", ylab="Latitude", bv_pal_2...
+    )
+    bivariatelegend!(
+        S,
+        L;
+        classes=3,
+        # inset=(1, bbox(0.04, 0.05, 0.28, 0.28, :top, :right)),
+        inset=(1, bbox(0.80, 0.02, 0.13, 0.28, :top, :right)),
+        subplot=2,
+        xlab="Richness",
+        ylab="Links",
+        guidefontsize=7,
+        bv_pal_2...
+    )
+end
 savefig(joinpath("figures", "bivariate_richness_links.png"))
 
 # Richness-link uncertainty bivariate map
-bivariate(
-    broadcast(v -> v^2, Sσ), Lv;
-    quantiles=true, classes=3, xlab="Longitude", ylab="Latitude", bv_pal_2...
-)
-bivariatelegend!(
-    broadcast(v -> v^2, Sσ),
-    Lv;
-    classes=3,
-    # inset=(1, bbox(0.04, 0.05, 0.28, 0.28, :top, :right)),
-    inset=(1, bbox(0.80, 0.02, 0.13, 0.28, :top, :right)),
-    subplot=2,
-    xlab="Richness variance",
-    ylab="Link variance",
-    guidefontsize=7,
-    bv_pal_2...
-)
+begin
+    bivariate(
+        broadcast(v -> v^2, Sσ), Lv;
+        quantiles=true, classes=3, xlab="Longitude", ylab="Latitude", bv_pal_2...
+    )
+    bivariatelegend!(
+        broadcast(v -> v^2, Sσ),
+        Lv;
+        classes=3,
+        # inset=(1, bbox(0.04, 0.05, 0.28, 0.28, :top, :right)),
+        inset=(1, bbox(0.80, 0.02, 0.13, 0.28, :top, :right)),
+        subplot=2,
+        xlab="Richness variance",
+        ylab="Link variance",
+        guidefontsize=7,
+        bv_pal_2...
+    )
+end
 savefig(joinpath("figures", "bivariate_richness_links_variance.png"))
 
 # Richness coefficient of variation
@@ -164,23 +170,25 @@ Scv = Sσ/S
 plot(Scv; c=:cividis, title="Richness coefficient of variation")
 
 # Richness-link coefficient of variation bivariate map
-# bivariate(
-#     Scv, Lcv;
-#     quantiles=true, classes=3, xlab="Longitude", ylab="Latitude", bv_pal_2...
-# )
-# bivariatelegend!(
-#     Scv,
-#     Lcv;
-#     classes=3,
-#     # inset=(1, bbox(0.04, 0.05, 0.28, 0.28, :top, :right)),
-#     inset=(1, bbox(0.80, 0.02, 0.13, 0.28, :top, :right)),
-#     subplot=2,
-#     xlab="Richness coefficient of variation",
-#     ylab="Link coefficient of variation",
-#     guidefontsize=6,
-#     bv_pal_2...
-# )
-# savefig(joinpath("figures", "bivariate_richness_links_coeff.png"))
+begin
+    bivariate(
+        Scv, Lcv;
+        quantiles=true, classes=3, xlab="Longitude", ylab="Latitude", bv_pal_2...
+    )
+    bivariatelegend!(
+        Scv,
+        Lcv;
+        classes=3,
+        # inset=(1, bbox(0.04, 0.05, 0.28, 0.28, :top, :right)),
+        inset=(1, bbox(0.80, 0.02, 0.13, 0.28, :top, :right)),
+        subplot=2,
+        xlab="Richness coefficient of variation",
+        ylab="Link coefficient of variation",
+        guidefontsize=6,
+        bv_pal_2...
+    )
+end
+savefig(joinpath("figures", "bivariate_richness_links_coeff.png"))
 
 ## LCBD & network measures
 
@@ -234,17 +242,21 @@ end
 savefig(joinpath("figures", "lcbd_bivariate_scatter.png"))
 
 # Density comparison for richness
-plot(xlab="Richness", ylab="Density")
-density!(S[keys(sites_mid)], label="Middle sites", c=:black)
-density!(S[keys(sites3)], label="Unique species", c=biv_colors[3])
-density!(S[keys(sites7)], label="Unique networks", c=biv_colors[7])
+begin
+    plot(xlab="Richness", ylab="Density")
+    density!(S[keys(sites_mid)], label="Middle sites", c=:black)
+    density!(S[keys(sites3)], label="Unique species", c=biv_colors[3])
+    density!(S[keys(sites7)], label="Unique networks", c=biv_colors[7])
+end
 savefig(joinpath("figures", "lcbd_bivariate_density_richness.png"))
 
 # Density comparison for links
-plot(xlab="Links", ylab="Density")
-density!(L[keys(sites_mid)], label="Middle sites", c=:black)
-density!(L[keys(sites3)], label="Unique species", c=biv_colors[3])
-density!(L[keys(sites7)], label="Unique networks", c=biv_colors[7])
+begin
+    plot(xlab="Links", ylab="Density")
+    density!(L[keys(sites_mid)], label="Middle sites", c=:black)
+    density!(L[keys(sites3)], label="Unique species", c=biv_colors[3])
+    density!(L[keys(sites7)], label="Unique networks", c=biv_colors[7])
+end
 savefig(joinpath("figures", "lcbd_bivariate_density_links.png"))
 
 # Comparison for all unique species regardless of networks
