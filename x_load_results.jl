@@ -33,6 +33,10 @@ lcbd_species_all
 lcbd_networks_all = Dict{String, SimpleSDMPredictor}()
 for opt in options
     path = joinpath(results_path, "lcbd_networks_$(opt).tif")
-    lcbd_networks_all[opt] = geotiff(SimpleSDMPredictor, path)
+    try
+        lcbd_networks_all[opt] = geotiff(SimpleSDMPredictor, path)
+    catch
+        lcbd_networks_all[opt] = geotiff(SimpleSDMPredictor, joinpath(results_path, "lcbd_networks_mean.tif"))
+    end
 end
 lcbd_networks_all
