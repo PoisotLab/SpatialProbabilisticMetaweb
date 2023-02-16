@@ -34,7 +34,7 @@ p = Progress(length(occfiles))
         end
     end
     Random.seed!(i)
-    abs = rand(SurfaceRangeEnvelope, pres)
+    abs = rand(WithinRadius, pres)
     outfile = replace(replace(occfiles[i], "occurrences" => "presence_absence"), ".csv" => ".tif")
     geotiff(outfile, [convert(Float32, replace(pres, false => nothing)), convert(Float32, replace(abs, false => nothing))])
     next!(p)
