@@ -46,16 +46,20 @@ ispath(pa_path) || mkpath(pa_path)
 p = Progress(length(occfiles))
 
 Threads.@threads for i in 1:length(jobfiles)
-    pres = similar(reference_layer, Bool)
-    df = DataFrame(CSV.File(jobfiles[i]; stringtype=String))
-    for r in eachrow(df)
-        if !isnothing(pres[r.longitude, r.latitude])
-            pres[r.longitude, r.latitude] = true
+    try
+        pres = similar(reference_layer, Bool)
+        df = DataFrame(CSV.File(jobfiles[i]; stringtype=String))
+        for r in eachrow(df)
+            if !isnothing(pres[r.longitude, r.latitude])
+                pres[r.longitude, r.latitude] = true
+            end
         end
+        Random.seed!(i)
+        abs = rand(WithinRadius, pres)
+        outfile = replace(replace(jobfiles[i], "occurrences" => "presence_absence"), ".csv" => ".tif")
+        geotiff(outfile, [convert(Float32, replace(pres, false => nothing)), convert(Float32, replace(abs, false => nothing))])
+        # next!(p)
+    catch
+        @warn "Error with $(jobfiles[i])"
     end
-    Random.seed!(i)
-    abs = rand(WithinRadius, pres)
-    outfile = replace(replace(jobfiles[i], "occurrences" => "presence_absence"), ".csv" => ".tif")
-    geotiff(outfile, [convert(Float32, replace(pres, false => nothing)), convert(Float32, replace(abs, false => nothing))])
-    # next!(p)
 end
