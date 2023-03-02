@@ -4,7 +4,7 @@
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=64
 #SBATCH --mem=120G
-#SBATCH --time=02:00:00
+#SBATCH --time=03:00:00
 #SBATCH --job-name=02_get_absences
 #SBATCH --output=jobs/job_02_get_absences-%J.out
 
