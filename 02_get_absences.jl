@@ -30,8 +30,8 @@ if (@isdefined JOBARRAY) && JOBARRAY == true
     _jobcount = parse(Int64, get(ENV, "SLURM_ARRAY_TASK_COUNT", "1"))
 
     _ntot = length(occfiles)
-    _nfiles = floor(Int64, _ntot/_jobcount)
-    _idx = [[(x*_nfiles + 1) for x in 0:(_jobcount-1)]..., _ntot]
+    _nfiles = ceil(Int64, _ntot/_jobcount)
+    _idx = [[(i*_nfiles + 1) for i in 0:(_jobcount-1)]..., _ntot]
 
     _idx1 = _idx[_jobid]
     _idx2 = _idx[_jobid+1]
