@@ -45,27 +45,17 @@ ispath(pa_path) || mkpath(pa_path)
 
 p = Progress(length(occfiles))
 
-using Dates
-pa_files = readdir("data/presence_absence/"; join=true)
-pa_dates = Dates.unix2datetime.(mtime.(pa_files))
-pa_outdated_idx = findall(==(2022), year.(pa_dates))
-pa_outdated = pa_files[pa_outdated_idx]
-# Threads.@threads for i in 1:length(jobfiles)
-@time for i in pa_outdated_idx
-    try
-        pres = similar(reference_layer, Bool)
-        df = DataFrame(CSV.File(jobfiles[i]; stringtype=String))
-        for r in eachrow(df)
-            if !isnothing(pres[r.longitude, r.latitude])
-                pres[r.longitude, r.latitude] = true
-            end
+Threads.@threads for i in 1:length(jobfiles)
+    pres = similar(reference_layer, Bool)
+    df = DataFrame(CSV.File(jobfiles[i]; stringtype=String))
+    for r in eachrow(df)
+        if !isnothing(pres[r.longitude, r.latitude])
+            pres[r.longitude, r.latitude] = true
         end
-        Random.seed!(i)
-        # abs = rand(WithinRadius, pres)
-        outfile = replace(replace(jobfiles[i], "occurrences" => "presence_absence"), ".csv" => ".tif")
-        # geotiff(outfile, [convert(Float32, replace(pres, false => nothing)), convert(Float32, replace(abs, false => nothing))])
-        # next!(p)
-    catch
-        @warn "Error with $(jobfiles[i])"
     end
+    Random.seed!(i)
+    abs = rand(WithinRadius, pres)
+    outfile = replace(replace(jobfiles[i], "occurrences" => "presence_absence"), ".csv" => ".tif")
+    geotiff(outfile, [convert(Float32, replace(pres, false => nothing)), convert(Float32, replace(abs, false => nothing))])
+    # next!(p)
 end
