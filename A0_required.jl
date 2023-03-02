@@ -1,13 +1,13 @@
 import Pkg; Pkg.activate(".")
 
 import CSV
-using ArchGDAL
 using Chain
 using DataFrames
 using DataFramesMeta
 using Distributions
 using EcologicalNetworks
 using EvoTrees
+using GDAL
 using ProgressMeter
 using Random
 using Shapefile
