@@ -32,25 +32,9 @@ if (@isdefined JOBARRAY) && JOBARRAY == true
     _ntot = length(occfiles)
     _nfiles = ceil(Int64, _ntot/_jobcount)
 
-    # Balance files between jobs according to filesize
-    _fs = filesize.(occfiles)
-    _fs_rel = _fs/sum(_fs)
-    _fs_cumu = cumsum(sort(_fs_rel, rev=true))
-    _fs_prop = _fs_cumu/(1/_jobcount)
-    _gp = round.(Int, _fs_prop)
+    # Balance larger files between jobs
+    _gp = repeat(vcat(collect(1:_jobcount), collect(_jobcount:-1:1)), Int(_nfiles/2))[1:_ntot]
     _gp_f = [sort(occfiles, by=filesize, rev=true)[findall(==(i), _gp)] for i in 1:_jobcount]
-    _gp_fs = [sum(filesize.(f))/1000 for f in _gp_f]
-
-    # Fix imbalance between two final groups
-    _nmin = argmin(_gp_fs)
-    _nmax = argmax(_gp_fs)
-    _gp_fs_max = filesize.(_gp_f[_nmax])/1000
-    _nmax_min = argmax(_gp_fs_max)
-    if maximum(_gp_fs) - minimum(_gp_fs) > maximum(_gp_fs_max)
-        _to_change = _gp_f[_nmax][_nmax_min]
-        _gp_f[_nmin] = vcat(_gp_f[_nmin], _to_change)
-        _gp_f[_nmax] = filter(!=(_to_change), _gp_f[_nmax])
-    end
 
     jobfiles = _gp_f[_jobid]
 else
