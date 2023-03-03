@@ -31,12 +31,12 @@ if (@isdefined JOBARRAY) && JOBARRAY == true
 
     _ntot = length(occfiles)
     _nfiles = ceil(Int64, _ntot/_jobcount)
-    _idx = [[(i*_nfiles + 1) for i in 0:(_jobcount-1)]..., _ntot]
 
-    _idx1 = _idx[_jobid]
-    _idx2 = _idx[_jobid+1]
+    # Balance larger files between jobs
+    _gp = repeat(vcat(collect(1:_jobcount), collect(_jobcount:-1:1)), Int(_nfiles/2))[1:_ntot]
+    _gp_f = [sort(occfiles, by=filesize, rev=true)[findall(==(i), _gp)] for i in 1:_jobcount]
 
-    jobfiles = occfiles[_idx1:_idx2]
+    jobfiles = _gp_f[_jobid]
 else
     jobfiles = occfiles
 end
