@@ -1,10 +1,10 @@
 #!/bin/bash
 #SBATCH --account=ctb-tpoisot
-#SBATCH --array=1-8
+#SBATCH --array=1-3
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=64
-#SBATCH --mem=120G
-#SBATCH --time=03:00:00
+#SBATCH --mem=248G
+#SBATCH --time=04:00:00
 #SBATCH --job-name=02_get_absences
 #SBATCH --output=jobs/job_02_get_absences-%J.out
 
