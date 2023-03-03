@@ -28,6 +28,8 @@ query = `gdal_rasterize -a ECO_ID $eco_file $out_file -ts $sx $sy -te $l $b $r $
 ecoregions = geotiff(SimpleSDMPredictor, out_path)
 ecoregions = replace(ecoregions, 0.0 => nothing)
 
+# Mask based on the Canada shapefile
+ecoregions = mask(reference_layer, ecoregions)
+
 # Reexport
 geotiff(out_path, ecoregions)
-
