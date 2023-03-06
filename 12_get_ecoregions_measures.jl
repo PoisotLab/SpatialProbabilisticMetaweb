@@ -57,19 +57,6 @@ Ld_eco = ecoregionalize(Ld, ecoregions_stack)
 S_eco = ecoregionalize(S, ecoregions_stack)
 Sσ_eco = ecoregionalize(Sσ, ecoregions_stack)
 
-# Plot results
-plot(Co_eco; title="Co")
-plot(L_eco; title="L")
-plot(Lv_eco; title="Lv")
-plot(Ld_eco; title="Ld")
-plot(S_eco; title="S")
-plot(Sσ_eco; title="Sσ")
-
-# Some variations
-plot(ecoregionalize(S, ecoregions_stack; f=sum))
-plot(ecoregionalize(S, ecoregions_stack; f=maximum))
-plot(ecoregionalize(S, ecoregions_stack; f=minimum))
-
 #### Metaweb by ecoregion
 
 # Load layer with networks in each cell
@@ -98,18 +85,7 @@ L_meta_eco = ecoregionalize(layer, networks, ecoregions_stack; fsite=mean, fnet=
 Lv_meta_eco = ecoregionalize(layer, networks, ecoregions_stack; fsite=mean, fnet=links_var)
 Ld_meta_eco = ecoregionalize(layer, networks, ecoregions_stack; fsite=mean, fnet=linkage_density)
 
-# Plot results
-plot(Co_meta_eco; title="Co_meta")
-plot(L_meta_eco; title="L_meta")
-plot(Lv_meta_eco; title="Lv_meta")
-plot(Ld_meta_eco; title="Ld_meta")
-
 # Test other options for metaweb assembly
 L_meta_eco_mean = ecoregionalize(layer, networks, ecoregions_stack; fsite=mean, fnet=links)
 L_meta_eco_max = ecoregionalize(layer, networks, ecoregions_stack; fsite=max, fnet=links)
 L_meta_eco_min = ecoregionalize(layer, networks, ecoregions_stack; fsite=min, fnet=links)
-
-# Plot results
-plot(L_meta_eco_mean; title="L_meta_mean")
-plot(L_meta_eco_max; title="L_meta_max")
-plot(L_meta_eco_min; title="L_meta_min")
