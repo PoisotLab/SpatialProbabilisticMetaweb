@@ -1,6 +1,6 @@
 #### Ecoregions
 
-CAN = true
+# CAN = true
 include("A0_required.jl")
 
 # Load the corresponding sdm results if dealing with QC or CAN data
@@ -69,3 +69,47 @@ plot(Sσ_eco; title="Sσ")
 plot(ecoregionalize(S, ecoregions_stack; f=sum))
 plot(ecoregionalize(S, ecoregions_stack; f=maximum))
 plot(ecoregionalize(S, ecoregions_stack; f=minimum))
+
+#### Metaweb by ecoregion
+
+# Load layer with networks in each cell
+include("09_get_network_measures.jl")
+
+# Assemble ecoregion metaweb via the networks BitArray
+function ecoregionalize(layer::T, networks::BitArray{4}, ecoregions_stack; fsite=mean, fnet=links) where {T<: SimpleSDMResponse{UnipartiteProbabilisticNetwork{Float64, String}}}
+    @assert fsite in [mean, max, min]
+    l_eco = similar(layer, Float32)
+    for e in ecoregions_stack
+        e_inds = indexin(keys(e), keys(layer))
+        networks_e = @view networks[e_inds, :, :, :];
+        mat_e = dropdims(mean(networks_e; dims=4), dims=4)
+        if fsite == mean
+            A_e = dropdims(fsite(mat_e; dims=1), dims=1)
+        elseif fsite in [max, min]
+            A_e = dropdims(reduce(fsite, mat_e; dims=1), dims=1)
+        end
+        network_e = UnipartiteProbabilisticNetwork(A_e, species(layer[1]))
+        l_eco[keys(e)] = fill(fnet(network_e), length(keys(e)))
+    end
+    return l_eco
+end
+Co_meta_eco = ecoregionalize(layer, networks, ecoregions_stack; fsite=mean, fnet=connectance)
+L_meta_eco = ecoregionalize(layer, networks, ecoregions_stack; fsite=mean, fnet=links)
+Lv_meta_eco = ecoregionalize(layer, networks, ecoregions_stack; fsite=mean, fnet=links_var)
+Ld_meta_eco = ecoregionalize(layer, networks, ecoregions_stack; fsite=mean, fnet=linkage_density)
+
+# Plot results
+plot(Co_meta_eco; title="Co_meta")
+plot(L_meta_eco; title="L_meta")
+plot(Lv_meta_eco; title="Lv_meta")
+plot(Ld_meta_eco; title="Ld_meta")
+
+# Test other options for metaweb assembly
+L_meta_eco_mean = ecoregionalize(layer, networks, ecoregions_stack; fsite=mean, fnet=links)
+L_meta_eco_max = ecoregionalize(layer, networks, ecoregions_stack; fsite=max, fnet=links)
+L_meta_eco_min = ecoregionalize(layer, networks, ecoregions_stack; fsite=min, fnet=links)
+
+# Plot results
+plot(L_meta_eco_mean; title="L_meta_mean")
+plot(L_meta_eco_max; title="L_meta_max")
+plot(L_meta_eco_min; title="L_meta_min")
