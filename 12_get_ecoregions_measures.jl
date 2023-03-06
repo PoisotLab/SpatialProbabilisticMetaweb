@@ -69,35 +69,3 @@ plot(Sσ_eco; title="Sσ")
 plot(ecoregionalize(S, ecoregions_stack; f=sum))
 plot(ecoregionalize(S, ecoregions_stack; f=maximum))
 plot(ecoregionalize(S, ecoregions_stack; f=minimum))
-
-#### Metaweb by ecoregion
-
-# Load layer with networks in each cell
-CAN = false
-include("07_get_network_lcbd.jl")
-
-function ecoregionalize(layer::T, ecoregions_stack; f=mean, agg=mean) where {T<: SimpleSDMResponse{UnipartiteProbabilisticNetwork{Float64, String}}}
-    l_eco = similar(layer)
-    # for e in ecoregions_stack
-        l_keys = keys(e)
-        l_keys_diff = setdiff(keys(layer), l_keys)
-        l_eco[l_keys_diff] = fill(nothing, length(l_keys_diff))
-        l_eco[l_keys] = layer[l_keys]
-    # end
-    reduce(union, collect(broadcast(>(0.0), l_eco)))
-end
-
-function union(X::T, Y::T; f=mean) where {T <: UnipartiteProbabilisticNetwork}
-    new_s = union(species(X), species(Y))
-    int_pos = interactions(X > 0.0) ∪ interactions(Y > 0.0)
-    int = interactions(X) ∪ interactions(Y)
-    I = zeros(Int64, length(int))
-    J = zeros(Int64, length(int))
-    for i in eachindex(int)
-        I[i] = findfirst(isequal(int[i].from), new_s)
-        J[i] = findfirst(isequal(int[i].to), new_s)
-    end
-    new_a = sparse(I, J, true, length(new_s), length(new_s))
-    return UnipartiteProbabilisticNetwork(new_a, new_s)
-end
-
