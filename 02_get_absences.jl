@@ -38,16 +38,7 @@ if (@isdefined JOBARRAY) && JOBARRAY == true
 
     jobfiles = _gp_f[_jobid]
 else
-    # jobfiles = occfiles
-    trouble_species = [
-        "Synaptomys_cooperi",
-        "Sorex_haydeni",
-        "Aplodontia_rufa",
-        "Sorex_palustris",
-        "Zapus_trinotatus",
-        "Spilogale_putorius"
-    ]
-    jobfiles = string.(joinpath.(occ_path, trouble_species), ".csv")
+    jobfiles = occfiles
 end
 
 ispath(pa_path) || mkpath(pa_path)
@@ -55,7 +46,7 @@ ispath(pa_path) || mkpath(pa_path)
 p = Progress(length(occfiles))
 
 Threads.@threads for i in 1:length(jobfiles)
-    @time try # 7- 12 min (for Canada)
+    try
         pres = similar(reference_layer, Bool)
         df = DataFrame(CSV.File(jobfiles[i]; stringtype=String))
         for r in eachrow(df)
