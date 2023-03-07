@@ -9,3 +9,4 @@ data/presence_absence/*.tif
 narval_tests.sh
 xtras/*
 data/results/
+shapefiles/ecoregions/
