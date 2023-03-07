@@ -3,7 +3,7 @@
 #SBATCH --array=1-3
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=64
-#SBATCH --mem=248G
+#SBATCH --mem=100G
 #SBATCH --time=08:00:00
 #SBATCH --job-name=02_get_absences
 #SBATCH --output=jobs/job_02_get_absences-%J.out
