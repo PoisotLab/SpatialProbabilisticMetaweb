@@ -29,13 +29,18 @@ ecoregions_stack = [replace(e, 0.0 => nothing) for e in ecoregions_stack]
 
 ## Basic summary statistics
 
+# Define the network measures to use
+network_measures = ["Co", "L", "Lv", "Ld"]
+network_fs = [connectance, links, links_var, linkage_density]
+network_filename = ["connectance", "links_mean", "links_var", "links_density"]
+
 # Load layers to summarize by ecoregion
-Co = geotiff(SimpleSDMPredictor, joinpath(results_path, "connectance.tif"))
-L = geotiff(SimpleSDMPredictor, joinpath(results_path, "links_mean.tif"))
-Lv = geotiff(SimpleSDMPredictor, joinpath(results_path, "links_var.tif"))
-Ld = geotiff(SimpleSDMPredictor, joinpath(results_path, "links_density.tif"))
-S = geotiff(SimpleSDMPredictor, joinpath(results_path, "richness_mean.tif"))
-Sσ = geotiff(SimpleSDMPredictor, joinpath(results_path, "richness_uncertainty.tif"))
+local_layers = Dict{String, SimpleSDMPredictor}()
+for (m, f) in zip(network_measures, network_filename)
+    local_layers[m] = geotiff(SimpleSDMPredictor, joinpath(results_path, "$f.tif"))
+end
+local_layers["S"] = geotiff(SimpleSDMPredictor, joinpath(results_path, "richness_mean.tif"))
+local_layers["Sσ"] = geotiff(SimpleSDMPredictor, joinpath(results_path, "richness_uncertainty.tif"))
 
 # Define function
 function ecoregionalize(layer, ecoregions_stack; f=mean, keepzeros=true)
@@ -50,12 +55,17 @@ function ecoregionalize(layer, ecoregions_stack; f=mean, keepzeros=true)
 end
 
 # Summarize by ecoregion
-Co_eco = ecoregionalize(Co, ecoregions_stack)
-L_eco = ecoregionalize(L, ecoregions_stack)
-Lv_eco = ecoregionalize(Lv, ecoregions_stack)
-Ld_eco = ecoregionalize(Ld, ecoregions_stack)
-S_eco = ecoregionalize(S, ecoregions_stack)
-Sσ_eco = ecoregionalize(Sσ, ecoregions_stack)
+ecoregion_layers = Dict{String, SimpleSDMResponse}()
+for m in network_measures
+    ecoregion_layers[m] = ecoregionalize(local_layers[m], ecoregions_stack)
+end
+
+# Some variations
+for f in [sum, maximum, minimum]
+    ecoregion_layers["S_$(string(f))"] = ecoregionalize(
+        local_layers["S"], ecoregions_stack; f=f
+    )
+end
 
 #### Metaweb by ecoregion
 
@@ -80,12 +90,16 @@ function ecoregionalize(layer::T, networks::BitArray{4}, ecoregions_stack; fsite
     end
     return l_eco
 end
-Co_meta_eco = ecoregionalize(layer, networks, ecoregions_stack; fsite=mean, fnet=connectance)
-L_meta_eco = ecoregionalize(layer, networks, ecoregions_stack; fsite=mean, fnet=links)
-Lv_meta_eco = ecoregionalize(layer, networks, ecoregions_stack; fsite=mean, fnet=links_var)
-Ld_meta_eco = ecoregionalize(layer, networks, ecoregions_stack; fsite=mean, fnet=linkage_density)
+ecometaweb_layers = Dict{String, SimpleSDMResponse}()
+for (m,f) in zip(network_measures, network_fs)
+    ecometaweb_layers[m] = ecoregionalize(
+        layer, networks, ecoregions_stack; fsite=mean, fnet=f
+    )
+end
 
 # Test other options for metaweb assembly
-L_meta_eco_mean = ecoregionalize(layer, networks, ecoregions_stack; fsite=mean, fnet=links)
-L_meta_eco_max = ecoregionalize(layer, networks, ecoregions_stack; fsite=max, fnet=links)
-L_meta_eco_min = ecoregionalize(layer, networks, ecoregions_stack; fsite=min, fnet=links)
+for f in [mean, max, min]
+    ecometaweb_layers["L_$(string(f))"] = ecoregionalize(
+        layer, networks, ecoregions_stack; fsite=f, fnet=links
+    )
+end
