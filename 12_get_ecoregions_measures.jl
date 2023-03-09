@@ -33,6 +33,14 @@ ecoregions_stack = [replace(e, 0.0 => nothing) for e in ecoregions_stack]
 network_measures = ["Co", "L", "Lv", "Ld"]
 network_fs = [connectance, links, links_var, linkage_density]
 network_filename = ["connectance", "links_mean", "links_var", "links_density"]
+summary_fs = [mean, median, maximum, minimum]
+
+# Predefine set of options for threading
+opt = []
+for (m, fn) in zip(network_measures, network_fs), fm in summary_fs
+    o = (m = m, fn = fn, fm = fm)
+    push!(opt, o)
+end
 
 # Load layers to summarize by ecoregion
 local_layers = Dict{String, SimpleSDMPredictor}()
@@ -45,7 +53,7 @@ local_layers["Sσ"] = geotiff(SimpleSDMPredictor, joinpath(results_path, "richne
 # Define function
 function ecoregionalize(layer, ecoregions_stack; f=mean, keepzeros=true)
     l_eco = similar(layer)
-    for e in ecoregions_stack
+    @threads for e in ecoregions_stack
         l_eco[keys(e)] = fill(f(layer[keys(e)]), length(keys(e)))
     end
     if !keepzeros
@@ -56,14 +64,9 @@ end
 
 # Summarize by ecoregion
 ecoregion_layers = Dict{String, SimpleSDMResponse}()
-for m in network_measures
-    ecoregion_layers[m] = ecoregionalize(local_layers[m], ecoregions_stack)
-end
-
-# Some variations
-for f in [sum, median, maximum, minimum]
-    ecoregion_layers["L_$(string(f))"] = ecoregionalize(
-        local_layers["L"], ecoregions_stack; f=f
+for o in opt
+    ecoregion_layers["$(o.m)_$(o.fm)"] = ecoregionalize(
+        local_layers[o.m], ecoregions_stack; f=o.fm
     )
 end
 
@@ -75,29 +78,22 @@ include("09_get_network_measures.jl")
 # Assemble ecoregion metaweb via the networks BitArray
 minimum_nonzero(x; dims=1) = replace(minimum(replace(x, 0.0 => 2.0); dims=dims), 2.0 => 0.0)
 function ecoregionalize(layer::T, networks::BitArray{4}, ecoregions_stack; fmeta=mean, fnet=links) where {T<: SimpleSDMResponse{UnipartiteProbabilisticNetwork{Float64, String}}}
-    # @assert fmeta in [mean, maximum, minimum, minimum_nonzero]
     l_eco = similar(layer, Float32)
-    for e in ecoregions_stack
+    @threads for e in ecoregions_stack
         e_inds = indexin(keys(e), keys(layer))
         networks_e = @view networks[e_inds, :, :, :];
         mat_e = dropdims(mean(networks_e; dims=4), dims=4)
         A_e = dropdims(fmeta(mat_e; dims=1), dims=1)
-        replace!(A_e, 2.0 => 0.0)
         network_e = UnipartiteProbabilisticNetwork(A_e, species(layer[1]))
         l_eco[keys(e)] = fill(fnet(network_e), length(keys(e)))
     end
     return l_eco
 end
-ecometaweb_layers = Dict{String, SimpleSDMResponse}()
-for (m,f) in zip(network_measures, network_fs)
-    ecometaweb_layers[m] = ecoregionalize(
-        layer, networks, ecoregions_stack; fmeta=mean, fnet=f
-    )
-end
 
-# Test other options for metaweb assembly
-for f in [mean, median, maximum, minimum]
-    ecometaweb_layers["L_$(string(f))"] = ecoregionalize(
-        layer, networks, ecoregions_stack; fmeta=f, fnet=links
+# Run for all options
+ecometaweb_layers = Dict{String, SimpleSDMResponse}()
+for o in opt
+    ecometaweb_layers["$(o.m)_$(o.fm)"] = ecoregionalize(
+        layer, networks, ecoregions_stack; fmeta=o.fm, fnet=o.fn
     )
 end
