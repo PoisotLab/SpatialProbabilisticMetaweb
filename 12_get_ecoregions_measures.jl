@@ -8,10 +8,12 @@ if (@isdefined CAN) && CAN == true
     ref_path = joinpath("data", "input", "canada_ref_2.tif");
     eco_path = joinpath("data", "input", "canada_ecoregions.tif");
     results_path = joinpath("data", "results");
+    ecoresults_path = joinpath("data", "ecoregions");
 else
     ref_path = joinpath("data", "input", "quebec_ref_10.tif");
     eco_path = joinpath("data", "input", "quebec_ecoregions.tif")
     results_path = joinpath("xtras", "results");
+    ecoresults_path = joinpath("xtras", "ecoregions");
 end
 
 # Define reference layer
@@ -96,4 +98,22 @@ for o in opt
     ecometaweb_layers["$(o.m)_$(o.fm)"] = ecoregionalize(
         layer, networks, ecoregions_stack; fmeta=o.fm, fnet=o.fn
     )
+end
+
+#### Export layers
+
+isdir(ecoresults_path) || mkdir(ecoresults_path)
+
+# Ecoregion summary results
+for o in opt
+    p = joinpath(ecoresults_path, "ecoregion_$(o.m)_$(o.fm).tif")
+    l = ecoregion_layers["$(o.m)_$(o.fm)"]
+    geotiff(p, l)
+end
+
+# Ecoregion metaweb results
+for o in opt
+    p = joinpath(ecoresults_path, "ecometaweb_$(o.m)_$(o.fm).tif")
+    l = ecometaweb_layers["$(o.m)_$(o.fm)"]
+    geotiff(p, l)
 end
