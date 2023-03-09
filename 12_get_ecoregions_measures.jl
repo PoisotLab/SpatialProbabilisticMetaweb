@@ -103,3 +103,34 @@ for f in [mean, max, min]
         layer, networks, ecoregions_stack; fsite=f, fnet=links
     )
 end
+
+all(convert.(Float32, collect(ecoregion_layers["L"])) == collect(ecometaweb_layers["L"]))
+
+Mtest = [
+    0.1 0.3 0.7;
+    0.7 0.4 0.9;
+    0.6 0.2 0.1;
+    0.3 0.8 0.2;
+]
+
+mean(Mtest; dims=1)
+mean(Mtest; dims=2)
+mean(mean(Mtest; dims=1)) == mean(mean(Mtest; dims=2))
+mean(mean(Mtest; dims=1)) == mean(mean(Mtest; dims=2)) ≈ mean(Mtest)
+
+sum(Mtest; dims=1)
+sum(Mtest; dims=2)
+sum(sum(Mtest; dims=1)) == sum(sum(Mtest; dims=2))
+sum(sum(Mtest; dims=1)) == sum(sum(Mtest; dims=2)) ≈ sum(Mtest)
+
+sum(Mtest; dims=1)
+sum(Mtest; dims=2)
+sum(sum(Mtest; dims=1)) == sum(sum(Mtest; dims=2))
+sum(sum(Mtest; dims=1)) == sum(sum(Mtest; dims=2)) ≈ sum(Mtest)
+
+maximum(Mtest; dims=1)
+maximum(Mtest; dims=2)
+maximum(Mtest; dims=1) |> mean
+maximum(Mtest; dims=2) |> mean
+maximum(Mtest; dims=1) != maximum(Mtest; dims=2)
+maximum(maximum(Mtest; dims=1)) == maximum(maximum(Mtest; dims=2)) == maximum(Mtest)
