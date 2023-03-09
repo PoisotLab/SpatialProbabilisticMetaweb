@@ -61,9 +61,9 @@ for m in network_measures
 end
 
 # Some variations
-for f in [sum, maximum, minimum]
-    ecoregion_layers["S_$(string(f))"] = ecoregionalize(
-        local_layers["S"], ecoregions_stack; f=f
+for f in [sum, median, maximum, minimum]
+    ecoregion_layers["L_$(string(f))"] = ecoregionalize(
+        local_layers["L"], ecoregions_stack; f=f
     )
 end
 
@@ -73,18 +73,16 @@ end
 include("09_get_network_measures.jl")
 
 # Assemble ecoregion metaweb via the networks BitArray
-function ecoregionalize(layer::T, networks::BitArray{4}, ecoregions_stack; fsite=mean, fnet=links) where {T<: SimpleSDMResponse{UnipartiteProbabilisticNetwork{Float64, String}}}
-    @assert fsite in [mean, max, min]
+minimum_nonzero(x; dims=1) = replace(minimum(replace(x, 0.0 => 2.0); dims=dims), 2.0 => 0.0)
+function ecoregionalize(layer::T, networks::BitArray{4}, ecoregions_stack; fmeta=mean, fnet=links) where {T<: SimpleSDMResponse{UnipartiteProbabilisticNetwork{Float64, String}}}
+    # @assert fmeta in [mean, maximum, minimum, minimum_nonzero]
     l_eco = similar(layer, Float32)
     for e in ecoregions_stack
         e_inds = indexin(keys(e), keys(layer))
         networks_e = @view networks[e_inds, :, :, :];
         mat_e = dropdims(mean(networks_e; dims=4), dims=4)
-        if fsite == mean
-            A_e = dropdims(fsite(mat_e; dims=1), dims=1)
-        elseif fsite in [max, min]
-            A_e = dropdims(reduce(fsite, mat_e; dims=1), dims=1)
-        end
+        A_e = dropdims(fmeta(mat_e; dims=1), dims=1)
+        replace!(A_e, 2.0 => 0.0)
         network_e = UnipartiteProbabilisticNetwork(A_e, species(layer[1]))
         l_eco[keys(e)] = fill(fnet(network_e), length(keys(e)))
     end
@@ -93,13 +91,13 @@ end
 ecometaweb_layers = Dict{String, SimpleSDMResponse}()
 for (m,f) in zip(network_measures, network_fs)
     ecometaweb_layers[m] = ecoregionalize(
-        layer, networks, ecoregions_stack; fsite=mean, fnet=f
+        layer, networks, ecoregions_stack; fmeta=mean, fnet=f
     )
 end
 
 # Test other options for metaweb assembly
-for f in [mean, max, min]
+for f in [mean, median, maximum, minimum]
     ecometaweb_layers["L_$(string(f))"] = ecoregionalize(
-        layer, networks, ecoregions_stack; fsite=f, fnet=links
+        layer, networks, ecoregions_stack; fmeta=f, fnet=links
     )
 end
