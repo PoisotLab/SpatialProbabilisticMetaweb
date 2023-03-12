@@ -100,7 +100,7 @@ function ecoregionalize(layer::T, networks::BitArray{4}, ecoregions_stack; fmeta
         networks_e = @view networks[e_inds, :, :, :];
         mat_e = dropdims(mean(networks_e; dims=4), dims=4)
         A_e = dropdims(fmeta(mat_e; dims=1), dims=1)
-        network_e = UnipartiteProbabilisticNetwork(A_e, species(layer[1]))
+        network_e = UnipartiteProbabilisticNetwork(A_e, species(collect(layer)[1]))
         l_eco[keys(e)] = fill(fnet(network_e), length(keys(e)))
     end
     return l_eco
