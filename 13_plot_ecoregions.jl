@@ -19,7 +19,8 @@ isdir(fig_path) || mkdir(fig_path)
 network_measures = ["Co", "L", "Lv", "Ld"]
 network_fs = [connectance, links, links_var, linkage_density]
 network_filename = ["connectance", "links_mean", "links_var", "links_density"]
-summary_fs = ["mean", "median", "maximum", "minimum_nonzero"]
+summary_fs = ["median", "quantile055", "quantile945", "iqr89"]
+summary_ts = ["median", "5.5% quantile", "94.5% quantile", "89% IQR"]
 
 # Predefine set of options
 opt = []
@@ -40,24 +41,31 @@ end
 
 # Plot results
 plot(
-    plot(ecoregion_layers["Co_mean"]; title="Co"),
-    plot(ecoregion_layers["L_mean"]; title="L"),
-    plot(ecoregion_layers["Lv_mean"]; title="Lv"),
-    plot(ecoregion_layers["Ld_mean"]; title="Ld"),
-    plot_title="Ecoregion mean"
+    [plot(ecoregion_layers["$(m)_median"]; title=m) for m in network_measures]...,
+    plot_title="Ecoregion median"
 )
-savefig(joinpath(fig_path, "ecoregion_all_mean.png"))
+savefig(joinpath(fig_path, "ecoregion_all_median.png"))
 
 # plot(ecoregion_layers["S"]; title="S")
 # plot(ecoregion_layers["Sσ"]; title="Sσ")
 
 # Some variations
-plot(
-    plot(ecoregion_layers["L_mean"]; title="mean"),
-    # plot(ecoregion_layers["L_sum"]; title="sum"),
-    plot(ecoregion_layers["L_median"]; title="median"),
-    plot(ecoregion_layers["L_maximum"]; title="maximum"),
-    plot(ecoregion_layers["L_minimum_nonzero"]; title="minimum_nonzero"),
-    plot_title="L"
-)
-savefig(joinpath(fig_path, "ecoregion_L.png"))
+ecoregion_plots = Dict{String, Plots.Plot}()
+for m in network_measures
+    begin
+        _L = [ecoregion_layers["$(m)_$f"] for f in summary_fs]
+        clim1 = mapreduce(minimum, min, _L)
+        clim2 = mapreduce(maximum, max, _L)
+        clims = (clim1, clim2)
+        ecoregion_plots[m] = plot(
+            [plot(ecoregion_layers["$(m)_$f"]; clim=clims) for f in summary_fs]...;
+            title=permutedims([t for t in summary_ts]),
+            plot_title=m
+        )
+    end
+    savefig(joinpath(fig_path, "ecoregion_$m.png"))
+end
+ecoregion_plots["Co"]
+ecoregion_plots["L"]
+ecoregion_plots["Lv"]
+ecoregion_plots["Ld"]

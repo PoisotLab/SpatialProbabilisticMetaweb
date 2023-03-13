@@ -35,7 +35,12 @@ ecoregions_stack = [replace(e, 0.0 => nothing) for e in ecoregions_stack]
 network_measures = ["Co", "L", "Lv", "Ld"]
 network_fs = [connectance, links, links_var, linkage_density]
 network_filename = ["connectance", "links_mean", "links_var", "links_density"]
-summary_fs = [mean, median, maximum, minimum]
+
+# Define the summary functions we will use
+quantile055(x) = quantile(x, 0.055)
+quantile945(x) = quantile(x, 0.945)
+iqr89(x) = quantile945(x) - quantile055(x)
+summary_fs = [median, quantile055, quantile945, iqr89]
 
 # Predefine set of options for threading
 opt = []
