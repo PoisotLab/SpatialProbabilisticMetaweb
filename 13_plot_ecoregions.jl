@@ -1,6 +1,6 @@
 #### Ecoregion plots
 
-# CAN = true
+CAN = true
 include("A0_required.jl")
 
 # Load the corresponding results if dealing with QC or CAN data
