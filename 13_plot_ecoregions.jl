@@ -61,38 +61,3 @@ plot(
     plot_title="L"
 )
 savefig(joinpath(fig_path, "ecoregion_L.png"))
-
-## Ecoregion metaweb
-
-#=
-
-# Load the ecoregion metaweb layers
-ecometaweb_layers = Dict{String, SimpleSDMResponse}()
-for o in opt
-    ecometaweb_layers["$(o.m)_$(o.fm)"] = geotiff(
-        SimpleSDMResponse, joinpath(ecoresults_path, "ecometaweb_$(o.m)_$(o.fm).tif")
-    )
-end
-
-# Plot results using mean of interactions
-plot(
-    plot(ecometaweb_layers["Co_mean"]; title="Co"),
-    plot(ecometaweb_layers["L_mean"]; title="L"),
-    plot(ecometaweb_layers["Lv_mean"]; title="Lv"),
-    plot(ecometaweb_layers["Ld_mean"]; title="Ld"),
-    plot_title="Ecoregion metaweb mean"
-)
-savefig(joinpath(fig_path, "ecometaweb_all_mean.png"))
-
-# Plot results
-plot(
-    plot(ecometaweb_layers["L_mean"]; title="mean"),
-    plot(ecometaweb_layers["L_median"]; title="median"),
-    plot(ecometaweb_layers["L_maximum"]; title="maximum"),
-    # plot(ecometaweb_layers["L_minimum"]; title="minimum"),
-    plot(ecometaweb_layers["L_minimum_nonzero"]; title="minimum_nonzero"),
-    plot_title="L ecoregion metaweb"
-)
-savefig(joinpath(fig_path, "ecometaweb_L.png"))
-
-=#
