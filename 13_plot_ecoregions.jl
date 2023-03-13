@@ -36,14 +36,6 @@ for o in opt
     )
 end
 
-# Load the ecoregion metaweb layers
-ecometaweb_layers = Dict{String, SimpleSDMResponse}()
-for o in opt
-    ecometaweb_layers["$(o.m)_$(o.fm)"] = geotiff(
-        SimpleSDMResponse, joinpath(ecoresults_path, "ecometaweb_$(o.m)_$(o.fm).tif")
-    )
-end
-
 ## Make some plots!!
 
 # Plot results
@@ -72,6 +64,16 @@ savefig(joinpath(fig_path, "ecoregion_L.png"))
 
 ## Ecoregion metaweb
 
+#=
+
+# Load the ecoregion metaweb layers
+ecometaweb_layers = Dict{String, SimpleSDMResponse}()
+for o in opt
+    ecometaweb_layers["$(o.m)_$(o.fm)"] = geotiff(
+        SimpleSDMResponse, joinpath(ecoresults_path, "ecometaweb_$(o.m)_$(o.fm).tif")
+    )
+end
+
 # Plot results using mean of interactions
 plot(
     plot(ecometaweb_layers["Co_mean"]; title="Co"),
@@ -92,3 +94,5 @@ plot(
     plot_title="L ecoregion metaweb"
 )
 savefig(joinpath(fig_path, "ecometaweb_L.png"))
+
+=#

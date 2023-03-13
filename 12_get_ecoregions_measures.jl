@@ -87,7 +87,17 @@ for o in opt
     )
 end
 
+# Export layers
+isdir(ecoresults_path) || mkdir(ecoresults_path)
+for o in opt
+    p = joinpath(ecoresults_path, "ecoregion_$(o.m)_$(o.fm).tif")
+    l = ecoregion_layers["$(o.m)_$(o.fm)"]
+    geotiff(p, l)
+end
+
 #### Metaweb by ecoregion
+
+#=
 
 # Load layer with networks in each cell
 include("09_get_network_measures.jl")
@@ -114,20 +124,11 @@ for o in opt
     )
 end
 
-#### Export layers
-
-isdir(ecoresults_path) || mkdir(ecoresults_path)
-
-# Ecoregion summary results
-for o in opt
-    p = joinpath(ecoresults_path, "ecoregion_$(o.m)_$(o.fm).tif")
-    l = ecoregion_layers["$(o.m)_$(o.fm)"]
-    geotiff(p, l)
-end
-
-# Ecoregion metaweb results
+# Export ecoregion metaweb results
 for o in opt
     p = joinpath(ecoresults_path, "ecometaweb_$(o.m)_$(o.fm).tif")
     l = ecometaweb_layers["$(o.m)_$(o.fm)"]
     geotiff(p, l)
 end
+
+=#
