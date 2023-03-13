@@ -2,8 +2,8 @@
 #SBATCH --account=ctb-tpoisot
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=64
-#SBATCH --mem=1000G
-#SBATCH --time=06:00:00
+#SBATCH --mem=450G
+#SBATCH --time=04:30:00
 #SBATCH --job-name=12_get_ecoregions_measures.jl
 #SBATCH --output=jobs/job_12_get_ecoregions_measures-%J.out
 
