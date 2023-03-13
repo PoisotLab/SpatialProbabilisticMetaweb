@@ -31,26 +31,11 @@ ecoregions_stack = [replace(e, 0.0 => nothing) for e in ecoregions_stack]
 
 ## Basic summary statistics
 
-# Define a function to get the minimum non-zero value
-function minimum_nonzero(x; dims=1)
-    t = eltype(x) isa Union ? eltype(x).b : eltype(x)
-    v = prevfloat(typemax(t))
-    if ndims(x) > 1
-        # For when we'll use the function on the ecoregion metaweb
-        x_min = replace(minimum(replace(x, 0.0 => v); dims=dims), v => 0.0)
-    else
-        # For when we'll use the function on a summary ecoregion layer
-        x_min = minimum(replace(x, 0.0 => v))
-        x_min = isequal(x_min, v) ? 0.0 : x_min
-    end
-    return x_min
-end
-
 # Define the network measures to use
 network_measures = ["Co", "L", "Lv", "Ld"]
 network_fs = [connectance, links, links_var, linkage_density]
 network_filename = ["connectance", "links_mean", "links_var", "links_density"]
-summary_fs = [mean, median, maximum, minimum_nonzero]
+summary_fs = [mean, median, maximum, minimum]
 
 # Predefine set of options for threading
 opt = []
