@@ -40,6 +40,15 @@ ecoregion_layers
 
 ## Make some plots!!
 
+layer = ecoregion_layers["L_median"]
+clims = extrema(layer)
+layer_n = replace(layer, 0.0 => nothing)
+plot(layer)
+plot(layer_n; clim=clims)
+# plot(layer; colorbar_scale=:log10)
+plot(layer_n; colorbar_scale=:log10)
+# plot(layer_n; colorbar_scale=:ln)
+
 # Plot results
 plot(
     [plot(ecoregion_layers["$(m)_median"]; title=m) for m in network_measures]...,
