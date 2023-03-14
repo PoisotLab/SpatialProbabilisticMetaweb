@@ -42,7 +42,7 @@ ecoregion_layers
 
 # Plot results
 plot(
-    [plot(ecoregion_layers["$(m)_median"]; title=m) for m in network_measures]...,
+    [plot(ecoregion_layers["$(m)_median"]; title=m, clim=(0.0, Inf)) for m in network_measures]...,
     plot_title="Ecoregion median"
 )
 savefig(joinpath(fig_path, "ecoregion_all_median.png"))
@@ -52,7 +52,8 @@ ecoregion_plots = Dict{String, Plots.Plot}()
 for m in measures
     begin
         _L = [ecoregion_layers["$(m)_$f"] for f in summary_fs]
-        clim1 = mapreduce(minimum, min, _L)
+        # clim1 = mapreduce(minimum, min, _L)
+        clim1 = 0.0
         clim2 = mapreduce(maximum, max, _L)
         clims = (clim1, clim2)
         ecoregion_plots[m] = plot(
@@ -72,7 +73,7 @@ ecoregion_plots["Sσ"]
 
 ## Compare with richness
 plot(
-    [plot(ecoregion_layers["$(m)_median"]) for m in ["L", "Lv", "S", "Sσ"]]...;
+    [plot(ecoregion_layers["$(m)_median"]; clim=(0.0, Inf)) for m in ["L", "Lv", "S", "Sσ"]]...;
     title=["Links" "Link variance" "Richness" "Richness variance"],
 )
 savefig(joinpath(fig_path, "ecoregion_comparison.png"))
