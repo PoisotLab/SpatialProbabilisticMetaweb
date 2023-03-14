@@ -35,14 +35,21 @@ for o in opt
     ecoregion_layers["$(o.m)_$(o.fs)"] = geotiff(
         SimpleSDMResponse, joinpath(ecoresults_path, "ecoregion_$(o.m)_$(o.fs).tif")
     )
+    # Replace zero values (sites not in an ecoregion)
+    ecoregion_layers["$(o.m)_$(o.fs)"] = replace(
+        ecoregion_layers["$(o.m)_$(o.fs)"], 0.0 => nothing
+    )
 end
 ecoregion_layers
 
 ## Make some plots!!
 
+# Load worldshape shapefile to use as background on maps
+ws = worldshape(50)
+
 # Plot results
 plot(
-    [plot(ecoregion_layers["$(m)_median"]; title=m, clim=(0.0, Inf)) for m in network_measures]...,
+    [plot(ecoregion_layers["$(m)_median"], ws; title=m, clim=(0.0, Inf)) for m in network_measures]...,
     plot_title="Ecoregion median"
 )
 savefig(joinpath(fig_path, "ecoregion_all_median.png"))
@@ -57,7 +64,7 @@ for m in measures
         clim2 = mapreduce(maximum, max, _L)
         clims = (clim1, clim2)
         ecoregion_plots[m] = plot(
-            [plot(ecoregion_layers["$(m)_$f"]; clim=clims) for f in summary_fs]...;
+            [plot(ecoregion_layers["$(m)_$f"], ws; clim=clims) for f in summary_fs]...;
             title=permutedims([t for t in summary_ts]),
             plot_title=m
         )
@@ -73,7 +80,7 @@ ecoregion_plots["Sσ"]
 
 ## Compare with richness
 plot(
-    [plot(ecoregion_layers["$(m)_median"]; clim=(0.0, Inf)) for m in ["L", "Lv", "S", "Sσ"]]...;
+    [plot(ecoregion_layers["$(m)_median"], ws; clim=(0.0, Inf)) for m in ["L", "Lv", "S", "Sσ"]]...;
     title=["Links" "Link variance" "Richness" "Richness variance"],
 )
 savefig(joinpath(fig_path, "ecoregion_comparison.png"))
