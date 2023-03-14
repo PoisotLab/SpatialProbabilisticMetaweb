@@ -19,10 +19,11 @@ using Base.Threads: @threads
 using JLD2, CodecZlib
 import ColorBlendModes
 using Plots.PlotMeasures
+import Plots.plot
 
 default(; dpi=200)
 
 include("A1_LCBD.jl")
 include("A2_colors.jl")
 include("A3_bivariate_values.jl")
-include("A4_shapefile.jl")
+include("A4_worldshape.jl")
