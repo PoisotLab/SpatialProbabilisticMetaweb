@@ -17,3 +17,8 @@ function worldshape(res)
     end
     return handle
 end
+
+function plot(layer::T, ws::Shapefile.Handle; ws_c=:lightgrey, ws_lc=:grey, ws_lw=0.5, kw...) where {T<:SimpleSDMLayer}
+    plot(ws; c=ws_c, lc=ws_lc, lw=ws_lw)
+    plot!(layer; kw...)
+end

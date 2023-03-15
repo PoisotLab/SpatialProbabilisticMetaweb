@@ -10,3 +10,4 @@ narval_tests.sh
 xtras/*
 data/results/
 shapefiles/ecoregions/
+data/ecoregions/
