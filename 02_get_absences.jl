@@ -58,7 +58,10 @@ Threads.@threads for i in 1:length(jobfiles)
         abs = rand(WithinRadius, pres)
         outfile = replace(replace(jobfiles[i], "occurrences" => "presence_absence"), ".csv" => ".tif")
         geotiff(outfile, [convert(Float32, replace(pres, false => nothing)), convert(Float32, replace(abs, false => nothing))])
-        # next!(p)
+        if !(@isdefined quiet) || quiet == false
+            # Print progress bar
+            next!(p)
+        end
     catch
         @warn "Error with $(jobfiles[i])"
     end

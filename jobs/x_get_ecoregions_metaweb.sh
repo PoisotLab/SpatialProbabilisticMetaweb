@@ -11,4 +11,4 @@ module load StdEnv/2020
 module load julia/1.8.1
 
 cd $HOME/scratch/2022-SpatialProbabilisticMetaweb
-julia --project --threads=63 -e 'CAN = true; include("x_get_ecoregions_measures.jl")'
+julia --project --threads=63 -e 'CAN = true; quiet = true; include("x_get_ecoregions_measures.jl")'
