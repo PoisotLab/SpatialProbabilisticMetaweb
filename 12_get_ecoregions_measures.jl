@@ -26,10 +26,11 @@ ecoregions_stack = [replace(e, 0.0 => nothing) for e in ecoregions_stack]
 ## Basic summary statistics
 
 # Define the network measures to use
-measures = ["Co", "L", "Lv", "Ld", "S", "Sσ"]
+measures = ["Co", "L", "Lv", "Ld", "S", "Sσ", "LCBD_species", "LCBD_networks"]
 filenames = [
     "connectance", "links_mean", "links_var", "links_density",
-    "richness_mean", "richness_uncertainty"
+    "richness_mean", "richness_uncertainty",
+    "lcbd_species_mean", "lcbd_networks_mean"
 ]
 
 # Define the summary functions we will use
@@ -45,7 +46,7 @@ for (m, f) in zip(measures, filenames)
 end
 
 # Define function
-function ecoregionalize(layer, ecoregions_stack; f=mean, keepzeros=true)
+function ecoregionalize(layer, ecoregions_stack; f=median, keepzeros=true)
     l_eco = similar(layer)
     @threads for e in ecoregions_stack
         l_eco[keys(e)] = fill(f(layer[keys(e)]), length(keys(e)))
@@ -72,6 +73,11 @@ for o in opt
     )
 end
 ecoregion_layers
+
+# Rescale LCBD layers as relative values
+for m in ["LCBD_species", "LCBD_networks"], f in summary_fs
+    ecoregion_layers["$(m)_$f"] = ecoregion_layers["$(m)_$f"]/maximum(local_layers[m])
+end
 
 # Export layers
 isdir(ecoresults_path) || mkdir(ecoresults_path)

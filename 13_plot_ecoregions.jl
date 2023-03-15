@@ -17,7 +17,7 @@ isdir(fig_path) || mkdir(fig_path)
 
 # Define the network measures to use
 network_measures = ["Co", "L", "Lv", "Ld"]
-measures = [network_measures..., "S", "Sσ"]
+measures = [network_measures..., "S", "Sσ", "LCBD_species", "LCBD_networks"]
 summary_fs = ["median", "quantile055", "quantile945", "iqr89"]
 summary_ts = ["median", "5.5% quantile", "94.5% quantile", "89% IQR"]
 
@@ -77,10 +77,22 @@ ecoregion_plots["Lv"]
 ecoregion_plots["Ld"]
 ecoregion_plots["S"]
 ecoregion_plots["Sσ"]
+ecoregion_plots["LCBD_species"]
+ecoregion_plots["LCBD_networks"]
+
 
 ## Compare with richness
 plot(
-    [plot(ecoregion_layers["$(m)_median"], ws; clim=(0.0, Inf)) for m in ["L", "Lv", "S", "Sσ"]]...;
-    title=["Links" "Link variance" "Richness" "Richness variance"],
+    [plot(ecoregion_layers["$(m)_median"], ws; clim=(0.0, Inf)) for m in ["S", "Sσ", "L", "Lv"]]...;
+    title=["Richness" "Richness variance" "Links" "Link variance"],
 )
 savefig(joinpath(fig_path, "ecoregion_comparison.png"))
+
+## Compare with LCBD
+
+# Get relative LCBD values
+plot(
+    [plot(ecoregion_layers["$(m)_median"], ws; clim=(0.0, Inf)) for m in ["S", "LCBD_species", "L", "LCBD_networks"]]...;
+    title=["Richness" "Species LCBD" "Links" "Network LCBD"],
+)
+savefig(joinpath(fig_path, "ecoregion_comparison_lcbd.png"))
