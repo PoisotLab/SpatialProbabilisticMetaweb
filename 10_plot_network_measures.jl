@@ -18,37 +18,39 @@ Ld = geotiff(SimpleSDMPredictor, joinpath(results_path, "links_density.tif"))
 S = geotiff(SimpleSDMPredictor, joinpath(results_path, "richness_mean.tif"))
 Sσ = geotiff(SimpleSDMPredictor, joinpath(results_path, "richness_uncertainty.tif"))
 
+# Load worldshape shapefile to use as background on maps
+ws = worldshape(50)
+
 # Basic plots
 plot(
-    plot(Co; c=:cividis, title="Connectance"),
-    plot(L; c=:cividis, title="Links"),
-    plot(Lv; c=:cividis, title="Link variance"),
-    plot(Ld; c=:cividis, title="Linkage density");
+    plot(Co, ws; c=:cividis, title="Connectance"),
+    plot(L, ws; c=:cividis, title="Links"),
+    plot(Lv, ws; c=:cividis, title="Link variance"),
+    plot(Ld, ws; c=:cividis, title="Linkage density");
     size=(900,600)
 )
 
 ## Some plots
 
 # Links
-plot(L; c=:acton, title="Expected number of links")
+plot(L, ws; c=:acton, title="Expected number of links")
 savefig(joinpath("figures", "links_mean.png"))
 
 # Links with other color palette
 plot_options = (
     cbtitle="Expected number of links", xaxis="Longitude", yaxis="Latitude", size=(650,400)
 )
-plot(L; c=:acton, plot_options...)
+plot(L, ws; c=:acton, plot_options...)
 savefig(joinpath("figures", "links_mean_acton.png"))
-# Weird horizontal line but at least it's not displayed on the PNG file
 
 # Link variance
-plot(Lv; c=:acton, cb_title="Link variance")
+plot(Lv, ws; c=:acton, cb_title="Link variance")
 savefig(joinpath("figures", "links_var.png"))
 
 # Link bivariate map
 begin
     bivariate(
-        L, Lv;
+        L, Lv, ws;
         quantiles=true, classes=3, xlab="Longitude", ylab="Latitude", bv_pal_2...
     )
     bivariatelegend!(
@@ -79,12 +81,12 @@ savefig(joinpath("figures", "links_relationship.png"))
 
 # Link coefficient of variation
 Lcv = sqrt(Lv)/L
-plot(Lcv; c=:cividis, title="Link coefficient of variation")
+plot(Lcv, ws; c=:cividis, title="Link coefficient of variation")
 savefig(joinpath("figures", "links_coeff_var.png"))
 
 # Link inverse-coefficient of variation or signal-to-noise ratio (SNR)
 Lsnr = L/sqrt(Lv)
-plot(Lsnr; c=:cividis, title="Link signal-to-noise ratio")
+plot(Lsnr, ws; c=:cividis, title="Link signal-to-noise ratio")
 savefig(joinpath("figures", "links_coeff_var_inv.png"))
 
 # Links coefficient of variation relationship
@@ -98,7 +100,7 @@ histogram2d(
 
 # Link bivariate map
 # bivariate(
-#     L, Lcv;
+#     L, Lcv, ws;
 #     quantiles=true, classes=3, xlab="Longitude", ylab="Latitude", bv_pal_2...
 # )
 # bivariatelegend!(
@@ -126,7 +128,7 @@ savefig(joinpath("figures", "richness_relationship_log.png"))
 # Richness-link bivariate map
 begin
     bivariate(
-        S, L;
+        S, L, ws;
         quantiles=true, classes=3, xlab="Longitude", ylab="Latitude", bv_pal_2...
     )
     bivariatelegend!(
@@ -147,7 +149,7 @@ savefig(joinpath("figures", "bivariate_richness_links.png"))
 # Richness-link uncertainty bivariate map
 begin
     bivariate(
-        broadcast(v -> v^2, Sσ), Lv;
+        broadcast(v -> v^2, Sσ), Lv, ws;
         quantiles=true, classes=3, xlab="Longitude", ylab="Latitude", bv_pal_2...
     )
     bivariatelegend!(
@@ -167,12 +169,12 @@ savefig(joinpath("figures", "bivariate_richness_links_variance.png"))
 
 # Richness coefficient of variation
 Scv = Sσ/S
-plot(Scv; c=:cividis, title="Richness coefficient of variation")
+plot(Scv, ws; c=:cividis, title="Richness coefficient of variation")
 
 # Richness-link coefficient of variation bivariate map
 begin
     bivariate(
-        Scv, Lcv;
+        Scv, Lcv, ws;
         quantiles=true, classes=3, xlab="Longitude", ylab="Latitude", bv_pal_2...
     )
     bivariatelegend!(
@@ -298,7 +300,7 @@ savefig(joinpath("figures", "lcbd_bivariate_unique_networks.png"))
 # L_all_plots = []
 # lims = (clim1, clim2)
 # plot(
-#     [plot(L; c=:acton, clim=lims) for L in L_all]...;
+#     [plot(L, ws; c=:acton, clim=lims) for L in L_all]...;
 #     cbtitle="Expected number of links",
 #     xaxis="Latitude",
 #     yaxis="Longitude",
@@ -315,7 +317,7 @@ savefig(joinpath("figures", "lcbd_bivariate_unique_networks.png"))
 # lims = (clim1, clim2)
 # titles = ["Mean" "Mean > cutoff" "Rnd" "Rnd > cutoff"] # for plots later on
 # plot(
-#     [plot(Lv; c=:acton, clim=lims) for Lv in Lv_all]...;
+#     [plot(Lv, ws; c=:acton, clim=lims) for Lv in Lv_all]...;
 #     title = titles,
 #     cbtitle="Link variance",
 #     layout=(2,2),
