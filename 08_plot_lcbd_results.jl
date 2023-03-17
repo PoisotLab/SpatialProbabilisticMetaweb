@@ -1,6 +1,6 @@
 #### Plot richness & LCBD results ####
 
-# CAN = true
+CAN = true
 include("A0_required.jl");
 
 # Load the corresponding sdm results if dealing with QC or CAN data
@@ -56,17 +56,19 @@ spatialrange = boundingbox(reference_layer)
 ws = worldshape(50)
 
 # All richness options
-clim1 = mapreduce(minimum, min, values(S_all))
-clim2 = mapreduce(maximum, max, values(S_all))
-lims = (clim1, clim2)
-plot(
-    [plot(S_all[opt], ws; c=:cividis, clim=lims) for opt in options]...;
-    title = titles,
-    cbtitle="Species richness",
-    layout=(2,2),
-    size=(900,600),
-    dpi=300,
-)
+begin
+    clim1 = mapreduce(minimum, min, values(S_all))
+    clim2 = mapreduce(maximum, max, values(S_all))
+    lims = (clim1, clim2)
+    plot(
+        [plot(S_all[opt], ws; c=:cividis, clim=lims) for opt in options]...;
+        title = titles,
+        cbtitle="Species richness",
+        layout=(2,2),
+        size=(900,600),
+        dpi=300,
+    )
+end
 savefig(joinpath("figures", "sampling_options", "richness_all.png"))
 # For committee document
 plot(
