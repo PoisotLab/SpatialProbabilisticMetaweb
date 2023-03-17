@@ -3,7 +3,7 @@
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=64
 #SBATCH --mem=130G
-#SBATCH --time=00:25:00
+#SBATCH --time=01:00:00
 #SBATCH --job-name=06_get_species_lcbd
 #SBATCH --output=jobs/job_06_get_species_lcbd-%J.out
 

@@ -70,7 +70,10 @@ Threads.@threads for i in 1:length(pa_files)
         var = similar(sdm)
         geotiff(joinpath(sdm_path, spname*"_model.tif"),sdm)
         geotiff(joinpath(sdm_path, spname*"_error.tif"),var)
-        next!(p)
+        if !(@isdefined quiet) || quiet == false
+            # Print progress bar
+            next!(p)
+        end
         continue
     end
 
@@ -139,7 +142,10 @@ Threads.@threads for i in 1:length(pa_files)
     geotiff(joinpath(sdm_path, spname*"_model.tif"),distribution)
     geotiff(joinpath(sdm_path, spname*"_error.tif"),uncertainty)
 
-    next!(p)
+    if !(@isdefined quiet) || quiet == false
+        # Print progress bar
+        next!(p)
+    end
 end
 
 # Export model statistics
