@@ -3,6 +3,9 @@ include("A0_required.jl")
 # Option to use job array
 # JOBARRAY = true
 
+# Option to use WithinRadius for pseudoabsences
+# WITHIN_RADIUS = true
+
 # Option to run for CAN
 # CAN = true
 if (@isdefined CAN) && CAN == true
@@ -55,7 +58,11 @@ Threads.@threads for i in 1:length(jobfiles)
             end
         end
         Random.seed!(i)
-        abs = rand(WithinRadius, pres)
+        if (@isdefined WITHIN_RADIUS) && WITHIN_RADIUS == true
+            abs = rand(WithinRadius, pres)
+        else
+            abs = rand(SurfaceRangeEnvelope, pres)
+        end
         outfile = replace(replace(jobfiles[i], "occurrences" => "presence_absence"), ".csv" => ".tif")
         geotiff(outfile, [convert(Float32, replace(pres, false => nothing)), convert(Float32, replace(abs, false => nothing))])
         if !(@isdefined quiet) || quiet == false

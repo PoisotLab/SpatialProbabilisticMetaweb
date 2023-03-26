@@ -14,6 +14,7 @@ include("A0_required.jl");
 # include("01_get_occurrences.jl"); # outdated
 
 # Create pseudo-absence
+# WITHIN_RADIUS = true # to use WithinRadius option (needs to run on Narval for Canada)
 include("02_get_absences.jl");
 
 # Train SDMs and predict species distributions
