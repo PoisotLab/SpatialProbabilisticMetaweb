@@ -122,7 +122,10 @@ function assemble_networks(
                 prob_network = UnipartiteProbabilisticNetwork(pcooc .* A, species(P))
                 networks[i, :, :, j] .= adjacency(rand(prob_network))
             end
-            next!(p)
+            if !(@isdefined quiet) || quiet == false
+                # Print progress bar
+                next!(p)
+            end
         end
 
         # Convert to BitArray to reduce memory used

@@ -107,23 +107,26 @@ end
 
 #### Make some plots!!!
 
+# Load worldshape shapefile to use as background on maps
+ws = worldshape(50)
+
 # Plot results using mean of interactions
 plot(
-    plot(ecometaweb_layers["Co_mean"]; title="Co"),
-    plot(ecometaweb_layers["L_mean"]; title="L"),
-    plot(ecometaweb_layers["Lv_mean"]; title="Lv"),
-    plot(ecometaweb_layers["Ld_mean"]; title="Ld"),
+    plot(ecometaweb_layers["Co_mean"], ws; title="Co"),
+    plot(ecometaweb_layers["L_mean"], ws; title="L"),
+    plot(ecometaweb_layers["Lv_mean"], ws; title="Lv"),
+    plot(ecometaweb_layers["Ld_mean"], ws; title="Ld"),
     plot_title="Ecoregion metaweb mean"
 )
 savefig(joinpath(fig_path, "ecometaweb_all_mean.png"))
 
 # Plot results
 plot(
-    plot(ecometaweb_layers["L_mean"]; title="mean"),
-    plot(ecometaweb_layers["L_median"]; title="median"),
-    plot(ecometaweb_layers["L_maximum"]; title="maximum"),
-    # plot(ecometaweb_layers["L_minimum"]; title="minimum"),
-    plot(ecometaweb_layers["L_minimum_nonzero"]; title="minimum_nonzero"),
+    plot(ecometaweb_layers["L_mean"], ws; title="mean"),
+    plot(ecometaweb_layers["L_median"], ws; title="median"),
+    plot(ecometaweb_layers["L_maximum"], ws; title="maximum"),
+    # plot(ecometaweb_layers["L_minimum"], ws; title="minimum"),
+    plot(ecometaweb_layers["L_minimum_nonzero"], ws; title="minimum_nonzero"),
     plot_title="L ecoregion metaweb"
 )
 savefig(joinpath(fig_path, "ecometaweb_L.png"))

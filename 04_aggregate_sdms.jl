@@ -41,7 +41,10 @@ p = Progress(length(map_files))
         μ[sp_name] = geotiff(SimpleSDMPredictor, map_file; spatialrange...)
         μ[sp_name] = mask(reference_layer, μ[sp_name])
     end
-    next!(p)
+    if !(@isdefined quiet) || quiet == false
+        # Print progress bar
+        next!(p)
+    end
 end
 
 # We need a few zero types for distributions, which will allow to use them in cell of layers
@@ -58,6 +61,9 @@ p = Progress(length(μ))
         _t[site] = Truncated(Normal(Float64(μ[sp][site]), Float64(σ[sp][site])), 0.0, 1.0)
     end
     D[sp] = _t
-    next!(p)
+    if !(@isdefined quiet) || quiet == false
+        # Print progress bar
+        next!(p)
+    end
 end
 GC.gc()

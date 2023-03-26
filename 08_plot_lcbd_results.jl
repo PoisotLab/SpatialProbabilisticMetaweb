@@ -1,6 +1,6 @@
 #### Plot richness & LCBD results ####
 
-# CAN = true
+CAN = true
 include("A0_required.jl");
 
 # Load the corresponding sdm results if dealing with QC or CAN data
@@ -52,21 +52,27 @@ spatialrange = boundingbox(reference_layer)
 
 ## Richness plots
 
+# Load worldshape shapefile to use as background on maps
+ws = worldshape(50)
+
 # All richness options
-clim1 = mapreduce(minimum, min, values(S_all))
-clim2 = mapreduce(maximum, max, values(S_all))
-lims = (clim1, clim2)
-plot(
-    [plot(S_all[opt]; c=:cividis, clim=lims) for opt in options]...;
-    title = titles,
-    cbtitle="Species richness",
-    layout=(2,2),
-    size=(900,600),
-)
+begin
+    clim1 = mapreduce(minimum, min, values(S_all))
+    clim2 = mapreduce(maximum, max, values(S_all))
+    lims = (clim1, clim2)
+    plot(
+        [plot(S_all[opt], ws; c=:cividis, clim=lims) for opt in options]...;
+        title = titles,
+        cbtitle="Species richness",
+        layout=(2,2),
+        size=(900,600),
+        dpi=300,
+    )
+end
 savefig(joinpath("figures", "sampling_options", "richness_all.png"))
 # For committee document
 plot(
-    [plot(S_all[opt]; c=:cividis, clim=lims) for opt in options]...;
+    [plot(S_all[opt], ws; c=:cividis, clim=lims) for opt in options]...;
     cbtitle="Species richness",
     layout=(2,2),
     size=(1000,600),
@@ -79,19 +85,19 @@ plot!(title = ["a)" "b)" "c)" "d)"], titlepos=:left)
 savefig(joinpath("figures", "sampling_options", "richness_all_committee_lettered.png"))
 
 # Richness for mean only
-plot(S_all["mean"], c=:cividis, cbtitle="Expected richness", size=(650, 400))
+plot(S_all["mean"], ws; c=:cividis, cbtitle="Expected richness", size=(650, 400))
 plot!(xaxis="Longitude", yaxis="Latitude")
 savefig(joinpath("figures", "richness_mean.png"))
 
 # Richness variance for mean only
-plot(Sσ, c=:cividis, cbtitle="Richness variance", size=(650, 400))
+plot(Sσ, ws; c=:cividis, cbtitle="Richness variance", size=(650, 400))
 plot!(xaxis="Longitude", yaxis="Latitude")
 savefig(joinpath("figures", "richness_var.png"))
 
 # Univariate richness maps
 plot(
-    plot(S_all["mean"], title="Expected richness", c=cgrad([p0, bv_pal_2[2]])),
-    plot(Sσ, title="Std. dev. of richness", c=cgrad([p0, bv_pal_2[3]]));
+    plot(S_all["mean"], ws; title="Expected richness", c=cgrad([p0, bv_pal_2[2]])),
+    plot(Sσ, ws; title="Std. dev. of richness", c=cgrad([p0, bv_pal_2[3]]));
     layout=(2,1),
     size=(600, 600)
 )
@@ -100,7 +106,7 @@ savefig(joinpath("figures", "richness_two-panels.png"))
 # Bivariate richness map
 begin
 bivariate(
-    S_all["mean"], Sσ;
+    S_all["mean"], Sσ, ws;
     quantiles=true, classes=3, xlab="Longitude", ylab="Latitude", bv_pal_2...
 )
 bivariatelegend!(
@@ -123,7 +129,7 @@ savefig(joinpath("figures", "richness_bivariate.png"))
 
 # All LCBD options
 plot(
-    [plot(lcbd_species_all[opt]/maximum(lcbd_species_all[opt]); c=:viridis) for opt in options]...;
+    [plot(lcbd_species_all[opt]/maximum(lcbd_species_all[opt]), ws; c=:viridis) for opt in options]...;
     title=titles,
     cbtitle="Relative species LCBD",
     layout=(2,2),
@@ -138,8 +144,7 @@ netw_plots = []
 for opt in options
     _l = lcbd_networks_all[opt]
     _lrel = _l/maximum(_l)
-    p = plot(reference_layer; c=:lightgrey)
-    plot!(p, _lrel; c=:viridis, clim=extrema(_lrel))
+    p = plot(_lrel, ws; c=:viridis, clim=extrema(_lrel))
     push!(netw_plots, p)
 end
 plot(netw_plots..., size = (900, 600), title=titles, cbtitle="Relative networks LCBD")
@@ -149,7 +154,7 @@ savefig(joinpath("figures", "sampling_options", "lcbd_networks_all.png"))
 biv_plots = []
 for (i, opt) in enumerate(options)
     bp = bivariate(
-        lcbd_networks_all[opt], lcbd_species_all[opt];
+        lcbd_networks_all[opt], lcbd_species_all[opt], ws;
         quantiles=true, bv_pal_4..., classes=3, title=titles[i]
     )
     bp = bivariatelegend!(
@@ -170,7 +175,7 @@ savefig(joinpath("figures", "sampling_options", "lcbd_bivariate_all.png"))
 
 # Bivariate species-networks LCBD for mean only
 bivariate(
-    lcbd_networks_all["mean"], lcbd_species_all["mean"];
+    lcbd_networks_all["mean"], lcbd_species_all["mean"], ws;
     quantiles=true, bv_pal_4..., classes=3,
     xaxis="Longitude", yaxis="Latitude"
 )
@@ -191,8 +196,8 @@ savefig(joinpath("figures", "lcbd_bivariate_mean.png"))
 
 # Map & compare LCBD values
 plot(
-    plot(lcbd_species_all["mean"], leg=false, c=:viridis, title="Species LCBD"),
-    plot(lcbd_networks_all["mean"], leg=false, c=:viridis, title="Networks LCBD"),
+    plot(lcbd_species_all["mean"], ws; leg=false, c=:viridis, title="Species LCBD"),
+    plot(lcbd_networks_all["mean"], ws; leg=false, c=:viridis, title="Networks LCBD"),
     layout=(2,1),
     size=(600,600)
 )
@@ -202,20 +207,20 @@ savefig(joinpath("figures", "lcbd_two-panels.png"))
 # plot_options = (cb=:none, xticks=:none, yticks=:none, frame=:box)
 plot_options = (c=:viridis, xaxis="Longitude", yaxis="Latitude")
 plot(
-    lcbd_species_all["mean"]/maximum(lcbd_species_all["mean"]);
+    lcbd_species_all["mean"]/maximum(lcbd_species_all["mean"]), ws;
     cbtitle="Relative species LCBD", plot_options...
 )
 savefig(joinpath("figures", "lcbd_mean_species.png"))
 plot(
-    lcbd_networks_all["mean"]/maximum(lcbd_networks_all["mean"]);
+    lcbd_networks_all["mean"]/maximum(lcbd_networks_all["mean"]), ws;
     cbtitle="Relative network LCBD", plot_options...
 )
 savefig(joinpath("figures", "lcbd_mean_networks.png"))
 
 # Univariate rescaled LCBD
 plot(
-    plot(rescale(lcbd_species_all["mean"], collect(0.0:0.05:1.0)); c=cgrad([p0, bv_pal_4[3]])),
-    plot(rescale(lcbd_networks_all["mean"], collect(0.0:0.05:1.0)); c=cgrad([p0, bv_pal_4[2]])),
+    plot(rescale(lcbd_species_all["mean"], collect(0.0:0.05:1.0)), ws; c=cgrad([p0, bv_pal_4[3]])),
+    plot(rescale(lcbd_networks_all["mean"], collect(0.0:0.05:1.0)), ws; c=cgrad([p0, bv_pal_4[2]])),
     title=["Species LCBD (rescaled)" "Networks LCBD (rescaled)"],
     layout=(2,1),
     size=(600,600)
@@ -224,11 +229,19 @@ savefig(joinpath("figures", "lcbd_two-panels_rescaled.png"))
 
 # Plot separately
 plot_options = (xaxis="Longitude", yaxis="Latitude", size=(650,400))
-plot(rescale(lcbd_species_all["mean"], collect(0.0:0.05:1.0)); c=cgrad([p0, bv_pal_4[3]]))
-plot!(; cbtitle= "Species LCBD (rescaled)", plot_options...)
+plot(
+    rescale(lcbd_species_all["mean"], collect(0.0:0.05:1.0)), ws;
+    c=cgrad([p0, bv_pal_4[3]]),
+    cbtitle= "Species LCBD (rescaled)",
+    plot_options...
+)
 savefig(joinpath("figures", "lcbd_mean_rescaled_species.png"))
-plot(rescale(lcbd_networks_all["mean"], collect(0.0:0.05:1.0)); c=cgrad([p0, bv_pal_4[2]]))
-plot!(; cbtitle= "Network LCBD (rescaled)", plot_options...)
+plot(
+    rescale(lcbd_networks_all["mean"], collect(0.0:0.05:1.0)), ws;
+    c=cgrad([p0, bv_pal_4[2]]),
+    cbtitle= "Network LCBD (rescaled)",
+    plot_options...
+)
 savefig(joinpath("figures", "lcbd_mean_rescaled_networks.png"))
 
 ## Relationship

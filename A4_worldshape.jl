@@ -22,3 +22,8 @@ function plot(layer::T, ws::Shapefile.Handle; ws_c=:lightgrey, ws_lc=:grey, ws_l
     plot(ws; c=ws_c, lc=ws_lc, lw=ws_lw)
     plot!(layer; kw...)
 end
+
+function bivariate(l1::T1, l2::T2, ws::Shapefile.Handle; ws_c=:lightgrey, ws_lc=:grey, ws_lw=0.5, kw...) where {T1 <: SimpleSDMLayer, T2 <: SimpleSDMLayer}
+    plot(ws; c=ws_c, lc=ws_lc, lw=ws_lw, cb=:none)
+    bivariate!(l1, l2; kw...)
+end
