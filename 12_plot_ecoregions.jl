@@ -5,9 +5,9 @@ include("A0_required.jl")
 
 # Load the corresponding results if dealing with QC or CAN data
 if (@isdefined CAN) && CAN == true
-    ecoresults_path = joinpath("data", "ecoregions");
+    ecoresults_path = joinpath("data", "results", "ecoregions");
 else
-    ecoresults_path = joinpath("xtras", "ecoregions");
+    ecoresults_path = joinpath("xtras", "results", "ecoregions");
 end
 
 ## Basic network measures

@@ -7,11 +7,11 @@ include("A0_required.jl")
 if (@isdefined CAN) && CAN == true
     eco_path = joinpath("data", "input", "canada_ecoregions.tif");
     results_path = joinpath("data", "results");
-    ecoresults_path = joinpath("data", "ecoregions");
+    ecoresults_path = joinpath("data", "results", "ecoregions");
 else
     eco_path = joinpath("data", "input", "quebec_ecoregions.tif")
     results_path = joinpath("xtras", "results");
-    ecoresults_path = joinpath("xtras", "ecoregions");
+    ecoresults_path = joinpath("xtras", "results", "ecoregions");
 end
 
 # Load ecoregions
