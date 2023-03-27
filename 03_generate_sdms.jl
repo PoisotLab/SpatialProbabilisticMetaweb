@@ -16,11 +16,25 @@ else
     @info "Running for Quebec at 10 arcmin resolution"
 end
 
-# Load all BIOCLIM variables
-layers = SimpleSDMPredictor(
+# Load all BIOCLIM and EarthEnv variables
+wc_layers = SimpleSDMPredictor(
     WorldClim, BioClim, 1:19; resolution=res, left=-180.0, right=-40.0, bottom=18.0, top=89.0
-    )
-all_values = hcat([layer[keys(layer)] for layer in layers]...)
+)
+lc_layers = [
+    geotiff(SimpleSDMPredictor, joinpath(input_path, "landcover_stack.tif"), i) for i in 1:12
+]
+
+# Set the coordinates that do not match to zero
+site_mismatch = setdiff(keys(wc_layers[1]), keys(lc_layers[1]))
+wc_layers = convert.(SimpleSDMResponse, wc_layers)
+for wc in wc_layers
+    wc[site_mismatch] = fill(nothing, length(site_mismatch))
+end
+wc_layers = convert.(SimpleSDMPredictor, wc_layers)
+
+# Assemble all layers
+layers = [wc_layers..., lc_layers...]
+all_values = mapreduce(collect, hcat, layers)
 
 # Verify that output path exists
 isdir(sdm_path) || mkpath(sdm_path)
