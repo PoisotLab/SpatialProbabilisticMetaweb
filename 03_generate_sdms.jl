@@ -105,6 +105,15 @@ Threads.@threads for i in 1:length(pa_files)
     Xtrain, Xtest = X[train_idx, :], X[test_idx, :]
     Ytrain, Ytest = y[train_idx], y[test_idx]
 
+    # Make sure landcover variables are not all zero
+    _all_zero = map(eachcol(X)) do col
+        all(iszero.(col))
+    end
+    if any(isone.(_all_zero))
+        _inds_all_zero = findall(isone, _all_zero)
+        "$spname: columns $(_inds_all_zero) only contain zeros"
+    end
+
     # Fit & run model
     model = fit_evotree(tree_store, Xtrain, Ytrain; X_eval=Xtest, Y_eval=Ytest)
     pred = EvoTrees.predict(model, all_values)
