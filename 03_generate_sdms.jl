@@ -95,15 +95,16 @@ Threads.@threads for i in 1:length(pa_files)
     xy_presence = keys(pr)
     xy_absence = keys(ab)
     xy = vcat(xy_presence, xy_absence)
+    xy_inds = indexin(xy, keys(layers[1]))
 
     # Assemble data for models
-    X = hcat([layer[xy] for layer in layers]...)
+    X = @view all_values[xy_inds, :]
     y = vcat(fill(1.0, length(xy_presence)), fill(0.0, length(xy_absence)))
     train_size = floor(Int, 0.7 * length(y))
     train_idx = sample(1:length(y), train_size; replace=false)
     test_idx = setdiff(1:length(y), train_idx)
-    Xtrain, Xtest = X[train_idx, :], X[test_idx, :]
-    Ytrain, Ytest = y[train_idx], y[test_idx]
+    Xtrain, Xtest = view(X, train_idx, :), view(X, test_idx, :)
+    Ytrain, Ytest = view(y, train_idx), view(y, test_idx)
 
     # Make sure landcover variables are not all zero
     _all_zero = map(eachcol(X)) do col
