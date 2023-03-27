@@ -44,8 +44,8 @@ lc_path = joinpath(SimpleSDMLayers._layers_assets_path, "EarthEnv", "LandCover",
 lc_files = readdir(lc_path)
 
 # Define reference layer
-reference_layer = geotiff(SimpleSDMPredictor, ref_path)
-spatialrange = boundingbox(reference_layer)
+spatialrange = (left=-180.0, right=-40.0, bottom=18.0, top=89.0)
+reference_layer = SimpleSDMPredictor(WorldClim, BioClim, 1; resolution=res, spatialrange...)
 
 # Coarsen the files
 lc_layers = SimpleSDMResponse{Float32}[]
