@@ -7,10 +7,12 @@ include("A0_required.jl");
 if (@isdefined CAN) && CAN == true
     ref_path = joinpath("data", "input", "canada_ref_2.tif");
     sdm_path = joinpath("data", "sdms");
+    input_path = joinpath("data", "input");
     @info "Running for Canada at 2.5 arcmin resolution"
 else
     ref_path = joinpath("data", "input", "quebec_ref_10.tif");
     sdm_path = joinpath("xtras", "sdms");
+    input_path = joinpath("xtras", "input");
     @info "Running for Quebec at 10 arcmin resolution"
 end
 
@@ -19,6 +21,13 @@ end
 # Define reference layer
 reference_layer = geotiff(SimpleSDMPredictor, ref_path)
 spatialrange = boundingbox(reference_layer)
+
+# Set the coordinates that do not match to zero
+lc_layer = geotiff(SimpleSDMPredictor, joinpath(input_path, "landcover_stack.tif"); spatialrange...)
+site_mismatch = setdiff(keys(reference_layer), keys(lc_layer))
+reference_layer = convert(SimpleSDMResponse, reference_layer)
+reference_layer[site_mismatch] = fill(nothing, length(site_mismatch))
+reference_layer = convert(SimpleSDMPredictor, reference_layer)
 
 # Select files to load
 map_files = readdir(sdm_path; join=true)
