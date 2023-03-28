@@ -48,11 +48,7 @@ filter!(contains(".tif"), pa_files)
 
 # Run SDMs, one species per loop
 p = Progress(length(pa_files))
-
-# i = findfirst(contains("Ondatra_zibethicus"), pa_files)
-i = findfirst(contains("Odocoileus_virginianus"), pa_files)
-
-# Threads.@threads for i in 1:length(pa_files)
+Threads.@threads for i in 1:length(pa_files)
     # Seed for reproducibility
     Random.seed!(i)
 
