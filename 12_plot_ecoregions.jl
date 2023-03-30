@@ -1,7 +1,7 @@
 #### Ecoregion plots
 
 CAN = true
-include("A0_required.jl")
+include("A0_required.jl");
 
 # Load the corresponding results if dealing with QC or CAN data
 if (@isdefined CAN) && CAN == true
@@ -49,8 +49,9 @@ ws = worldshape(50)
 
 # Plot results
 plot(
-    [plot(ecoregion_layers["$(m)_median"], ws; title=m, clim=(0.0, Inf)) for m in network_measures]...,
-    plot_title="Ecoregion median"
+    [plot(ecoregion_layers["$(m)_median"], ws; title=m, clim=(0.0, Inf)) for m in network_measures]...;
+    # plot_title="Ecoregion median", size=(700,400), left_margin=3mm
+    plot_title="Ecoregion median", xaxis="", yaxis="",
 )
 savefig(joinpath(fig_path, "ecoregion_all_median.png"))
 
@@ -66,7 +67,9 @@ for m in measures
         ecoregion_plots[m] = plot(
             [plot(ecoregion_layers["$(m)_$f"], ws; clim=clims) for f in summary_fs]...;
             title=permutedims([t for t in summary_ts]),
-            plot_title=m
+            plot_title=m,
+            xaxis="",
+            yaxis="",
         )
     end
     savefig(joinpath(fig_path, "ecoregion_$m.png"))
@@ -84,7 +87,7 @@ ecoregion_plots["LCBD_networks"]
 ## Compare with richness
 plot(
     [plot(ecoregion_layers["$(m)_median"], ws; clim=(0.0, Inf)) for m in ["S", "Sv", "L", "Lv"]]...;
-    title=["Richness" "Richness variance" "Links" "Link variance"],
+    title=["Richness" "Richness variance" "Links" "Link variance"], xaxis="", yaxis="",
 )
 savefig(joinpath(fig_path, "ecoregion_comparison.png"))
 
@@ -93,6 +96,6 @@ savefig(joinpath(fig_path, "ecoregion_comparison.png"))
 # Get relative LCBD values
 plot(
     [plot(ecoregion_layers["$(m)_median"], ws; clim=(0.0, Inf)) for m in ["S", "LCBD_species", "L", "LCBD_networks"]]...;
-    title=["Richness" "Species LCBD" "Links" "Network LCBD"],
+    title=["Richness" "Species LCBD" "Links" "Network LCBD"], xaxis="", yaxis=""
 )
 savefig(joinpath(fig_path, "ecoregion_comparison_lcbd.png"))

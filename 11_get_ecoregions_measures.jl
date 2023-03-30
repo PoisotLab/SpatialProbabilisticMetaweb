@@ -1,7 +1,7 @@
 #### Ecoregions
 
 CAN = true
-include("A0_required.jl")
+include("A0_required.jl");
 
 # Load the corresponding sdm results if dealing with QC or CAN data
 if (@isdefined CAN) && CAN == true
