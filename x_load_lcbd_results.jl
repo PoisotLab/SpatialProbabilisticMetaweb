@@ -22,7 +22,7 @@ for opt in options
     S_all[opt] = geotiff(SimpleSDMPredictor, path)
 end
 S_all
-Sσ = geotiff(SimpleSDMPredictor, joinpath(results_path, "richness_uncertainty.tif"))
+Sv = geotiff(SimpleSDMPredictor, joinpath(results_path, "richness_uncertainty.tif"))
 
 # Species LCBD layers
 lcbd_species_all = Dict{String, SimpleSDMPredictor}()

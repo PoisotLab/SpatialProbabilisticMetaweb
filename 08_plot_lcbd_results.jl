@@ -21,21 +21,21 @@ plot(S_all["mean"], ws; c=:cividis, cbtitle="Expected richness", size=(650, 400)
 savefig(joinpath("figures", "richness_mean.png"))
 
 # Richness variance for mean only
-plot(Sσ, ws; c=:cividis, cbtitle="Richness variance", size=(650, 400))
+plot(Sv, ws; c=:cividis, cbtitle="Richness variance", size=(650, 400))
 savefig(joinpath("figures", "richness_var.png"))
 
 # Bivariate richness map
 begin
-    bivariate(S_all["mean"], Sσ, ws; quantiles=true, classes=3, bv_pal_2...)
+    bivariate(S_all["mean"], v, ws; quantiles=true, classes=3, bv_pal_2...)
     bivariatelegend!(
         S_all["mean"],
-        Sσ;
+        Sv;
         classes=3,
         # inset=(1, bbox(0.0, 0.17, 0.10, 0.28, :top, :right)),
         inset=(1, bbox(0.80, 0.02, 0.13, 0.28, :top, :right)),
         subplot=2,
         xlab="Expected richness",
-        ylab="Std. dev. of richness",
+        ylab="Richness variance",
         guidefontsize=7,
         bv_pal_2...
     )
@@ -44,18 +44,11 @@ savefig(joinpath("figures", "richness_bivariate.png"))
 
 ## LCBD plots
 
-# Map & compare LCBD values
-plot(
-    plot(lcbd_species_all["mean"], ws; c=:viridis, title="Species LCBD"),
-    plot(lcbd_networks_all["mean"], ws; c=:viridis, title="Networks LCBD"),
-    layout=(2,1),
-    size=(600,600)
-)
-savefig(joinpath("figures", "lcbd_two-panels.png"))
-
-# Plot separately
+# Species LCBD
 plot(lcbd_species_all["mean"], ws; c=:viridis, cbtitle="Relative species LCBD")
 savefig(joinpath("figures", "lcbd_mean_species.png"))
+
+# Network LCBD
 plot(lcbd_networks_all["mean"], ws; c=:viridis, cbtitle="Relative network LCBD")
 savefig(joinpath("figures", "lcbd_mean_networks.png"))
 

@@ -17,7 +17,7 @@ isdir(fig_path) || mkdir(fig_path)
 
 # Define the network measures to use
 network_measures = ["Co", "L", "Lv", "Ld"]
-measures = [network_measures..., "S", "Sσ", "LCBD_species", "LCBD_networks"]
+measures = [network_measures..., "S", "Sv", "LCBD_species", "LCBD_networks"]
 summary_fs = ["median", "quantile055", "quantile945", "iqr89"]
 summary_ts = ["median", "5.5% quantile", "94.5% quantile", "89% IQR"]
 
@@ -76,14 +76,14 @@ ecoregion_plots["L"]
 ecoregion_plots["Lv"]
 ecoregion_plots["Ld"]
 ecoregion_plots["S"]
-ecoregion_plots["Sσ"]
+ecoregion_plots["Sv"]
 ecoregion_plots["LCBD_species"]
 ecoregion_plots["LCBD_networks"]
 
 
 ## Compare with richness
 plot(
-    [plot(ecoregion_layers["$(m)_median"], ws; clim=(0.0, Inf)) for m in ["S", "Sσ", "L", "Lv"]]...;
+    [plot(ecoregion_layers["$(m)_median"], ws; clim=(0.0, Inf)) for m in ["S", "Sv", "L", "Lv"]]...;
     title=["Richness" "Richness variance" "Links" "Link variance"],
 )
 savefig(joinpath(fig_path, "ecoregion_comparison.png"))

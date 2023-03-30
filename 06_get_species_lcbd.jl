@@ -21,7 +21,7 @@ end
 Smeans = map(l -> broadcast(mean, l), collect(values(D)))
 Sμ = reduce(+, Smeans)
 Svars = map(l -> broadcast(var, l), collect(values(D)))
-Sσ = sqrt(reduce(+, Svars))
+Sv = reduce(+, Svars)
 
 # Option 2: Species richness for random samples
 Random.seed!(42)
@@ -53,7 +53,7 @@ Sμ_cut, Sr_cut = [reduce(+, convert.(Float32, S)) for S in (Smeans_cut, Srands_
 # Export results
 isdir(results_path) || mkpath(results_path)
 geotiff(joinpath(results_path, "richness_mean.tif"), Sμ)
-geotiff(joinpath(results_path, "richness_uncertainty.tif"), Sσ)
+geotiff(joinpath(results_path, "richness_uncertainty.tif"), Sv)
 geotiff(joinpath(results_path, "richness_rand.tif"), Sr)
 geotiff(joinpath(results_path, "richness_mean_thr.tif"), Sμ_cut)
 geotiff(joinpath(results_path, "richness_rand_thr.tif"), Sr_cut)

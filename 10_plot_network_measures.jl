@@ -16,7 +16,7 @@ L = geotiff(SimpleSDMPredictor, joinpath(results_path, "links_mean.tif"))
 Lv = geotiff(SimpleSDMPredictor, joinpath(results_path, "links_var.tif"))
 Ld = geotiff(SimpleSDMPredictor, joinpath(results_path, "links_density.tif"))
 S = geotiff(SimpleSDMPredictor, joinpath(results_path, "richness_mean.tif"))
-Sσ = geotiff(SimpleSDMPredictor, joinpath(results_path, "richness_uncertainty.tif"))
+Sv = geotiff(SimpleSDMPredictor, joinpath(results_path, "richness_uncertainty.tif"))
 
 # Load worldshape shapefile to use as background on maps
 ws = worldshape(50)
@@ -91,9 +91,9 @@ savefig(joinpath("figures", "bivariate_richness_links.png"))
 
 # Richness-link uncertainty bivariate map
 begin
-    bivariate(broadcast(v -> v^2, Sσ), Lv, ws; quantiles=true, classes=3, bv_pal_2...)
+    bivariate(Sv, Lv, ws; quantiles=true, classes=3, bv_pal_2...)
     bivariatelegend!(
-        broadcast(v -> v^2, Sσ),
+        Sv,
         Lv;
         classes=3,
         # inset=(1, bbox(0.04, 0.05, 0.28, 0.28, :top, :right)),
@@ -165,11 +165,6 @@ begin
     plot(_p1, _p2, _p3; size=(800, 400), left_margin=3mm, bottom_margin=3mm, layout=_layout)
 end; # do not display as VS Code might crash
 savefig(joinpath("figures", "lcbd_bivariate_densities.png"))
-
-_layout = @layout [a [b; c]]
-plot(
-    plot(), plot(), plot(); layout=_layout
-)
 
 ## Compare sampling options
 
