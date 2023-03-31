@@ -1,7 +1,6 @@
 .vscode
 *.code-workspace
 data/ecoregions/
-data/input/landcover_stack.tif
 data/jld2
 data/occurrences/
 data/presence_absence/
