@@ -95,3 +95,33 @@ plot(
     title=["Richness" "Species LCBD" "Links" "Network LCBD"], xaxis="", yaxis=""
 )
 savefig(joinpath(fig_path, "ecoregion_comparison_lcbd.png"))
+
+## Relationship between LCBD median and IQR
+
+# Show relationship as scatter plot
+begin
+    scatter(
+        unique(collect(ecoregion_layers["LCBD_species_median"])),
+        unique(collect(ecoregion_layers["LCBD_species_iqr89"]));
+        label="Species LCBD", c=:black
+    )
+    scatter!(
+        unique(collect(ecoregion_layers["LCBD_networks_median"])),
+        unique(collect(ecoregion_layers["LCBD_networks_iqr89"]));
+        label="Network LCBD", c=:orange
+    )
+    plot!(xaxis=("Ecoregion median relative LCBD value", (0,1)), yaxis=("89% IQR", (0,1)))
+end
+savefig(joinpath(fig_path, "ecoregion_relation_lcbd_iqr.png"))
+
+# Show probability densities
+begin
+    _p1 = density(unique(collect(ecoregion_layers["LCBD_species_median"])); c=:black, label="Species LCBD")
+    density!(unique(collect(ecoregion_layers["LCBD_networks_median"])), c=:orange, label="Network LCBD")
+    plot!(xaxis="Relative LCBD value", yaxis="Probability density")
+    _p2 = density(unique(collect(ecoregion_layers["LCBD_species_iqr89"])); c=:black, label="Species LCBD")
+    density!(unique(collect(ecoregion_layers["LCBD_networks_iqr89"])), c=:orange, label="Network LCBD")
+    plot!(xaxis="89% IQR", yaxis="Probability Density")
+    plot(_p1, _p2, size=(650, 400))
+end
+savefig(joinpath(fig_path, "ecoregion_relation_lcbd_densities.png"))
