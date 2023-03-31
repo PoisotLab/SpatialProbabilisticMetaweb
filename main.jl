@@ -66,6 +66,7 @@ include("12_plot_ecoregions.jl");
 
 # include("x_canada_shapefile.jl"); # do not run as-is
 include("x_get_ecoregions.jl");
+include("x_get_landcover.jl");
 # include("x_gbif_download.jl"); # outdated
 include("x_load_results.jl");
 include("x_reconcile_metaweb.jl");

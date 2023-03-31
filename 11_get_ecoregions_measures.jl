@@ -1,7 +1,7 @@
 #### Ecoregions
 
 CAN = true
-include("A0_required.jl")
+include("A0_required.jl");
 
 # Load the corresponding sdm results if dealing with QC or CAN data
 if (@isdefined CAN) && CAN == true
@@ -26,7 +26,7 @@ ecoregions_stack = [replace(e, 0.0 => nothing) for e in ecoregions_stack]
 ## Basic summary statistics
 
 # Define the network measures to use
-measures = ["Co", "L", "Lv", "Ld", "S", "Sσ", "LCBD_species", "LCBD_networks"]
+measures = ["Co", "L", "Lv", "Ld", "S", "Sv", "LCBD_species", "LCBD_networks"]
 filenames = [
     "connectance", "links_mean", "links_var", "links_density",
     "richness_mean", "richness_uncertainty",

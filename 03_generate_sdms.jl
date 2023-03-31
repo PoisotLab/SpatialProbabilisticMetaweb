@@ -16,11 +16,25 @@ else
     @info "Running for Quebec at 10 arcmin resolution"
 end
 
-# Load all BIOCLIM variables
-layers = SimpleSDMPredictor(
+# Load all BIOCLIM and EarthEnv variables
+wc_layers = SimpleSDMPredictor(
     WorldClim, BioClim, 1:19; resolution=res, left=-180.0, right=-40.0, bottom=18.0, top=89.0
-    )
-all_values = hcat([layer[keys(layer)] for layer in layers]...)
+)
+lc_layers = [
+    geotiff(SimpleSDMPredictor, joinpath(input_path, "landcover_stack.tif"), i) for i in 1:12
+]
+
+# Set the coordinates that do not match to zero
+site_mismatch = setdiff(keys(wc_layers[1]), keys(lc_layers[1]))
+wc_layers = convert.(SimpleSDMResponse, wc_layers)
+for wc in wc_layers
+    wc[site_mismatch] = fill(nothing, length(site_mismatch))
+end
+wc_layers = convert.(SimpleSDMPredictor, wc_layers)
+
+# Assemble all layers
+layers = [wc_layers..., lc_layers...]
+all_values = mapreduce(collect, hcat, layers)
 
 # Verify that output path exists
 isdir(sdm_path) || mkpath(sdm_path)
@@ -81,15 +95,25 @@ Threads.@threads for i in 1:length(pa_files)
     xy_presence = keys(pr)
     xy_absence = keys(ab)
     xy = vcat(xy_presence, xy_absence)
+    xy_inds = indexin(xy, keys(layers[1]))
 
     # Assemble data for models
-    X = hcat([layer[xy] for layer in layers]...)
+    X = @view all_values[xy_inds, :]
     y = vcat(fill(1.0, length(xy_presence)), fill(0.0, length(xy_absence)))
     train_size = floor(Int, 0.7 * length(y))
     train_idx = sample(1:length(y), train_size; replace=false)
     test_idx = setdiff(1:length(y), train_idx)
-    Xtrain, Xtest = X[train_idx, :], X[test_idx, :]
-    Ytrain, Ytest = y[train_idx], y[test_idx]
+    Xtrain, Xtest = view(X, train_idx, :), view(X, test_idx, :)
+    Ytrain, Ytest = view(y, train_idx), view(y, test_idx)
+
+    # Make sure landcover variables are not all zero
+    _all_zero = map(eachcol(X)) do col
+        all(iszero.(col))
+    end
+    if any(isone.(_all_zero))
+        _inds_all_zero = findall(isone, _all_zero)
+        "$spname: columns $(_inds_all_zero) only contain zeros"
+    end
 
     # Fit & run model
     model = fit_evotree(tree_store, Xtrain, Ytrain; X_eval=Xtest, Y_eval=Ytest)

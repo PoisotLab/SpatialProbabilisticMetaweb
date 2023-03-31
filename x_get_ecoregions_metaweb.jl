@@ -65,7 +65,7 @@ for (m, f) in zip(network_measures, network_filename)
     local_layers[m] = geotiff(SimpleSDMPredictor, joinpath(results_path, "$f.tif"))
 end
 local_layers["S"] = geotiff(SimpleSDMPredictor, joinpath(results_path, "richness_mean.tif"))
-local_layers["Sσ"] = geotiff(SimpleSDMPredictor, joinpath(results_path, "richness_uncertainty.tif"))
+local_layers["Sv"] = geotiff(SimpleSDMPredictor, joinpath(results_path, "richness_uncertainty.tif"))
 
 #### Metaweb by ecoregion
 

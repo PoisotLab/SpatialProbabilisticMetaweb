@@ -1,7 +1,7 @@
 #### Ecoregion plots
 
 CAN = true
-include("A0_required.jl")
+include("A0_required.jl");
 
 # Load the corresponding results if dealing with QC or CAN data
 if (@isdefined CAN) && CAN == true
@@ -17,9 +17,13 @@ isdir(fig_path) || mkdir(fig_path)
 
 # Define the network measures to use
 network_measures = ["Co", "L", "Lv", "Ld"]
-measures = [network_measures..., "S", "Sσ", "LCBD_species", "LCBD_networks"]
-summary_fs = ["median", "quantile055", "quantile945", "iqr89"]
-summary_ts = ["median", "5.5% quantile", "94.5% quantile", "89% IQR"]
+measures = [network_measures..., "S", "Sv", "LCBD_species", "LCBD_networks"]
+measures_ts = [
+    "\nConnectance", "Number of links", "Link variance", "\nLinkage density",
+    "\nRichness", "\nRichness variance", "\nRelative species LCBD", "\nRelative network LCBD"
+]
+summary_fs = ["median", "iqr89"]
+summary_ts = ["median", "89% IQR"]
 
 # Predefine set of options
 opt = []
@@ -49,26 +53,21 @@ ws = worldshape(50)
 
 # Plot results
 plot(
-    [plot(ecoregion_layers["$(m)_median"], ws; title=m, clim=(0.0, Inf)) for m in network_measures]...,
-    plot_title="Ecoregion median"
+    [plot(ecoregion_layers["$(m)_median"], ws; title=m, clim=(0.0, Inf)) for m in network_measures]...;
+    plot_title="Ecoregion median", xaxis="", yaxis="",
 )
 savefig(joinpath(fig_path, "ecoregion_all_median.png"))
 
 # Some variations
 ecoregion_plots = Dict{String, Plots.Plot}()
-for m in measures
-    begin
-        _L = [ecoregion_layers["$(m)_$f"] for f in summary_fs]
-        # clim1 = mapreduce(minimum, min, _L)
-        clim1 = 0.0
-        clim2 = mapreduce(maximum, max, _L)
-        clims = (clim1, clim2)
-        ecoregion_plots[m] = plot(
-            [plot(ecoregion_layers["$(m)_$f"], ws; clim=clims) for f in summary_fs]...;
-            title=permutedims([t for t in summary_ts]),
-            plot_title=m
-        )
-    end
+for (m,t) in zip(measures, measures_ts)
+    ecoregion_plots[m] = plot(
+        plot(ecoregion_layers["$(m)_median"], ws; c=:inferno, clim=(0.0, Inf)),
+        plot(ecoregion_layers["$(m)_iqr89"], ws; c=:magma, clim=(0.0, Inf));
+        layout=(2,1),
+        size=(650, 600),
+        cbtitle=["$t" "$t 89% IQR"],
+    )
     savefig(joinpath(fig_path, "ecoregion_$m.png"))
 end
 ecoregion_plots["Co"]
@@ -76,15 +75,15 @@ ecoregion_plots["L"]
 ecoregion_plots["Lv"]
 ecoregion_plots["Ld"]
 ecoregion_plots["S"]
-ecoregion_plots["Sσ"]
+ecoregion_plots["Sv"]
 ecoregion_plots["LCBD_species"]
 ecoregion_plots["LCBD_networks"]
 
 
 ## Compare with richness
 plot(
-    [plot(ecoregion_layers["$(m)_median"], ws; clim=(0.0, Inf)) for m in ["S", "Sσ", "L", "Lv"]]...;
-    title=["Richness" "Richness variance" "Links" "Link variance"],
+    [plot(ecoregion_layers["$(m)_median"], ws; clim=(0.0, Inf)) for m in ["S", "Sv", "L", "Lv"]]...;
+    title=["Richness" "Richness variance" "Links" "Link variance"], xaxis="", yaxis="",
 )
 savefig(joinpath(fig_path, "ecoregion_comparison.png"))
 
@@ -93,6 +92,36 @@ savefig(joinpath(fig_path, "ecoregion_comparison.png"))
 # Get relative LCBD values
 plot(
     [plot(ecoregion_layers["$(m)_median"], ws; clim=(0.0, Inf)) for m in ["S", "LCBD_species", "L", "LCBD_networks"]]...;
-    title=["Richness" "Species LCBD" "Links" "Network LCBD"],
+    title=["Richness" "Species LCBD" "Links" "Network LCBD"], xaxis="", yaxis=""
 )
 savefig(joinpath(fig_path, "ecoregion_comparison_lcbd.png"))
+
+## Relationship between LCBD median and IQR
+
+# Show relationship as scatter plot
+begin
+    scatter(
+        unique(collect(ecoregion_layers["LCBD_species_median"])),
+        unique(collect(ecoregion_layers["LCBD_species_iqr89"]));
+        label="Species LCBD", c=:black
+    )
+    scatter!(
+        unique(collect(ecoregion_layers["LCBD_networks_median"])),
+        unique(collect(ecoregion_layers["LCBD_networks_iqr89"]));
+        label="Network LCBD", c=:orange
+    )
+    plot!(xaxis=("Ecoregion median relative LCBD value", (0,1)), yaxis=("89% IQR", (0,1)))
+end
+savefig(joinpath(fig_path, "ecoregion_relation_lcbd_iqr.png"))
+
+# Show probability densities
+begin
+    _p1 = density(unique(collect(ecoregion_layers["LCBD_species_median"])); c=:black, label="Species LCBD")
+    density!(unique(collect(ecoregion_layers["LCBD_networks_median"])), c=:orange, label="Network LCBD")
+    plot!(xaxis="Relative LCBD value", yaxis="Probability density")
+    _p2 = density(unique(collect(ecoregion_layers["LCBD_species_iqr89"])); c=:black, label="Species LCBD")
+    density!(unique(collect(ecoregion_layers["LCBD_networks_iqr89"])), c=:orange, label="Network LCBD")
+    plot!(xaxis="89% IQR", yaxis="Probability Density")
+    plot(_p1, _p2, size=(650, 400))
+end
+savefig(joinpath(fig_path, "ecoregion_relation_lcbd_densities.png"))

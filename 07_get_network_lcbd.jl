@@ -12,10 +12,6 @@ else
     results_path = joinpath("xtras", "results")
 end
 
-# Define reference layer
-reference_layer = geotiff(SimpleSDMPredictor, ref_path)
-spatialrange = boundingbox(reference_layer)
-
 # Load networks
 include("05_assemble_networks.jl");
 
