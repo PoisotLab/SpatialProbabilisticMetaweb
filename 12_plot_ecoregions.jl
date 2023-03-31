@@ -18,8 +18,12 @@ isdir(fig_path) || mkdir(fig_path)
 # Define the network measures to use
 network_measures = ["Co", "L", "Lv", "Ld"]
 measures = [network_measures..., "S", "Sv", "LCBD_species", "LCBD_networks"]
-summary_fs = ["median", "quantile055", "quantile945", "iqr89"]
-summary_ts = ["median", "5.5% quantile", "94.5% quantile", "89% IQR"]
+measures_ts = [
+    "\nConnectance", "Number of links", "Link variance", "\nLinkage density",
+    "\nRichness", "\nRichness variance", "\nRelative species LCBD", "\nRelative network LCBD"
+]
+summary_fs = ["median", "iqr89"]
+summary_ts = ["median", "89% IQR"]
 
 # Predefine set of options
 opt = []
@@ -50,28 +54,20 @@ ws = worldshape(50)
 # Plot results
 plot(
     [plot(ecoregion_layers["$(m)_median"], ws; title=m, clim=(0.0, Inf)) for m in network_measures]...;
-    # plot_title="Ecoregion median", size=(700,400), left_margin=3mm
     plot_title="Ecoregion median", xaxis="", yaxis="",
 )
 savefig(joinpath(fig_path, "ecoregion_all_median.png"))
 
 # Some variations
 ecoregion_plots = Dict{String, Plots.Plot}()
-for m in measures
-    begin
-        _L = [ecoregion_layers["$(m)_$f"] for f in summary_fs]
-        # clim1 = mapreduce(minimum, min, _L)
-        clim1 = 0.0
-        clim2 = mapreduce(maximum, max, _L)
-        clims = (clim1, clim2)
-        ecoregion_plots[m] = plot(
-            [plot(ecoregion_layers["$(m)_$f"], ws; clim=clims) for f in summary_fs]...;
-            title=permutedims([t for t in summary_ts]),
-            plot_title=m,
-            xaxis="",
-            yaxis="",
-        )
-    end
+for (m,t) in zip(measures, measures_ts)
+    ecoregion_plots[m] = plot(
+        plot(ecoregion_layers["$(m)_median"], ws; c=:inferno, clim=(0.0, Inf)),
+        plot(ecoregion_layers["$(m)_iqr89"], ws; c=:magma, clim=(0.0, Inf));
+        layout=(2,1),
+        size=(650, 600),
+        cbtitle=["$t" "$t 89% IQR"],
+    )
     savefig(joinpath(fig_path, "ecoregion_$m.png"))
 end
 ecoregion_plots["Co"]
