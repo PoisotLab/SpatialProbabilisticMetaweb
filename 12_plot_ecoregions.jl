@@ -98,22 +98,6 @@ savefig(joinpath(fig_path, "ecoregion_comparison_lcbd.png"))
 
 ## Relationship between LCBD median and IQR
 
-# Show relationship as scatter plot
-begin
-    scatter(
-        unique(collect(ecoregion_layers["LCBD_species_median"])),
-        unique(collect(ecoregion_layers["LCBD_species_iqr89"]));
-        label="Species LCBD", c=:black
-    )
-    scatter!(
-        unique(collect(ecoregion_layers["LCBD_networks_median"])),
-        unique(collect(ecoregion_layers["LCBD_networks_iqr89"]));
-        label="Network LCBD", c=:orange
-    )
-    plot!(xaxis=("Ecoregion median relative LCBD value", (0,1)), yaxis=("89% IQR", (0,1)))
-end
-savefig(joinpath(fig_path, "ecoregion_relation_lcbd_iqr.png"))
-
 # Show probability densities
 begin
     _p1 = density(unique(collect(ecoregion_layers["LCBD_species_median"])); c=:black, label="Species LCBD")
@@ -125,3 +109,26 @@ begin
     plot(_p1, _p2, size=(650, 400))
 end
 savefig(joinpath(fig_path, "ecoregion_relation_lcbd_densities.png"))
+
+# Side-by-side median-median and iqr-iqr relationships
+_v1 = collect(ecoregion_layers["LCBD_species_median"])
+_v2 = collect(ecoregion_layers["LCBD_networks_median"])
+_pairs_med = unique(Pair.(_v1, _v2))
+_lims_med = extrema([_v1 _v2]) .+ [-0.01, 0.01]
+_v3 = collect(ecoregion_layers["LCBD_species_iqr89"])
+_v4 = collect(ecoregion_layers["LCBD_networks_iqr89"])
+_pairs_iqr = unique(Pair.(_v3, _v4))
+_lims_iqr = extrema([_v3 _v4]) .+ [-0.01, 0.01]
+plot(
+    scatter(first.(_pairs_med), last.(_pairs_med)),
+    scatter(first.(_pairs_iqr), last.(_pairs_iqr)),
+    xlab=["Median species LCBD" "89% IQR species LCBD"],
+    ylab=["Median network LCBD" "89% IQR network LCBD"],
+    xlims=[_lims_med _lims_iqr],
+    ylims=[_lims_med _lims_iqr],
+    mc=:black,
+    legend=:none,
+    size=(650,400),
+    aspectratio=1
+)
+savefig(joinpath(fig_path, "ecoregion_relation_lcbd_iqr.png"))
