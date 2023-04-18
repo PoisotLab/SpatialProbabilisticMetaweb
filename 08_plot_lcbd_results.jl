@@ -26,7 +26,7 @@ savefig(joinpath("figures", "richness_var.png"))
 
 # Bivariate richness map
 begin
-    bivariate(S_all["mean"], v, ws; quantiles=true, classes=3, bv_pal_2...)
+    bivariate(S_all["mean"], Sv, ws; quantiles=true, classes=3, bv_pal_2...)
     bivariatelegend!(
         S_all["mean"],
         Sv;
