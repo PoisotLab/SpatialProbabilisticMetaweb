@@ -58,6 +58,45 @@ plot(
 )
 savefig(joinpath(fig_path, "ecoregion_all_median.png"))
 
+# Richness & links
+plot(
+    plot(ecoregion_layers["S_median"], ws; c=:cividis, clim=(0.0, Inf)),
+    plot(ecoregion_layers["L_median"], ws; c=:acton, clim=(0.0, Inf));
+    layout=(2,1),
+    size=(650, 600),
+    cbtitle=["Richness" "Number of links"],
+    # title=["a)" "b)"],
+    # titlepos=:left,
+    # size=(650, 650),
+)
+savefig(joinpath(fig_path, "ecoregion_S_L.png"))
+
+# Links
+plot(
+    plot(ecoregion_layers["L_median"], ws; c=:acton, clim=(0.0, Inf)),
+    plot(ecoregion_layers["L_iqr89"], ws; c=:magma, clim=(0.0, Inf));
+    layout=(2,1),
+    size=(650, 600),
+    cbtitle=["Number of Links" "Number of links 89% IQR"],
+    # title=["a)" "b)"],
+    # titlepos=:left,
+    # size=(650, 650),
+)
+savefig(joinpath(fig_path, "ecoregion_L_acton.png"))
+
+# Double ecoregions all the way across the sky
+p_lcbd = plot(
+    plot(ecoregion_layers["LCBD_species_median"], ws; c=cgrad([p0, bv_pal_4[3]]), clim=(-Inf, Inf)),
+    plot(ecoregion_layers["LCBD_networks_median"], ws; c=cgrad([p0, bv_pal_4[2]]), clim=(-Inf, Inf));
+    layout=(2,1),
+    size=(650, 600),
+    cbtitle=["\nRelative species LCBD" "\nRelative network LCBD"],
+    # title=["a)" "b)"],
+    # titlepos=:left,
+    # size=(650, 650),
+)
+savefig(joinpath(fig_path, "ecoregion_LCBD_both.png"))
+
 # Some variations
 ecoregion_plots = Dict{String, Plots.Plot}()
 for (m,t) in zip(measures, measures_ts)
@@ -99,16 +138,26 @@ savefig(joinpath(fig_path, "ecoregion_comparison_lcbd.png"))
 ## Relationship between LCBD median and IQR
 
 # Show probability densities
-begin
-    _p1 = density(unique(collect(ecoregion_layers["LCBD_species_median"])); c=:black, label="Species LCBD")
-    density!(unique(collect(ecoregion_layers["LCBD_networks_median"])), c=:orange, label="Network LCBD")
-    plot!(xaxis="Relative LCBD value", yaxis="Probability density")
-    _p2 = density(unique(collect(ecoregion_layers["LCBD_species_iqr89"])); c=:black, label="Species LCBD")
-    density!(unique(collect(ecoregion_layers["LCBD_networks_iqr89"])), c=:orange, label="Network LCBD")
+p_dens = begin
+    _p1 = density(unique(collect(ecoregion_layers["LCBD_species_median"])); c=bv_pal_4[3], label="Species LCBD")
+    density!(unique(collect(ecoregion_layers["LCBD_networks_median"])), c=bv_pal_4[2], label="Network LCBD")
+    plot!(xaxis="Relative LCBD value", yaxis="Probability density", legend=:topleft)
+    _p2 = density(unique(collect(ecoregion_layers["LCBD_species_iqr89"])); c=bv_pal_4[3], label="Species LCBD")
+    density!(unique(collect(ecoregion_layers["LCBD_networks_iqr89"])), c=bv_pal_4[2], label="Network LCBD")
     plot!(xaxis="89% IQR", yaxis="Probability Density")
     plot(_p1, _p2, size=(650, 400))
 end
 savefig(joinpath(fig_path, "ecoregion_relation_lcbd_densities.png"))
+
+_plcbd1 = plot(ecoregion_layers["LCBD_species_median"], ws; c=cgrad([p0, bv_pal_4[3]]), cbtitle="\nRelative species LCBD");
+_plcbd2 = plot(ecoregion_layers["LCBD_networks_median"], ws; c=cgrad([p0, bv_pal_4[2]]), cbtitle="\nRelative network LCBD");
+begin
+    _layout = @layout [a; b; [c d]]
+    plot(_plcbd1, _plcbd2, _p1, _p2;
+        layout=_layout, title=["a)" "b)" "c)" "d)"], size=(650, 900), titlepos=:left,
+        leftmargin=2mm)
+end
+savefig(joinpath(fig_path, "ecoregion_LCBD_all_included.png"))
 
 # Side-by-side median-median and iqr-iqr relationships
 _v1 = collect(ecoregion_layers["LCBD_species_median"])
