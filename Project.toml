@@ -22,3 +22,8 @@ Shapefile = "8e980c4a-a4fe-5da2-b3a7-4b4b0353a2f4"
 SimpleSDMLayers = "2c645270-77db-11e9-22c3-0f302a89c64c"
 StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 StatsPlots = "f3b207a7-027a-5e70-b257-86293d7955fd"
+
+[compat]
+EvoTrees = "0.10.0"
+SimpleSDMLayers = "0.8.3"
+julia = "1.9"
