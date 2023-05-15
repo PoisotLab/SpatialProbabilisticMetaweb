@@ -1489,9 +1489,9 @@ weakdeps = ["ChainRulesCore"]
 
 [[deps.SpeciesDistributionToolkit]]
 deps = ["ArchGDAL", "Distances", "Fauxcurrences", "GBIF", "GDAL", "MakieCore", "Phylopic", "Reexport", "SimpleSDMDatasets", "SimpleSDMLayers", "StatsBase"]
-git-tree-sha1 = "a8f956620a7046e453e891a6302e62863d00ffbb"
+git-tree-sha1 = "afc58e9986956673eecf29e9d04e889b75648530"
 uuid = "72b53823-5c0b-4575-ad0e-8e97227ad13b"
-version = "0.0.6"
+version = "0.0.7"
 
 [[deps.StableHashTraits]]
 deps = ["CRC32c", "Compat", "Dates", "SHA", "Tables", "TupleTools", "UUIDs"]
