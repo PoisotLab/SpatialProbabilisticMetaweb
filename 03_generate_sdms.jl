@@ -17,12 +17,14 @@ else
 end
 
 # Load all BIOCLIM and EarthEnv variables
-wc_layers = SimpleSDMPredictor(
-    WorldClim, BioClim, 1:19; resolution=res, left=-180.0, right=-40.0, bottom=18.0, top=89.0
-)
-lc_layers = [
-    geotiff(SimpleSDMPredictor, joinpath(input_path, "landcover_stack.tif"), i) for i in 1:12
+data_provider = RasterData(WorldClim2, BioClim)
+training_extent = (left=-180.0, right=-40.0, bottom=18.0, top=89.0)
+wc_layers = [
+    SimpleSDMPredictor(data_provider; layer = l, resolution=res, training_extent...) for
+    l in layers(data_provider)
 ]
+lc_path = joinpath(input_path, "landcover_stack.tif")
+lc_layers = [read_geotiff(lc_path, SimpleSDMPredictor; bandnumber=i) for i in 1:12]
 
 # Set the coordinates that do not match to zero
 site_mismatch = setdiff(keys(wc_layers[1]), keys(lc_layers[1]))
@@ -33,14 +35,22 @@ end
 wc_layers = convert.(SimpleSDMPredictor, wc_layers)
 
 # Assemble all layers
-layers = [wc_layers..., lc_layers...]
-all_values = mapreduce(collect, hcat, layers)
+all_layers = [wc_layers..., lc_layers...]
+all_values = mapreduce(values, hcat, all_layers)
 
 # Verify that output path exists
 isdir(sdm_path) || mkpath(sdm_path)
 
 # Empty DataFrame to collect model statistics
-df = [DataFrame(species = String[], occurrences = Int64[], AUC = Float64[], J = Float64[], cutoff = Float64[]) for i in 1:Threads.nthreads()]
+df = [
+    DataFrame(
+        species = String[],
+        occurrences = Int64[],
+        AUC = Float64[],
+        J = Float64[],
+        cutoff = Float64[]
+    ) for i in 1:Threads.nthreads()
+]
 
 # List all species files
 pa_files = readdir(pa_path; join=true)
@@ -48,7 +58,7 @@ filter!(contains(".tif"), pa_files)
 
 # Run SDMs, one species per loop
 p = Progress(length(pa_files))
-Threads.@threads for i in 1:length(pa_files)
+@threads for i in 1:length(pa_files)
     # Seed for reproducibility
     Random.seed!(i)
 
@@ -72,18 +82,18 @@ Threads.@threads for i in 1:length(pa_files)
     spname = replace(split(pa_file, "/")[3], ".tif" => "")
 
     # Presence-absence files
-    pr = geotiff(SimpleSDMResponse, pa_file, 1)
-    ab = geotiff(SimpleSDMResponse, pa_file, 2)
+    pr = read_geotiff(pa_file, SimpleSDMResponse; bandnumber=1)
+    ab = read_geotiff(pa_file, SimpleSDMResponse; bandnumber=2)
     replace!(pr, false => nothing)
     replace!(ab, false => nothing)
 
     # Exit if too few presence sites
     if length(pr) <= 10
-        sdm = similar(layers[1])
+        sdm = similar(all_layers[1])
         sdm[keys(sdm)] = fill(length(pr)/length(sdm), length(sdm))
         var = similar(sdm)
-        geotiff(joinpath(sdm_path, spname*"_model.tif"),sdm)
-        geotiff(joinpath(sdm_path, spname*"_error.tif"),var)
+        write_geotiff(joinpath(sdm_path, spname*"_model.tif"), sdm)
+        write_geotiff(joinpath(sdm_path, spname*"_error.tif"), var)
         if !(@isdefined quiet) || quiet == false
             # Print progress bar
             next!(p)
@@ -95,7 +105,7 @@ Threads.@threads for i in 1:length(pa_files)
     xy_presence = keys(pr)
     xy_absence = keys(ab)
     xy = vcat(xy_presence, xy_absence)
-    xy_inds = indexin(xy, keys(layers[1]))
+    xy_inds = indexin(xy, keys(all_layers[1]))
 
     # Assemble data for models
     X = @view all_values[xy_inds, :]
@@ -120,12 +130,12 @@ Threads.@threads for i in 1:length(pa_files)
     pred = EvoTrees.predict(model, all_values)
 
     # Assemble distribution layer
-    distribution = similar(layers[1], Float64)
+    distribution = similar(all_layers[1], Float64)
     distribution[keys(distribution)] = pred[:, 1]
     distribution
 
     # Assemble uncertainty layer
-    uncertainty = similar(layers[1], Float64)
+    uncertainty = similar(all_layers[1], Float64)
     uncertainty[keys(uncertainty)] = pred[:, 2]
     uncertainty
 
@@ -161,10 +171,10 @@ Threads.@threads for i in 1:length(pa_files)
     push!(df[Threads.threadid()], (spname, length(xy_presence), AUC, maximum(J), τ))
 
     # Finalize layers
-    range_mask = broadcast(v -> v >= τ, distribution)
+    range_mask = distribution .>= τ
     sdm = mask(range_mask, distribution)/maximum(mask(range_mask, distribution))
-    geotiff(joinpath(sdm_path, spname*"_model.tif"),distribution)
-    geotiff(joinpath(sdm_path, spname*"_error.tif"),uncertainty)
+    write_geotiff(joinpath(sdm_path, spname*"_model.tif"), distribution)
+    write_geotiff(joinpath(sdm_path, spname*"_error.tif"), uncertainty)
 
     if !(@isdefined quiet) || quiet == false
         # Print progress bar

@@ -84,7 +84,7 @@ function assemble_networks(
             left=lon_lims[i],
             right=lon_lims[i+1],
             bottom=lat_lims[j],
-            top=lat_lims[j+1] - 0.0000000001 # temporary workaround to avoid issue with clipping coordinate
+            top=lat_lims[j+1] # - 0.0000000001 # temporary workaround to avoid issue with clipping coordinate
         )
         mini_reference_layer = clip(reference_layer; new_coords...)
         mini_D = Dict{String, SimpleSDMResponse}()

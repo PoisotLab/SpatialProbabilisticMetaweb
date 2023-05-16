@@ -11,12 +11,12 @@ else
 end
 
 # Objects
-Co = geotiff(SimpleSDMPredictor, joinpath(results_path, "connectance.tif"))
-L = geotiff(SimpleSDMPredictor, joinpath(results_path, "links_mean.tif"))
-Lv = geotiff(SimpleSDMPredictor, joinpath(results_path, "links_var.tif"))
-Ld = geotiff(SimpleSDMPredictor, joinpath(results_path, "links_density.tif"))
-S = geotiff(SimpleSDMPredictor, joinpath(results_path, "richness_mean.tif"))
-Sv = geotiff(SimpleSDMPredictor, joinpath(results_path, "richness_uncertainty.tif"))
+Co = read_geotiff(joinpath(results_path, "connectance.tif"), SimpleSDMPredictor)
+L = read_geotiff(joinpath(results_path, "links_mean.tif"), SimpleSDMPredictor)
+Lv = read_geotiff(joinpath(results_path, "links_var.tif"), SimpleSDMPredictor)
+Ld = read_geotiff(joinpath(results_path, "links_density.tif"), SimpleSDMPredictor)
+S = read_geotiff(joinpath(results_path, "richness_mean.tif"), SimpleSDMPredictor)
+Sv = read_geotiff(joinpath(results_path, "richness_uncertainty.tif"), SimpleSDMPredictor)
 
 # Load worldshape shapefile to use as background on maps
 ws = worldshape(50)

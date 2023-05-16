@@ -36,13 +36,11 @@ opt
 # Load the ecoregion summary layers
 ecoregion_layers = Dict{String, SimpleSDMResponse}()
 for o in opt
-    ecoregion_layers["$(o.m)_$(o.fs)"] = geotiff(
-        SimpleSDMResponse, joinpath(ecoresults_path, "ecoregion_$(o.m)_$(o.fs).tif")
-    )
+    # Load layer
+    path = joinpath(ecoresults_path, "ecoregion_$(o.m)_$(o.fs).tif")
+    ecoregion_layers["$(o.m)_$(o.fs)"] = read_geotiff(path, SimpleSDMResponse)
     # Replace zero values (sites not in an ecoregion)
-    ecoregion_layers["$(o.m)_$(o.fs)"] = replace(
-        ecoregion_layers["$(o.m)_$(o.fs)"], 0.0 => nothing
-    )
+    replace!(ecoregion_layers["$(o.m)_$(o.fs)"], 0.0 => nothing)
 end
 ecoregion_layers
 
@@ -121,12 +119,12 @@ end
 savefig(joinpath(fig_path, "ecoregion_LCBD_all_included.png"))
 
 # Side-by-side median-median and iqr-iqr relationships
-_v1 = collect(ecoregion_layers["LCBD_species_median"])
-_v2 = collect(ecoregion_layers["LCBD_networks_median"])
+_v1 = values(ecoregion_layers["LCBD_species_median"])
+_v2 = values(ecoregion_layers["LCBD_networks_median"])
 _pairs_med = unique(Pair.(_v1, _v2))
 _lims_med = extrema([_v1 _v2]) .+ [-0.01, 0.01]
-_v3 = collect(ecoregion_layers["LCBD_species_iqr89"])
-_v4 = collect(ecoregion_layers["LCBD_networks_iqr89"])
+_v3 = values(ecoregion_layers["LCBD_species_iqr89"])
+_v4 = values(ecoregion_layers["LCBD_networks_iqr89"])
 _pairs_iqr = unique(Pair.(_v3, _v4))
 _lims_iqr = extrema([_v3 _v4]) .+ [-0.01, 0.01]
 plot(

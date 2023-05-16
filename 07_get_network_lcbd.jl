@@ -1,19 +1,19 @@
 #### Network LCBD analysis ####
 
 # CAN = true
-include("A0_required.jl");
+include("05_assemble_networks.jl"); # load networks
 
 # Load the corresponding sdm results if dealing with QC or CAN data
 if (@isdefined CAN) && CAN == true
-    ref_path = joinpath("data", "input", "canada_ref_2.tif");
     results_path = joinpath("data", "results")
 else
-    ref_path = joinpath("data", "input", "quebec_ref_10.tif");
     results_path = joinpath("xtras", "results")
 end
 
-# Load networks
-include("05_assemble_networks.jl");
+# Verify loaded objects
+size(networks) # local networks
+P # probabilistic metaweb
+reference_layer # reference_layer
 
 # Get the networks LCBD
 function networks_to_layer(networks::BitArray{4}, P, reference_layer::SimpleSDMLayer)
@@ -47,7 +47,7 @@ lcbd_networks = networks_to_layer(networks, P, reference_layer)
 
 # Export
 isdir(results_path) || mkpath(results_path)
-geotiff(joinpath(results_path, "lcbd_networks_mean.tif"), lcbd_networks)
+write_geotiff(joinpath(results_path, "lcbd_networks_mean.tif"), lcbd_networks)
 # geotiff(joinpath(results_path, "lcbd_networks_rand.tif"), lcbd_networks_rnd)
 # geotiff(joinpath(results_path, "lcbd_networks_mean_thr.tif"), lcbd_networks_thr)
 # geotiff(joinpath(results_path, "lcbd_networks_rand_thr.tif"), lcbd_networks_rnd_thr)

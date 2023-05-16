@@ -15,13 +15,15 @@ else
 end
 
 # Load ecoregions
-ecoregions = geotiff(SimpleSDMPredictor, eco_path)
-plot(ecoregions)
+ecoregions = read_geotiff(eco_path, SimpleSDMPredictor)
+heatmap(ecoregions)
 
 # Separate ecoregions in different layers
-ecoregions_ids = unique(collect(ecoregions))
-ecoregions_stack = [convert(Float32, broadcast(==(e), ecoregions)) for e in ecoregions_ids]
-ecoregions_stack = [replace(e, 0.0 => nothing) for e in ecoregions_stack]
+ecoregions_ids = unique(values(ecoregions))
+ecoregions_stack = [convert(Float32, ecoregions .== id) for id in ecoregions_ids]
+for e in ecoregions_stack
+    replace!(e, 0.0 => nothing)
+end
 
 ## Basic summary statistics
 
@@ -42,17 +44,17 @@ summary_fs = [median, quantile055, quantile945, iqr89]
 # Load layers to summarize by ecoregion
 local_layers = Dict{String, SimpleSDMPredictor}()
 for (m, f) in zip(measures, filenames)
-    local_layers[m] = geotiff(SimpleSDMPredictor, joinpath(results_path, "$f.tif"))
+    local_layers[m] = read_geotiff(joinpath(results_path, "$f.tif"), SimpleSDMPredictor)
 end
 
 # Define function
 function ecoregionalize(layer, ecoregions_stack; f=median, keepzeros=true)
     l_eco = similar(layer)
     @threads for e in ecoregions_stack
-        l_eco[keys(e)] = fill(f(layer[keys(e)]), length(keys(e)))
+        l_eco[keys(e)] = fill(f(layer[keys(e)]), length(e))
     end
     if !keepzeros
-        l_eco = replace(l_eco, 0.0 => nothing)
+        replace!(l_eco, 0.0 => nothing)
     end
     return l_eco
 end
@@ -82,7 +84,7 @@ end
 # Export layers
 isdir(ecoresults_path) || mkdir(ecoresults_path)
 for o in opt
-    p = joinpath(ecoresults_path, "ecoregion_$(o.m)_$(o.fs).tif")
-    l = ecoregion_layers["$(o.m)_$(o.fs)"]
-    geotiff(p, l)
+    path = joinpath(ecoresults_path, "ecoregion_$(o.m)_$(o.fs).tif")
+    layer = ecoregion_layers["$(o.m)_$(o.fs)"]
+    write_geotiff(path, layer)
 end
