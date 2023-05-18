@@ -1,7 +1,7 @@
 #### Ecoregions ####
 
 CAN = true
-include("A0_required.jl")
+include("A0_required.jl");
 
 # Load the corresponding sdm results if dealing with QC or CAN data
 if (@isdefined CAN) && CAN == true
@@ -15,11 +15,13 @@ else
 end
 
 # Define reference layer
-reference_layer = geotiff(SimpleSDMPredictor, ref_path)
+reference_layer = read_geotiff(ref_path, SimpleSDMPredictor)
 spatialrange = boundingbox(reference_layer)
 
 # Set the coordinates that do not match to zero
-lc_layer = geotiff(SimpleSDMPredictor, joinpath(input_path, "landcover_stack.tif"); spatialrange...)
+lc_layer = read_geotiff(
+    joinpath(input_path, "landcover_stack.tif"), SimpleSDMPredictor; spatialrange...
+)
 site_mismatch = setdiff(keys(reference_layer), keys(lc_layer))
 reference_layer = convert(SimpleSDMResponse, reference_layer)
 reference_layer[site_mismatch] = fill(nothing, length(site_mismatch))
@@ -34,11 +36,11 @@ query = `gdal_rasterize -a ECO_ID $eco_file $out_file -ts $sx $sy -te $l $b $r $
 @time run(query);
 
 # Read and replace zero values
-ecoregions = geotiff(SimpleSDMPredictor, out_path)
-ecoregions = replace(ecoregions, 0.0 => nothing)
+ecoregions = read_geotiff(out_path, SimpleSDMResponse)
+replace!(ecoregions, 0.0 => nothing)
 
 # Mask based on the Canada shapefile
 ecoregions = mask(reference_layer, ecoregions)
 
 # Reexport
-geotiff(out_path, ecoregions)
+write_geotiff(out_path, ecoregions)
