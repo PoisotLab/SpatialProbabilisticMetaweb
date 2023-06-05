@@ -11,6 +11,7 @@ narval_tests.sh
 shapefiles/canada/
 shapefiles/ecoregions/
 xtras/*
+tmp_makie.jl
 
 # Except
 !xtras/*.jl

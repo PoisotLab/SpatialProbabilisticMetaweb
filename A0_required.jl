@@ -9,6 +9,7 @@ using Distributions
 using EcologicalNetworks
 using EvoTrees
 using GDAL
+using GeoMakie
 using ProgressMeter
 using Random
 using Shapefile
