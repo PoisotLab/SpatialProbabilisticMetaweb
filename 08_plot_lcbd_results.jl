@@ -38,6 +38,25 @@ begin
 end
 save(joinpath("figures", "richness_mean.png"), fig)
 
+# GeoMakie attempt
+begin
+    fig = Figure()
+    ga = GeoAxis(
+        fig[1, 1];
+        source = "+proj=longlat +datum=WGS84",
+        dest = "esri:102002", # Lambert Conformal Conic
+        lonlims = (spatialrange.left, spatialrange.right),
+        latlims = (spatialrange.bottom, spatialrange.top),
+        xlabel = "Longitude",
+        ylabel = "Latitude",
+    )
+    hm1 = surface!(bglayer; colormap=:Greys, shading=false)
+    hm2 = surface!(ga, S_all["mean"]; colormap=:cividis, shading=false)
+    Colorbar(fig[1,end+1], hm2; height=Relative(0.5), label="Expected Richness")
+    fig
+end
+save(joinpath("figures", "richness_proj_bg.png"), fig; px_per_unit=3.0)
+
 # Richness variance for mean only
 plot(Sv, ws; c=:cividis, cbtitle="Richness variance", size=(650, 400))
 savefig(joinpath("figures", "richness_var.png"))
