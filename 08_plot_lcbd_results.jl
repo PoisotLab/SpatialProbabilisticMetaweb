@@ -3,6 +3,13 @@
 CAN = true
 include("A0_required.jl");
 
+# Set corresponding resolution
+if (@isdefined CAN) && CAN == true
+    res = 2.5
+else
+    res = 10.0
+end
+
 # Load LCBD results
 include("x_load_lcbd_results.jl");
 
@@ -16,9 +23,20 @@ lcbd_networks_all
 # Load worldshape shapefile to use as background on maps
 ws = worldshape(50)
 
+# Load background layer
+spatialrange = boundingbox(S_all["mean"])
+bglayer = similar(
+    SimpleSDMPredictor(RasterData(WorldClim2, BioClim); resolution=2.5, spatialrange...)
+)
+
 # Richness for mean only
-plot(S_all["mean"], ws; c=:cividis, cbtitle="Expected richness", size=(650, 400))
-savefig(joinpath("figures", "richness_mean.png"))
+begin
+    fig = background_map()
+    hm2 = heatmap!(S_all["mean"]; colormap=:cividis)
+    Colorbar(fig[1,end+1], hm2; height=Relative(0.5), label="Expected Richness")
+    fig
+end
+save(joinpath("figures", "richness_mean.png"), fig)
 
 # Richness variance for mean only
 plot(Sv, ws; c=:cividis, cbtitle="Richness variance", size=(650, 400))

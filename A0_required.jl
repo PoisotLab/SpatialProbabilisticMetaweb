@@ -24,6 +24,6 @@ using SpeciesDistributionToolkit: _write_geotiff as write_geotiff
 using SpeciesDistributionToolkit: boundingbox
 
 include("A1_LCBD.jl")
-# include("A2_colors.jl")
-# include("A3_bivariate_values.jl")
-# include("A4_worldshape.jl")
+include("A2_colors.jl")
+include("A3_bivariate_values.jl")
+include("A4_worldshape.jl")

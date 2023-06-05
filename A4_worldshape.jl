@@ -18,12 +18,23 @@ function worldshape(res)
     return handle
 end
 
-function plot(layer::T, ws::Shapefile.Handle; ws_c=:lightgrey, ws_lc=:grey, ws_lw=0.5, kw...) where {T<:SimpleSDMLayer}
-    plot(ws; c=ws_c, lc=ws_lc, lw=ws_lw, xaxis="Longitude", yaxis="Latitude")
-    plot!(layer; kw...)
-end
+# function plot(layer::T, ws::Shapefile.Handle; ws_c=:lightgrey, ws_lc=:grey, ws_lw=0.5, kw...) where {T<:SimpleSDMLayer}
+#     plot(ws; c=ws_c, lc=ws_lc, lw=ws_lw, xaxis="Longitude", yaxis="Latitude")
+#     plot!(layer; kw...)
+# end
 
-function bivariate(l1::T1, l2::T2, ws::Shapefile.Handle; ws_c=:lightgrey, ws_lc=:grey, ws_lw=0.5, kw...) where {T1 <: SimpleSDMLayer, T2 <: SimpleSDMLayer}
-    plot(ws; c=ws_c, lc=ws_lc, lw=ws_lw, cb=:none, xaxis="Longitude", yaxis="Latitude")
-    bivariate!(l1, l2; kw...)
+# function bivariate(l1::T1, l2::T2, ws::Shapefile.Handle; ws_c=:lightgrey, ws_lc=:grey, ws_lw=0.5, kw...) where {T1 <: SimpleSDMLayer, T2 <: SimpleSDMLayer}
+#     plot(ws; c=ws_c, lc=ws_lc, lw=ws_lw, cb=:none, xaxis="Longitude", yaxis="Latitude")
+#     bivariate!(l1, l2; kw...)
+# end
+
+function background_map()
+    fig = Figure()
+    ax = Axis(fig[1,1],
+        aspect=DataAspect(),
+        xlabel="Latitude",
+        ylabel="Longitude",
+    )
+    hm1 = heatmap!(bglayer; colormap=:Greys,)
+    return fig
 end
