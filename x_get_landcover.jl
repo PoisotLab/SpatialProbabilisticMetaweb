@@ -4,13 +4,11 @@ include("A0_required.jl");
 CAN = true
 if (@isdefined CAN) && CAN == true
     res = 2.5;
-    ref_path = joinpath("data", "input", "canada_ref_2.tif");
-    out_path = joinpath("data", "input");
+    input_path = joinpath("data", "input");
     @info "Running for Canada at 2.5 arcmin resolution"
 else
     res = 10.0;
-    ref_path = joinpath("data", "input", "quebec_ref_10.tif");
-    out_path = joinpath("xtras", "input");
+    input_path = joinpath("xtras", "input");
     @info "Running for Quebec at 10 arcmin resolution"
 end
 
@@ -44,10 +42,10 @@ end
 ## Coarsen the landcover layers
 
 # Define reference layer
-spatialrange = (left=-180.0, right=-40.0, bottom=18.0, top=89.0)
-reference_layer = SimpleSDMPredictor(
-    RasterData(WorldClim2, BioClim); resolution=res, spatialrange...
+reference_layer = read_geotiff(
+    joinpath(input_path, "chelsa2_stack.tif"), SimpleSDMPredictor; bandnumber=1
 )
+spatialrange = boundingbox(reference_layer)
 
 # Make sure we have the landcover files locally
 lc_provider = RasterData(EarthEnv, LandCover)
@@ -61,18 +59,20 @@ lc_path = joinpath(SimpleSDMDatasets._LAYER_PATH, "EarthEnv", "LandCover")
 lc_files = readdir(lc_path)
 filter!(startswith("consensus_full_class_"), lc_files)
 
-# Coarsen the files
-lc_ids = replace.(lc_files, "consensus_full_class_" => "", ".tif" => "")
-lc_layers = SimpleSDMResponse{Float32}[]
-for id in lc_ids
-    # Define paths (making sure 11 isn't read before 2)
-    lc_file = joinpath(lc_path, "consensus_full_class_$id.tif")
-    out_file = tempname()
+# Make sure to process the files in order
+lc_ids = collect(eachindex(lc_files))
+lc_files_ordered = [
+    joinpath.(lc_path, "consensus_full_class_$id.tif") for id in lc_ids
+]
 
+# Coarsen the files
+lc_layers = SimpleSDMResponse{Float32}[]
+for file in lc_files_ordered
     # Coarsen to the reference resolution
     sy, sx = size(reference_layer)
     l, r, b, t = spatialrange
-    query = `gdalwarp -r average $lc_file $out_file -ts $sx $sy -te $l $b $r $t`
+    out_file = tempname()
+    query = `gdalwarp -r average $file $out_file -ts $sx $sy -te $l $b $r $t`
     run(query);
 
     # Mask the coarsened layer with the reference layer
@@ -91,4 +91,4 @@ for id in lc_ids
 end
 
 # Export as a stack
-write_geotiff(joinpath(out_path, "landcover_stack.tif"), lc_layers)
+write_geotiff(joinpath(input_path, "landcover_stack.tif"), lc_layers)
