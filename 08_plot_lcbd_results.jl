@@ -36,7 +36,7 @@ begin
     Colorbar(fig[1,end+1], hm2; height=Relative(0.5), label="Expected Richness")
     fig
 end
-save(joinpath("figures", "richness_mean.png"), fig)
+save(joinpath("figures", "richness_mean.png"), fig; px_per_unit=2.0)
 
 # GeoMakie attempt
 begin
