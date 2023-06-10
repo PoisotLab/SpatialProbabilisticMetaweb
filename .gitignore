@@ -11,6 +11,8 @@ JuliaSysimage.so
 narval_tests.sh
 shapefiles/canada/
 shapefiles/ecoregions/
+shapefiles/countries.geojson
+shapefiles/ne_50m*
 xtras/*
 tmp_makie.jl
 

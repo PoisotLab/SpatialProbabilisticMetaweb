@@ -38,3 +38,14 @@ function background_map()
     hm1 = heatmap!(bglayer; colormap=:Greys,)
     return fig
 end
+
+function Makie.convert_arguments(::Type{<:Poly}, p::Shapefile.Polygon)
+    polys = Shapefile.GeoInterface.coordinates(p)
+    ps = map(polys) do pol
+        Polygon(
+            Point2f.(pol[1]), # interior
+            map(x -> Point2f.(x), pol[2:end])
+        )
+    end
+    (ps,)
+end
