@@ -58,13 +58,15 @@ end
 save(joinpath("figures", "richness_proj_bg.png"), fig; px_per_unit=3.0)
 
 # GeoMakie with shape
-in_file = "shapefiles/ne_50m_land.shp"
-out_file = "shapefiles/ne_50m_land_clip.shp"
-l, r, b, t = spatialrange
-query = `ogr2ogr -clipsrc $l $(b+1.0) $r $t $out_file $in_file`
-run(query);
-shapes = Shapefile.shapes(Shapefile.Table(out_file))
-@time begin
+clipbg_file = "shapefiles/ne_50m_land_clip.shp"
+if !isfile(clipbg_file)
+    in_file = "shapefiles/ne_50m_land.shp"
+    l, r, b, t = spatialrange
+    query = `ogr2ogr -clipsrc $l $(b-3.0) $r $t $clipbg_file $in_file`
+    run(query);
+end
+shapes = Shapefile.shapes(Shapefile.Table(clipbg_file))
+begin
     fig = Figure()
     ga = GeoAxis(
         fig[1, 1];
@@ -75,10 +77,11 @@ shapes = Shapefile.shapes(Shapefile.Table(out_file))
         xlabel = "Longitude",
         ylabel = "Latitude",
     )
-    foreach(table) do geo
-        poly!(ga, geo; shading=false, strokecolor=:darkgrey, strokewidth=1, color=:lightgrey)
+    foreach(shapes) do sh
+        poly!(ga, sh; shading=false, strokecolor=:darkgrey, strokewidth=1, color=:lightgrey)
     end
     hm2 = surface!(ga, S_all["mean"]; colormap=:cividis, shading=false)
+    Colorbar(fig[1,end+1], hm2; height=Relative(0.5), label="Expected Richness")
     fig
 end
 save(joinpath("figures", "richness_proj_shp.png"), fig; px_per_unit=3.0)
