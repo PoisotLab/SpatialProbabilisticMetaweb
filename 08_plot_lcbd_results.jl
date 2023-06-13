@@ -58,14 +58,7 @@ end
 save(joinpath("figures", "richness_proj_bg.png"), fig; px_per_unit=3.0)
 
 # GeoMakie with shape
-clipbg_file = "shapefiles/ne_50m_land_clip.shp"
-if !isfile(clipbg_file)
-    in_file = "shapefiles/ne_50m_land.shp"
-    l, r, b, t = spatialrange
-    query = `ogr2ogr -clipsrc $l $(b-3.0) $r $t $clipbg_file $in_file`
-    run(query);
-end
-shapes = Shapefile.shapes(Shapefile.Table(clipbg_file))
+shapes = Shapefile.shapes(Shapefile.Table("shapefiles/land/land_50m_curved.shp"))
 begin
     fig = Figure()
     ga = GeoAxis(

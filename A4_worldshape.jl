@@ -1,7 +1,7 @@
 function _download_shapefile(res)
     @assert res ∈ [50, 100]
     fn = "ne_$(res)m_land.shp"
-    ispath("shapefiles") || mkpath("shapefiles")
+    ispath(joinpath("shapefiles", "land")) || mkpath(joinpath("shapefiles", "land"))
     tf = joinpath("shapefiles", fn)
     if !isfile(tf)
         dir = "https://github.com/nvkelso/natural-earth-vector/" *
