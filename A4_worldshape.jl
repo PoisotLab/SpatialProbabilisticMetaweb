@@ -28,14 +28,21 @@ end
 #     bivariate!(l1, l2; kw...)
 # end
 
-function background_map()
+function background_map(; lims=(left=-145.0, right=-50.0, bottom=40.0, top=89.0))
+    shapes = Shapefile.shapes(Shapefile.Table("shapefiles/land/land_50m_curved.shp"))
     fig = Figure()
-    ax = Axis(fig[1,1],
-        aspect=DataAspect(),
-        xlabel="Latitude",
-        ylabel="Longitude",
+    ga = GeoAxis(
+        fig[1, 1];
+        source = "+proj=longlat +datum=WGS84",
+        dest = "esri:102002", # Lambert Conformal Conic
+        lonlims = (lims.left, lims.right),
+        latlims = (lims.bottom, lims.top),
+        xlabel = "Longitude",
+        ylabel = "Latitude",
     )
-    hm1 = heatmap!(bglayer; colormap=:Greys,)
+    foreach(shapes) do sh
+        poly!(ga, sh; shading=false, strokecolor=:darkgrey, strokewidth=1, color=:lightgrey)
+    end
     return fig
 end
 

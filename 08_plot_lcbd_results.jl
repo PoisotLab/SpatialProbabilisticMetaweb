@@ -20,68 +20,23 @@ lcbd_networks_all
 
 ## Richness plots
 
-# Load worldshape shapefile to use as background on maps
-ws = worldshape(50)
-
-# Load background layer
-spatialrange = boundingbox(S_all["mean"])
-bglayer = similar(
-    SimpleSDMPredictor(RasterData(WorldClim2, BioClim); resolution=2.5, spatialrange...)
-)
-
 # Richness for mean only
 begin
     fig = background_map()
-    hm2 = heatmap!(S_all["mean"]; colormap=:cividis)
+    hm2 = surface!(S_all["mean"]; colormap=:cividis, shading=false)
     Colorbar(fig[1,end+1], hm2; height=Relative(0.5), label="Expected Richness")
     fig
 end
-save(joinpath("figures", "richness_mean.png"), fig; px_per_unit=2.0)
-
-# GeoMakie attempt
-begin
-    fig = Figure()
-    ga = GeoAxis(
-        fig[1, 1];
-        source = "+proj=longlat +datum=WGS84",
-        dest = "esri:102002", # Lambert Conformal Conic
-        lonlims = (spatialrange.left, spatialrange.right),
-        latlims = (spatialrange.bottom, spatialrange.top),
-        xlabel = "Longitude",
-        ylabel = "Latitude",
-    )
-    hm1 = surface!(bglayer; colormap=:Greys, shading=false)
-    hm2 = surface!(ga, S_all["mean"]; colormap=:cividis, shading=false)
-    Colorbar(fig[1,end+1], hm2; height=Relative(0.5), label="Expected Richness")
-    fig
-end
-save(joinpath("figures", "richness_proj_bg.png"), fig; px_per_unit=3.0)
-
-# GeoMakie with shape
-shapes = Shapefile.shapes(Shapefile.Table("shapefiles/land/land_50m_curved.shp"))
-begin
-    fig = Figure()
-    ga = GeoAxis(
-        fig[1, 1];
-        source = "+proj=longlat +datum=WGS84",
-        dest = "esri:102002", # Lambert Conformal Conic
-        lonlims = (spatialrange.left, spatialrange.right),
-        latlims = (spatialrange.bottom, spatialrange.top),
-        xlabel = "Longitude",
-        ylabel = "Latitude",
-    )
-    foreach(shapes) do sh
-        poly!(ga, sh; shading=false, strokecolor=:darkgrey, strokewidth=1, color=:lightgrey)
-    end
-    hm2 = surface!(ga, S_all["mean"]; colormap=:cividis, shading=false)
-    Colorbar(fig[1,end+1], hm2; height=Relative(0.5), label="Expected Richness")
-    fig
-end
-save(joinpath("figures", "richness_proj_shp.png"), fig; px_per_unit=3.0)
+save(joinpath("figures", "richness_mean.png"), fig; px_per_unit=3.0)
 
 # Richness variance for mean only
-plot(Sv, ws; c=:cividis, cbtitle="Richness variance", size=(650, 400))
-savefig(joinpath("figures", "richness_var.png"))
+begin
+    fig = background_map()
+    hm2 = surface!(Sv; colormap=:cividis, shading=false)
+    Colorbar(fig[1,end+1], hm2; height=Relative(0.5), label="Richness variance")
+    fig
+end
+save(joinpath("figures", "richness_var.png"), fig; px_per_unit=3.0)
 
 # Bivariate richness map
 begin
@@ -104,12 +59,22 @@ savefig(joinpath("figures", "richness_bivariate.png"))
 ## LCBD plots
 
 # Species LCBD
-plot(lcbd_species_all["mean"], ws; c=:viridis, cbtitle="Relative species LCBD")
-savefig(joinpath("figures", "lcbd_mean_species.png"))
+begin
+    fig = background_map()
+    hm2 = surface!(lcbd_species_all["mean"]; colormap=:viridis, shading=false)
+    Colorbar(fig[1,end+1], hm2; height=Relative(0.5), label="Relative species LCBD")
+    fig
+end
+save(joinpath("figures", "lcbd_mean_species.png"), fig; px_per_unit=3.0)
 
 # Network LCBD
-plot(lcbd_networks_all["mean"], ws; c=:viridis, cbtitle="Relative network LCBD")
-savefig(joinpath("figures", "lcbd_mean_networks.png"))
+begin
+    fig = background_map()
+    hm2 = surface!(lcbd_networks_all["mean"]; colormap=:viridis, shading=false)
+    Colorbar(fig[1,end+1], hm2; height=Relative(0.5), label="Relative network LCBD")
+    fig
+end
+save(joinpath("figures", "lcbd_mean_networks.png"), fig; px_per_unit=3.0)
 
 # Bivariate species-networks LCBD for mean only
 begin
@@ -131,27 +96,83 @@ begin
 end
 savefig(joinpath("figures", "lcbd_bivariate_mean.png"))
 
+## Sampling options
+
+options = reshape(options, (2,2))
+titles = reshape(titles, (2,2))
+
+# All richness options
+begin
+    layers_all = S_all
+    cbmin = mapreduce(minimum, min, values(layers_all))
+    cbmax = mapreduce(maximum, max, values(layers_all))
+    fig = Figure()
+    for i in 1:2, j in 1:2
+        o = options[i,j]
+        l = layers_all[o]
+        t = titles[i,j]
+        hm = heatmap(
+            fig[i,j], l; colormap=:cividis, colorrange=(cbmin, cbmax), axis=(;title=t)
+        )
+    end
+    Colorbar(
+        fig[:,end+1];
+        height=Relative(0.5),
+        colormap=:cividis,
+        colorrange=(cbmin, cbmax),
+        label="Expected Richness",
+    )
+    fig
+end
+save(joinpath("figures", "sampling_options", "richness_all.png"), fig; px_per_unit=3.0)
+
 # All species LCBD options
-plot(
-    [plot(lcbd_species_all[opt], ws; c=:viridis) for opt in options]...;
-    title=titles,
-    cbtitle="Relative species LCBD",
-    layout=(2,2),
-    size=(900,600),
-)
-savefig(joinpath("figures", "sampling_options", "lcbd_species_all.png"))
+#= # returns NaNs
+begin
+    layers_all = lcbd_species_all
+    cbmin = mapreduce(minimum, min, values(layers_all))
+    cbmax = mapreduce(maximum, max, values(layers_all))
+    fig = Figure()
+    for i in 1:2, j in 1:2
+        o = options[i,j]
+        l = layers_all[o]
+        t = titles[i,j]
+        hm = heatmap(fig[i,j], l; colorrange=(cbmin, cbmax), axis=(;title=t))
+    end
+    Colorbar(
+        fig[:,end+1];
+        height=Relative(0.5),
+        label="Relative species LCBD",
+        colorrange=(cbmin, cbmax)
+    )
+    fig
+end
+save(joinpath("figures", "sampling_options", "lcbd_species_all.png"), fig; px_per_unit=3.0)
+=#
 
 # All networks LCBD options
 # NO DATA FOR NOW
 #=
-plot(
-    [plot(lcbd_networks_all[opt], ws; c=:viridis) for opt in options]...;
-    title=titles,
-    cbtitle="Relative networks LCBD",
-    layout=(2,2),
-    size=(900,600),
-)
-savefig(joinpath("figures", "sampling_options", "lcbd_networks_all.png"))
+begin
+    layers_all = lcbd_networks_all
+    cbmin = mapreduce(minimum, min, values(layers_all))
+    cbmax = mapreduce(maximum, max, values(layers_all))
+    fig = Figure()
+    for i in 1:2, j in 1:2
+        o = options[i,j]
+        l = layers_all[o]
+        t = titles[i,j]
+        hm = heatmap(fig[i,j], l; colorrange=(cbmin, cbmax), axis=(;title=t))
+    end
+    Colorbar(
+        fig[:,end+1];
+        height=Relative(0.5),
+        label="Relative species LCBD",
+        colorrange=(cbmin, cbmax)
+    )
+    fig
+end
+save(joinpath("figures", "sampling_options", "lcbd_networks_all.png"), fig; px_per_unit=3.0)
 
 # Bivariate species-networks LCBD
 biv_plots = []
