@@ -18,22 +18,34 @@ Ld = read_geotiff(joinpath(results_path, "links_density.tif"), SimpleSDMPredicto
 S = read_geotiff(joinpath(results_path, "richness_mean.tif"), SimpleSDMPredictor)
 Sv = read_geotiff(joinpath(results_path, "richness_uncertainty.tif"), SimpleSDMPredictor)
 
-# Load worldshape shapefile to use as background on maps
-ws = worldshape(50)
-
 ## Some plots
 
 # Connectance
-plot(Co, ws; c=:acton, cbtitle="Connectance", size=(650,400))
-savefig(joinpath("figures", "links_connectance.png"))
+begin
+    fig = background_map()
+    hm2 = surface!(Co; colormap=:acton, shading=false)
+    Colorbar(fig[1,end+1], hm2; height=Relative(0.5), label="Connectance")
+    fig
+end
+save(joinpath("figures", "links_connectance.png"), fig; px_per_unit=3.0)
 
 # Links
-plot(L, ws; c=:acton, cbtitle="Expected number of links")
-savefig(joinpath("figures", "links_mean.png"))
+begin
+    fig = background_map()
+    hm2 = surface!(L; colormap=:acton, shading=false)
+    Colorbar(fig[1,end+1], hm2; height=Relative(0.5), label="Expected number of links")
+    fig
+end
+save(joinpath("figures", "links_mean.png"), fig; px_per_unit=3.0)
 
 # Link variance
-plot(Lv, ws; c=:acton, cb_title="Link variance")
-savefig(joinpath("figures", "links_var.png"))
+begin
+    fig = background_map()
+    hm2 = surface!(Lv; colormap=:acton, shading=false)
+    Colorbar(fig[1,end+1], hm2; height=Relative(0.5), label="Link variance")
+    fig
+end
+save(joinpath("figures", "links_var.png"), fig; px_per_unit=3.0)
 
 # Link bivariate map
 begin
@@ -53,23 +65,7 @@ begin
 end
 savefig(joinpath("figures", "links_bivariate.png"))
 
-# Link coefficient of variation
-Lcv = sqrt(Lv)/L
-plot(Lcv, ws; c=:cividis, cbtitle="Link coefficient of variation")
-savefig(joinpath("figures", "links_coeff_var.png"))
-
-# Link inverse-coefficient of variation or signal-to-noise ratio (SNR)
-Lsnr = L/sqrt(Lv)
-plot(Lsnr, ws; c=:cividis, cbtitle="Link signal-to-noise ratio")
-savefig(joinpath("figures", "links_coeff_var_inv.png"))
-
 ## Richness
-
-# Richness-link relationship
-histogram2d(S, L, xlab="Richness", ylab="Links", cbtitle="Sites")
-savefig(joinpath("figures", "richness_relationship.png"))
-histogram2d(S, L; xaxis=("Richness (log)", :log), yaxis=("Links (log)", :log), cbtitle="Sites")
-savefig(joinpath("figures", "richness_relationship_log.png"))
 
 # Richness-link bivariate map
 begin
@@ -111,24 +107,6 @@ savefig(joinpath("figures", "bivariate_richness_links_variance.png"))
 
 # Load LCBD results
 include("x_load_lcbd_results.jl");
-
-# LCBD-richness relationships
-plot(
-    histogram2d(S, lcbd_species_all["mean"]; cb=:none),
-    histogram2d(S, lcbd_networks_all["mean"]; cb=:none);
-    xaxis="Richness", yaxis="Relative LCBD", title=["Species LCBD" "Networks LCBD"],
-    size=(700, 400)
-)
-savefig(joinpath("figures", "lcbd_relationship_richness.png"))
-
-# LCBD-links relationships
-plot(
-    histogram2d(L, lcbd_species_all["mean"]; cb=:none),
-    histogram2d(L, lcbd_networks_all["mean"]; cb=:none);
-    xaxis=("Links (log)", :log), yaxis="Relative LCBD", title=["Species LCBD" "Networks LCBD"],
-    size=(700, 400)
-)
-savefig(joinpath("figures", "lcbd_relationship_links.png"))
 
 ## Compare link & richness density of unique sites
 
