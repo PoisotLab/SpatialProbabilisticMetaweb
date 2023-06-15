@@ -19,8 +19,8 @@ isdir(fig_path) || mkdir(fig_path)
 network_measures = ["Co", "L", "Lv", "Ld"]
 measures = [network_measures..., "S", "Sv", "LCBD_species", "LCBD_networks"]
 measures_ts = [
-    "\nConnectance", "Number of links", "Link variance", "\nLinkage density",
-    "\nRichness", "\nRichness variance", "\nRelative species LCBD", "\nRelative network LCBD"
+    "Connectance", "Number of links", "Link variance", "Linkage density",
+    "Richness", "Richness variance", "Relative species LCBD", "Relative network LCBD"
 ]
 summary_fs = ["median", "iqr89"]
 summary_ts = ["median", "89% IQR"]
@@ -46,27 +46,37 @@ ecoregion_layers
 
 ## Make some plots!!
 
-# Load worldshape shapefile to use as background on maps
-ws = worldshape(50)
-
 # Plot results
-plot(
-    [plot(ecoregion_layers["$(m)_median"], ws; title=m, clim=(0.0, Inf)) for m in network_measures]...;
-    plot_title="Ecoregion median", xaxis="", yaxis="",
-)
-savefig(joinpath(fig_path, "ecoregion_all_median.png"))
+begin
+    fig = Figure(; resolution=(1200,600))
+    for i in 1:2, j in 1:2
+        m = reshape(network_measures, (2,2))[i,j]
+        t = reshape(measures_ts[1:4], (2,2))[i,j]
+        background_map(; fig=fig, pos=[i,j], title=t, titlealign=:left)
+        hm2 = surface!(ecoregion_layers["$(m)_median"]; colormap=:inferno, shading=false)
+        Colorbar(fig[i, j][1,2], hm2; height=Relative(0.5))
+    end
+    fig
+end
+save(joinpath(fig_path, "ecoregion_all_median.png"), fig; px_per_unit=3.0)
 
 # Some variations
-ecoregion_plots = Dict{String, Plots.Plot}()
+ecoregion_plots = Dict{String, Figure}()
 for (m,t) in zip(measures, measures_ts)
-    ecoregion_plots[m] = plot(
-        plot(ecoregion_layers["$(m)_median"], ws; c=:inferno, clim=(0.0, Inf)),
-        plot(ecoregion_layers["$(m)_iqr89"], ws; c=:magma, clim=(0.0, Inf));
-        layout=(2,1),
-        size=(650, 600),
-        cbtitle=["$t" "$t 89% IQR"],
-    )
-    savefig(joinpath(fig_path, "ecoregion_$m.png"))
+    begin
+        fig = Figure(; resolution=(800,800))
+
+        background_map(; fig=fig, pos=[1,1], title="Median", titlealign=:left)
+        background_map(; fig=fig, pos=[2,1], title="89% IQR", titlealign=:left)
+
+        hm1 = surface!(fig[1,1], ecoregion_layers["$(m)_median"]; colormap=:inferno, shading=false)
+        hm2 = surface!(fig[2,1], ecoregion_layers["$(m)_iqr89"]; colormap=:inferno, shading=false)
+
+        Colorbar(fig[1, 1][1,2], hm1; height=Relative(0.5), label="$(t)")
+        Colorbar(fig[2, 1][1,2], hm2; height=Relative(0.5), label="$(t) 89% IQR")
+
+        ecoregion_plots[m] = fig;
+    end;
 end
 ecoregion_plots["Co"]
 ecoregion_plots["L"]
@@ -77,22 +87,44 @@ ecoregion_plots["Sv"]
 ecoregion_plots["LCBD_species"]
 ecoregion_plots["LCBD_networks"]
 
+# Export
+@time @threads for m in String.(keys(ecoregion_plots))
+    @time save(joinpath(fig_path, "ecoregion_$m.png"), ecoregion_plots[m]; px_per_unit=3.0)
+end
 
 ## Compare with richness
-plot(
-    [plot(ecoregion_layers["$(m)_median"], ws; clim=(0.0, Inf)) for m in ["S", "Sv", "L", "Lv"]]...;
-    title=["Richness" "Richness variance" "Links" "Link variance"], xaxis="", yaxis="",
-)
-savefig(joinpath(fig_path, "ecoregion_comparison.png"))
+begin
+    ms = ["S" "Sv"; "L" "Lv"]
+    ts = ["Richness" "Richness variance"; "Links" "Link variance"]
+    fig = Figure(; resolution=(1200,600))
+    for i in 1:2, j in 1:2
+        m = ms[i,j]
+        t = ts[i,j]
+        background_map(; fig=fig, pos=[i,j], title=t, titlealign=:left)
+        hm2 = surface!(ecoregion_layers["$(m)_median"]; colormap=:inferno, shading=false)
+        Colorbar(fig[i, j][1,2], hm2; height=Relative(0.5), label=t)
+    end
+    fig
+end
+save(joinpath(fig_path, "ecoregion_comparison.png"), fig; px_per_unit=3.0)
 
 ## Compare with LCBD
 
 # Get relative LCBD values
-plot(
-    [plot(ecoregion_layers["$(m)_median"], ws; clim=(0.0, Inf)) for m in ["S", "LCBD_species", "L", "LCBD_networks"]]...;
-    title=["Richness" "Species LCBD" "Links" "Network LCBD"], xaxis="", yaxis=""
-)
-savefig(joinpath(fig_path, "ecoregion_comparison_lcbd.png"))
+begin
+    ms = ["S" "LCBD_species"; "L" "LCBD_networks"]
+    ts = ["Richness" "Species LCBD"; "Links" "Network LCBD"]
+    fig = Figure(; resolution=(1200,600))
+    for i in 1:2, j in 1:2
+        m = ms[i,j]
+        t = ts[i,j]
+        background_map(; fig=fig, pos=[i,j], title=t, titlealign=:left)
+        hm2 = surface!(ecoregion_layers["$(m)_median"]; colormap=:inferno, shading=false)
+        Colorbar(fig[i, j][1,2], hm2; height=Relative(0.5), label=t)
+    end
+    fig
+end
+save(joinpath(fig_path, "ecoregion_comparison_lcbd.png"), fig; px_per_unit=3.0)
 
 ## Relationship between LCBD median and IQR
 
