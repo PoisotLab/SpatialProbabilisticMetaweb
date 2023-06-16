@@ -28,8 +28,8 @@ Sv = read_geotiff(joinpath(results_path, "richness_uncertainty.tif"), SimpleSDMP
 # Connectance
 begin
     fig = background_map()
-    hm2 = surface!(Co; colormap=:acton, shading=false)
-    Colorbar(fig[1,end+1], hm2; height=Relative(0.5), label="Connectance")
+    sf = surface!(Co; colormap=:acton, shading=false)
+    Colorbar(fig[1,2], sf; height=Relative(0.5), label="Connectance")
     fig
 end
 if Makie.current_backend() == CairoMakie
@@ -39,8 +39,8 @@ end
 # Links
 begin
     fig = background_map()
-    hm2 = surface!(L; colormap=:acton, shading=false)
-    Colorbar(fig[1,end+1], hm2; height=Relative(0.5), label="Expected number of links")
+    sf = surface!(L; colormap=:acton, shading=false)
+    Colorbar(fig[1,2], sf; height=Relative(0.5), label="Expected number of links")
     fig
 end
 if Makie.current_backend() == CairoMakie
@@ -50,8 +50,8 @@ end
 # Link variance
 begin
     fig = background_map()
-    hm2 = surface!(Lv; colormap=:acton, shading=false)
-    Colorbar(fig[1,end+1], hm2; height=Relative(0.5), label="Link variance")
+    sf = surface!(Lv; colormap=:acton, shading=false)
+    Colorbar(fig[1,2], sf; height=Relative(0.5), label="Link variance")
     fig
 end
 if Makie.current_backend() == CairoMakie

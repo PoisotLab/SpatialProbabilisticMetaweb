@@ -28,8 +28,8 @@ lcbd_networks_all
 # Richness for mean only
 begin
     fig = background_map()
-    hm2 = surface!(S_all["mean"]; colormap=:cividis, shading=false)
-    Colorbar(fig[1,end+1], hm2; height=Relative(0.5), label="Expected Richness")
+    sf = surface!(S_all["mean"]; colormap=:cividis, shading=false)
+    Colorbar(fig[1,2], sf; height=Relative(0.5), label="Expected Richness")
     fig
 end
 if Makie.current_backend() == CairoMakie
@@ -39,8 +39,8 @@ end
 # Richness variance for mean only
 begin
     fig = background_map()
-    hm2 = surface!(Sv; colormap=:cividis, shading=false)
-    Colorbar(fig[1,end+1], hm2; height=Relative(0.5), label="Richness variance")
+    sf = surface!(Sv; colormap=:cividis, shading=false)
+    Colorbar(fig[1,2], sf; height=Relative(0.5), label="Richness variance")
     fig
 end
 if Makie.current_backend() == CairoMakie
@@ -72,8 +72,8 @@ end
 # Species LCBD
 begin
     fig = background_map()
-    hm2 = surface!(lcbd_species_all["mean"]; colormap=:viridis, shading=false)
-    Colorbar(fig[1,end+1], hm2; height=Relative(0.5), label="Relative species LCBD")
+    sf = surface!(lcbd_species_all["mean"]; colormap=:viridis, shading=false)
+    Colorbar(fig[1,2], sf; height=Relative(0.5), label="Relative species LCBD")
     fig
 end
 if Makie.current_backend() == CairoMakie
@@ -83,8 +83,8 @@ end
 # Network LCBD
 begin
     fig = background_map()
-    hm2 = surface!(lcbd_networks_all["mean"]; colormap=:viridis, shading=false)
-    Colorbar(fig[1,end+1], hm2; height=Relative(0.5), label="Relative network LCBD")
+    sf = surface!(lcbd_networks_all["mean"]; colormap=:viridis, shading=false)
+    Colorbar(fig[1,2], sf; height=Relative(0.5), label="Relative network LCBD")
     fig
 end
 if Makie.current_backend() == CairoMakie
@@ -123,22 +123,17 @@ begin
     layers_all = S_all
     cbmin = mapreduce(minimum, min, values(layers_all))
     cbmax = mapreduce(maximum, max, values(layers_all))
-    fig = Figure()
+    fig = Figure(; resolution=(1200,600))
     for i in 1:2, j in 1:2
         o = options[i,j]
         l = layers_all[o]
         t = titles[i,j]
-        hm = heatmap(
-            fig[i,j], l; colormap=:cividis, colorrange=(cbmin, cbmax), axis=(;title=t)
+        p = background_map(fig[i,j]; title=t, titlealign=:left)
+        s = surface!(
+            fig[i,j], l; colormap=:cividis, colorrange=(cbmin, cbmax), shading=false
         )
+        Colorbar(p[1,2], s; height=Relative(0.5), label="Expected Richness")
     end
-    Colorbar(
-        fig[:,end+1];
-        height=Relative(0.5),
-        colormap=:cividis,
-        colorrange=(cbmin, cbmax),
-        label="Expected Richness",
-    )
     fig
 end
 if Makie.current_backend() == CairoMakie

@@ -57,9 +57,9 @@ begin
     for i in 1:2, j in 1:2
         m = reshape(network_measures, (2,2))[i,j]
         t = reshape(measures_ts[1:4], (2,2))[i,j]
-        background_map(fig[i,j]; title=t, titlealign=:left)
-        hm2 = surface!(ecoregion_layers["$(m)_median"]; colormap=:inferno, shading=false)
-        Colorbar(fig[i, j][1,2], hm2; height=Relative(0.5))
+        p = background_map(fig[i,j]; title=t, titlealign=:left)
+        s = surface!(ecoregion_layers["$(m)_median"]; colormap=:inferno, shading=false)
+        Colorbar(p[1,2], s; height=Relative(0.5))
     end
     fig
 end
@@ -71,18 +71,18 @@ end
 ecoregion_plots = Dict{String, Figure}()
 for (m,t) in zip(measures, measures_ts)
     begin
-        fig = Figure(; resolution=(800,800))
+        f = Figure(; resolution=(800,800))
 
-        background_map(fig[1,1]; title="Median", titlealign=:left)
-        background_map(fig[2,1]; title="89% IQR", titlealign=:left)
+        p1 = background_map(f[1,1]; title="Median", titlealign=:left)
+        p2 = background_map(f[2,1]; title="89% IQR", titlealign=:left)
 
-        hm1 = surface!(fig[1,1], ecoregion_layers["$(m)_median"]; colormap=:inferno, shading=false)
-        hm2 = surface!(fig[2,1], ecoregion_layers["$(m)_iqr89"]; colormap=:inferno, shading=false)
+        sf1 = surface!(p1, ecoregion_layers["$(m)_median"]; colormap=:inferno, shading=false)
+        sf2 = surface!(p2, ecoregion_layers["$(m)_iqr89"]; colormap=:inferno, shading=false)
 
-        Colorbar(fig[1, 1][1,2], hm1; height=Relative(0.5), label="$(t)")
-        Colorbar(fig[2, 1][1,2], hm2; height=Relative(0.5), label="$(t) 89% IQR")
+        Colorbar(p1[1,2], sf1; height=Relative(0.5), label="$(t)")
+        Colorbar(p2[1,2], sf2; height=Relative(0.5), label="$(t) 89% IQR")
 
-        ecoregion_plots[m] = fig;
+        ecoregion_plots[m] = f;
     end;
 end
 ecoregion_plots["Co"]
@@ -109,9 +109,9 @@ begin
     for i in 1:2, j in 1:2
         m = ms[i,j]
         t = ts[i,j]
-        background_map(fig[i,j]; title=t, titlealign=:left)
-        hm2 = surface!(ecoregion_layers["$(m)_median"]; colormap=:inferno, shading=false)
-        Colorbar(fig[i, j][1,2], hm2; height=Relative(0.5), label=t)
+        p = background_map(fig[i,j]; title=t, titlealign=:left)
+        s = surface!(ecoregion_layers["$(m)_median"]; colormap=:inferno, shading=false)
+        Colorbar(p[1,2], s; height=Relative(0.5), label=t)
     end
     fig
 end
@@ -129,9 +129,9 @@ begin
     for i in 1:2, j in 1:2
         m = ms[i,j]
         t = ts[i,j]
-        background_map(fig[i,j]; title=t, titlealign=:left)
-        hm2 = surface!(ecoregion_layers["$(m)_median"]; colormap=:inferno, shading=false)
-        Colorbar(fig[i, j][1,2], hm2; height=Relative(0.5), label=t)
+        p = background_map(fig[i,j]; title=t, titlealign=:left)
+        s = surface!(ecoregion_layers["$(m)_median"]; colormap=:inferno, shading=false)
+        Colorbar(p[1,2], s; height=Relative(0.5), label=t)
     end
     fig
 end
@@ -154,25 +154,25 @@ function make_density_figure(fig = Figure(;resolution=(800, 400)))
         # title="89% IQR",
         xlabel="89% IQR",
     )
-    p1 = density!(fig[1,1],
+    p1 = density!(ax1,
         unique(values(ecoregion_layers["LCBD_species_median"]));
         color=(bv_pal_4[3], 0.3),
         strokecolor=bv_pal_4[3],
         strokewidth=3,
     )
-    p2 = density!(fig[1,1],
+    p2 = density!(ax1,
         unique(values(ecoregion_layers["LCBD_networks_median"]));
         color=(bv_pal_4[2], 0.3),
         strokecolor=bv_pal_4[2],
         strokewidth=3,
     )
-    p3 = density!(fig[1,2],
+    p3 = density!(ax2,
         unique(values(ecoregion_layers["LCBD_species_iqr89"]));
         color=(bv_pal_4[3], 0.3),
         strokecolor=bv_pal_4[3],
         strokewidth=3,
     )
-    p4 = density!(fig[1,2],
+    p4 = density!(ax2,
         unique(values(ecoregion_layers["LCBD_networks_iqr89"]));
         color=(bv_pal_4[2], 0.3),
         strokecolor=bv_pal_4[2],
@@ -188,24 +188,28 @@ end
 
 begin
     fig = Figure(resolution=(800,1000))
+    # Define layout
+    g1 = fig[1:2,1] = GridLayout()
+    g2 = fig[3:4,1] = GridLayout()
+    g3 = fig[5,1] = GridLayout()
     # Species LCBD
-    p1 = background_map(fig[1:2,1])
-    hm1 = surface!(
+    p1 = background_map(g1[1,1])
+    sf1 = surface!(
         ecoregion_layers["LCBD_species_median"];
         colormap=cgrad([p0, bv_pal_4[3]]),
         shading=false
     )
-    Colorbar(p1[1,2], hm1; height=Relative(0.5), label="Species LCBD")
+    Colorbar(g1[1,2], sf1; height=Relative(0.5), label="Species LCBD")
     # Network LCBD
-    p2 = background_map(fig[3:4,1])
-    hm2 = surface!(
+    p2 = background_map(g2[1,1])
+    sf2 = surface!(
         ecoregion_layers["LCBD_networks_median"];
         colormap=cgrad([p0, bv_pal_4[2]]),
         shading=false
     )
-    Colorbar(p2[1,2], hm2; height=Relative(0.5), label="Network LCBD")
+    Colorbar(g2[1,2], sf2; height=Relative(0.5), label="Network LCBD")
     # Density maps
-    p3 = make_density_figure(fig[5,1])
+    p3 = make_density_figure(g3)
     fig
 end
 if Makie.current_backend() == CairoMakie

@@ -30,13 +30,13 @@ end
 
 function background_map(
     fig = Figure();
-    pos=[1,1],
     lims=(left=-145.0, right=-50.0, bottom=40.0, top=89.0),
+    tuple=false,
     kw...
 )
     shapes = Shapefile.shapes(Shapefile.Table("shapefiles/land/land_50m_curved.shp"))
     ga = GeoAxis(
-        fig;
+        fig isa Figure ? fig[1,1] : fig;
         source = "+proj=longlat +datum=WGS84",
         dest = "esri:102002", # Lambert Conformal Conic
         lonlims = (lims.left, lims.right),
@@ -48,7 +48,11 @@ function background_map(
     foreach(shapes) do sh
         poly!(ga, sh; shading=false, strokecolor=:darkgrey, strokewidth=1, color=:lightgrey)
     end
-    return fig
+    if tuple
+        return (fig=fig, ga=ga)
+    else
+        return fig
+    end
 end
 
 function Makie.convert_arguments(::Type{<:Poly}, p::Shapefile.Polygon)
