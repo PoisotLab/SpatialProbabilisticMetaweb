@@ -10,6 +10,11 @@ else
     ecoresults_path = joinpath("xtras", "results", "ecoregions");
 end
 
+# Load CairoMakie if exporting figures
+if (@isdefined SAVE) && SAVE == true
+    CairoMakie.activate!()
+end
+
 ## Basic network measures
 
 fig_path = joinpath("figures", "ecoregions")
@@ -58,7 +63,9 @@ begin
     end
     fig
 end
-save(joinpath(fig_path, "ecoregion_all_median.png"), fig; px_per_unit=3.0)
+if Makie.current_backend() == CairoMakie
+    save(joinpath(fig_path, "ecoregion_all_median.png"), fig; px_per_unit=3.0)
+end
 
 # Some variations
 ecoregion_plots = Dict{String, Figure}()
@@ -88,8 +95,10 @@ ecoregion_plots["LCBD_species"]
 ecoregion_plots["LCBD_networks"]
 
 # Export
-@time @threads for m in String.(keys(ecoregion_plots))
-    @time save(joinpath(fig_path, "ecoregion_$m.png"), ecoregion_plots[m]; px_per_unit=3.0)
+if Makie.current_backend() == CairoMakie
+    @threads for m in String.(keys(ecoregion_plots))
+        save(joinpath(fig_path, "ecoregion_$m.png"), ecoregion_plots[m]; px_per_unit=3.0)
+    end
 end
 
 ## Compare with richness
@@ -106,7 +115,9 @@ begin
     end
     fig
 end
-save(joinpath(fig_path, "ecoregion_comparison.png"), fig; px_per_unit=3.0)
+if Makie.current_backend() == CairoMakie
+    save(joinpath(fig_path, "ecoregion_comparison.png"), fig; px_per_unit=3.0)
+end
 
 ## Compare with LCBD
 
@@ -124,7 +135,9 @@ begin
     end
     fig
 end
-save(joinpath(fig_path, "ecoregion_comparison_lcbd.png"), fig; px_per_unit=3.0)
+if Makie.current_backend() == CairoMakie
+    save(joinpath(fig_path, "ecoregion_comparison_lcbd.png"), fig; px_per_unit=3.0)
+end
 
 ## Relationship between LCBD median and IQR
 
@@ -168,8 +181,10 @@ function make_density_figure(fig = Figure(;resolution=(800, 400)))
     Legend(fig[1,3], [p1, p2], ["Species LCBD", "Network LCBD"])
     fig
 end
-make_density_figure()
-save(joinpath(fig_path, "ecoregion_relation_lcbd_densities.png"), fig; px_per_unit=3.0)
+fig = make_density_figure()
+if Makie.current_backend() == CairoMakie
+    save(joinpath(fig_path, "ecoregion_relation_lcbd_densities.png"), fig; px_per_unit=3.0)
+end
 
 begin
     fig = Figure(resolution=(800,1000))
@@ -193,8 +208,9 @@ begin
     p3 = make_density_figure(fig[5,1])
     fig
 end
-save(joinpath(fig_path, "ecoregion_LCBD_all_included.png"), fig; px_per_unit=3.0)
-
+if Makie.current_backend() == CairoMakie
+    save(joinpath(fig_path, "ecoregion_LCBD_all_included.png"), fig; px_per_unit=3.0)
+end
 
 # Side-by-side median-median and iqr-iqr relationships
 _v1 = values(ecoregion_layers["LCBD_species_median"])
@@ -233,4 +249,6 @@ begin
     )
     fig
 end
-save(joinpath(fig_path, "ecoregion_relation_lcbd_iqr.png"), fig; px_per_unit=3.0)
+if Makie.current_backend() == CairoMakie
+    save(joinpath(fig_path, "ecoregion_relation_lcbd_iqr.png"), fig; px_per_unit=3.0)
+end

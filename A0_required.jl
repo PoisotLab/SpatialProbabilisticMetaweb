@@ -10,6 +10,7 @@ using EcologicalNetworks
 using EvoTrees
 using GDAL
 using GeoMakie
+using GLMakie
 using ProgressMeter
 using Random
 using Shapefile

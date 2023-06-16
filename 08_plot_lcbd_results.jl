@@ -10,6 +10,11 @@ else
     res = 10.0
 end
 
+# Load CairoMakie if exporting figures
+if (@isdefined SAVE) && SAVE == true
+    CairoMakie.activate!()
+end
+
 # Load LCBD results
 include("x_load_lcbd_results.jl");
 
@@ -27,7 +32,9 @@ begin
     Colorbar(fig[1,end+1], hm2; height=Relative(0.5), label="Expected Richness")
     fig
 end
-save(joinpath("figures", "richness_mean.png"), fig; px_per_unit=3.0)
+if Makie.current_backend() == CairoMakie
+    save(joinpath("figures", "richness_mean.png"), fig; px_per_unit=3.0)
+end
 
 # Richness variance for mean only
 begin
@@ -36,7 +43,9 @@ begin
     Colorbar(fig[1,end+1], hm2; height=Relative(0.5), label="Richness variance")
     fig
 end
-save(joinpath("figures", "richness_var.png"), fig; px_per_unit=3.0)
+if Makie.current_backend() == CairoMakie
+    save(joinpath("figures", "richness_var.png"), fig; px_per_unit=3.0)
+end
 
 # Bivariate richness map
 begin
@@ -54,7 +63,9 @@ begin
         bv_pal_2...
     )
 end
-savefig(joinpath("figures", "richness_bivariate.png"))
+if Makie.current_backend() == CairoMakie
+    savefig(joinpath("figures", "richness_bivariate.png"))
+end
 
 ## LCBD plots
 
@@ -65,7 +76,9 @@ begin
     Colorbar(fig[1,end+1], hm2; height=Relative(0.5), label="Relative species LCBD")
     fig
 end
-save(joinpath("figures", "lcbd_mean_species.png"), fig; px_per_unit=3.0)
+if Makie.current_backend() == CairoMakie
+    save(joinpath("figures", "lcbd_mean_species.png"), fig; px_per_unit=3.0)
+end
 
 # Network LCBD
 begin
@@ -74,7 +87,9 @@ begin
     Colorbar(fig[1,end+1], hm2; height=Relative(0.5), label="Relative network LCBD")
     fig
 end
-save(joinpath("figures", "lcbd_mean_networks.png"), fig; px_per_unit=3.0)
+if Makie.current_backend() == CairoMakie
+    save(joinpath("figures", "lcbd_mean_networks.png"), fig; px_per_unit=3.0)
+end
 
 # Bivariate species-networks LCBD for mean only
 begin
@@ -94,7 +109,9 @@ begin
         bv_pal_4...
     )
 end
-savefig(joinpath("figures", "lcbd_bivariate_mean.png"))
+if Makie.current_backend() == CairoMakie
+    savefig(joinpath("figures", "lcbd_bivariate_mean.png"))
+end
 
 ## Sampling options
 
@@ -124,7 +141,9 @@ begin
     )
     fig
 end
-save(joinpath("figures", "sampling_options", "richness_all.png"), fig; px_per_unit=3.0)
+if Makie.current_backend() == CairoMakie
+    save(joinpath("figures", "sampling_options", "richness_all.png"), fig; px_per_unit=3.0)
+end
 
 # All species LCBD options
 #= # returns NaNs
@@ -147,7 +166,9 @@ begin
     )
     fig
 end
-save(joinpath("figures", "sampling_options", "lcbd_species_all.png"), fig; px_per_unit=3.0)
+if Makie.current_backend() == CairoMakie
+    save(joinpath("figures", "sampling_options", "lcbd_species_all.png"), fig; px_per_unit=3.0)
+end
 =#
 
 # All networks LCBD options
@@ -172,7 +193,9 @@ begin
     )
     fig
 end
-save(joinpath("figures", "sampling_options", "lcbd_networks_all.png"), fig; px_per_unit=3.0)
+if Makie.current_backend() == CairoMakie
+    save(joinpath("figures", "sampling_options", "lcbd_networks_all.png"), fig; px_per_unit=3.0)
+end
 
 # Bivariate species-networks LCBD
 biv_plots = []
@@ -195,5 +218,7 @@ for (i, opt) in enumerate(options)
     push!(biv_plots, bp)
 end
 plot(biv_plots..., size = (900, 600))
-savefig(joinpath("figures", "sampling_options", "lcbd_bivariate_all.png"))
+if Makie.current_backend() == CairoMakie
+    savefig(joinpath("figures", "sampling_options", "lcbd_bivariate_all.png"))
+end
 =#

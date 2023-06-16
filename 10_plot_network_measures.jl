@@ -10,6 +10,11 @@ else
     results_path = joinpath("xtras", "results")
 end
 
+# Load CairoMakie if exporting figures
+if (@isdefined SAVE) && SAVE == true
+    CairoMakie.activate!()
+end
+
 # Objects
 Co = read_geotiff(joinpath(results_path, "connectance.tif"), SimpleSDMPredictor)
 L = read_geotiff(joinpath(results_path, "links_mean.tif"), SimpleSDMPredictor)
@@ -27,7 +32,9 @@ begin
     Colorbar(fig[1,end+1], hm2; height=Relative(0.5), label="Connectance")
     fig
 end
-save(joinpath("figures", "links_connectance.png"), fig; px_per_unit=3.0)
+if Makie.current_backend() == CairoMakie
+    save(joinpath("figures", "links_connectance.png"), fig; px_per_unit=3.0)
+end
 
 # Links
 begin
@@ -36,7 +43,9 @@ begin
     Colorbar(fig[1,end+1], hm2; height=Relative(0.5), label="Expected number of links")
     fig
 end
-save(joinpath("figures", "links_mean.png"), fig; px_per_unit=3.0)
+if Makie.current_backend() == CairoMakie
+    save(joinpath("figures", "links_mean.png"), fig; px_per_unit=3.0)
+end
 
 # Link variance
 begin
@@ -45,7 +54,9 @@ begin
     Colorbar(fig[1,end+1], hm2; height=Relative(0.5), label="Link variance")
     fig
 end
-save(joinpath("figures", "links_var.png"), fig; px_per_unit=3.0)
+if Makie.current_backend() == CairoMakie
+    save(joinpath("figures", "links_var.png"), fig; px_per_unit=3.0)
+end
 
 # Link bivariate map
 begin
@@ -63,7 +74,9 @@ begin
         bv_pal_2...
     )
 end
-savefig(joinpath("figures", "links_bivariate.png"))
+if Makie.current_backend() == CairoMakie
+    savefig(joinpath("figures", "links_bivariate.png"))
+end
 
 ## Richness
 
@@ -83,7 +96,9 @@ begin
         bv_pal_2...
     )
 end
-savefig(joinpath("figures", "bivariate_richness_links.png"))
+if Makie.current_backend() == CairoMakie
+    savefig(joinpath("figures", "bivariate_richness_links.png"))
+end
 
 # Richness-link uncertainty bivariate map
 begin
@@ -101,7 +116,9 @@ begin
         bv_pal_2...
     )
 end
-savefig(joinpath("figures", "bivariate_richness_links_variance.png"))
+if Makie.current_backend() == CairoMakie
+    savefig(joinpath("figures", "bivariate_richness_links_variance.png"))
+end
 
 ## LCBD & network measures
 
@@ -142,7 +159,9 @@ begin
     _layout = @layout [a [b; c]]
     plot(_p1, _p2, _p3; size=(800, 400), left_margin=3mm, bottom_margin=3mm, layout=_layout)
 end; # do not display as VS Code might crash
-savefig(joinpath("figures", "lcbd_bivariate_densities.png"))
+if Makie.current_backend() == CairoMakie
+    savefig(joinpath("figures", "lcbd_bivariate_densities.png"))
+end
 
 ## Compare sampling options
 
