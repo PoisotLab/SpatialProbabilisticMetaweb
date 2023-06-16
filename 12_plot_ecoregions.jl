@@ -52,7 +52,7 @@ begin
     for i in 1:2, j in 1:2
         m = reshape(network_measures, (2,2))[i,j]
         t = reshape(measures_ts[1:4], (2,2))[i,j]
-        background_map(; fig=fig, pos=[i,j], title=t, titlealign=:left)
+        background_map(fig[i,j]; title=t, titlealign=:left)
         hm2 = surface!(ecoregion_layers["$(m)_median"]; colormap=:inferno, shading=false)
         Colorbar(fig[i, j][1,2], hm2; height=Relative(0.5))
     end
@@ -66,8 +66,8 @@ for (m,t) in zip(measures, measures_ts)
     begin
         fig = Figure(; resolution=(800,800))
 
-        background_map(; fig=fig, pos=[1,1], title="Median", titlealign=:left)
-        background_map(; fig=fig, pos=[2,1], title="89% IQR", titlealign=:left)
+        background_map(fig[1,1]; title="Median", titlealign=:left)
+        background_map(fig[2,1]; title="89% IQR", titlealign=:left)
 
         hm1 = surface!(fig[1,1], ecoregion_layers["$(m)_median"]; colormap=:inferno, shading=false)
         hm2 = surface!(fig[2,1], ecoregion_layers["$(m)_iqr89"]; colormap=:inferno, shading=false)
@@ -100,7 +100,7 @@ begin
     for i in 1:2, j in 1:2
         m = ms[i,j]
         t = ts[i,j]
-        background_map(; fig=fig, pos=[i,j], title=t, titlealign=:left)
+        background_map(fig[i,j]; title=t, titlealign=:left)
         hm2 = surface!(ecoregion_layers["$(m)_median"]; colormap=:inferno, shading=false)
         Colorbar(fig[i, j][1,2], hm2; height=Relative(0.5), label=t)
     end
@@ -118,7 +118,7 @@ begin
     for i in 1:2, j in 1:2
         m = ms[i,j]
         t = ts[i,j]
-        background_map(; fig=fig, pos=[i,j], title=t, titlealign=:left)
+        background_map(fig[i,j]; title=t, titlealign=:left)
         hm2 = surface!(ecoregion_layers["$(m)_median"]; colormap=:inferno, shading=false)
         Colorbar(fig[i, j][1,2], hm2; height=Relative(0.5), label=t)
     end
@@ -129,26 +129,72 @@ save(joinpath(fig_path, "ecoregion_comparison_lcbd.png"), fig; px_per_unit=3.0)
 ## Relationship between LCBD median and IQR
 
 # Show probability densities
-p_dens = begin
-    _p1 = density(unique(collect(ecoregion_layers["LCBD_species_median"])); c=bv_pal_4[3], label="Species LCBD")
-    density!(unique(collect(ecoregion_layers["LCBD_networks_median"])), c=bv_pal_4[2], label="Network LCBD")
-    plot!(xaxis="Relative LCBD value", yaxis="Probability density", legend=:topleft)
-    _p2 = density(unique(collect(ecoregion_layers["LCBD_species_iqr89"])); c=bv_pal_4[3], label="Species LCBD")
-    density!(unique(collect(ecoregion_layers["LCBD_networks_iqr89"])), c=bv_pal_4[2], label="Network LCBD")
-    plot!(xaxis="89% IQR", yaxis="Probability Density")
-    plot(_p1, _p2, size=(650, 400))
+function make_density_figure(fig = Figure(;resolution=(800, 400)))
+    ax1 = Axis(
+        fig[1,1],
+        # title="Median",
+        xlabel="Relative LCBD value",
+        ylabel="Probability Density"
+    )
+    ax2 = Axis(
+        fig[1,2],
+        # title="89% IQR",
+        xlabel="89% IQR",
+    )
+    p1 = density!(fig[1,1],
+        unique(values(ecoregion_layers["LCBD_species_median"]));
+        color=(bv_pal_4[3], 0.3),
+        strokecolor=bv_pal_4[3],
+        strokewidth=3,
+    )
+    p2 = density!(fig[1,1],
+        unique(values(ecoregion_layers["LCBD_networks_median"]));
+        color=(bv_pal_4[2], 0.3),
+        strokecolor=bv_pal_4[2],
+        strokewidth=3,
+    )
+    p3 = density!(fig[1,2],
+        unique(values(ecoregion_layers["LCBD_species_iqr89"]));
+        color=(bv_pal_4[3], 0.3),
+        strokecolor=bv_pal_4[3],
+        strokewidth=3,
+    )
+    p4 = density!(fig[1,2],
+        unique(values(ecoregion_layers["LCBD_networks_iqr89"]));
+        color=(bv_pal_4[2], 0.3),
+        strokecolor=bv_pal_4[2],
+        strokewidth=3,
+    )
+    Legend(fig[1,3], [p1, p2], ["Species LCBD", "Network LCBD"])
+    fig
 end
-savefig(joinpath(fig_path, "ecoregion_relation_lcbd_densities.png"))
+make_density_figure()
+save(joinpath(fig_path, "ecoregion_relation_lcbd_densities.png"), fig; px_per_unit=3.0)
 
-_plcbd1 = plot(ecoregion_layers["LCBD_species_median"], ws; c=cgrad([p0, bv_pal_4[3]]), cbtitle="\nRelative species LCBD");
-_plcbd2 = plot(ecoregion_layers["LCBD_networks_median"], ws; c=cgrad([p0, bv_pal_4[2]]), cbtitle="\nRelative network LCBD");
 begin
-    _layout = @layout [a; b; [c d]]
-    plot(_plcbd1, _plcbd2, _p1, _p2;
-        layout=_layout, title=["a)" "b)" "c)" "d)"], size=(650, 900), titlepos=:left,
-        leftmargin=2mm)
+    fig = Figure(resolution=(800,1000))
+    # Species LCBD
+    p1 = background_map(fig[1:2,1])
+    hm1 = surface!(
+        ecoregion_layers["LCBD_species_median"];
+        colormap=cgrad([p0, bv_pal_4[3]]),
+        shading=false
+    )
+    Colorbar(p1[1,2], hm1; height=Relative(0.5), label="Species LCBD")
+    # Network LCBD
+    p2 = background_map(fig[3:4,1])
+    hm2 = surface!(
+        ecoregion_layers["LCBD_networks_median"];
+        colormap=cgrad([p0, bv_pal_4[2]]),
+        shading=false
+    )
+    Colorbar(p2[1,2], hm2; height=Relative(0.5), label="Network LCBD")
+    # Density maps
+    p3 = make_density_figure(fig[5,1])
+    fig
 end
-savefig(joinpath(fig_path, "ecoregion_LCBD_all_included.png"))
+save(joinpath(fig_path, "ecoregion_LCBD_all_included.png"), fig; px_per_unit=3.0)
+
 
 # Side-by-side median-median and iqr-iqr relationships
 _v1 = values(ecoregion_layers["LCBD_species_median"])
@@ -159,16 +205,32 @@ _v3 = values(ecoregion_layers["LCBD_species_iqr89"])
 _v4 = values(ecoregion_layers["LCBD_networks_iqr89"])
 _pairs_iqr = unique(Pair.(_v3, _v4))
 _lims_iqr = extrema([_v3 _v4]) .+ [-0.01, 0.01]
-plot(
-    scatter(first.(_pairs_med), last.(_pairs_med)),
-    scatter(first.(_pairs_iqr), last.(_pairs_iqr)),
-    xlab=["Median species LCBD" "89% IQR species LCBD"],
-    ylab=["Median network LCBD" "89% IQR network LCBD"],
-    xlims=[_lims_med _lims_iqr],
-    ylims=[_lims_med _lims_iqr],
-    mc=:black,
-    legend=:none,
-    size=(650,400),
-    aspectratio=1
-)
-savefig(joinpath(fig_path, "ecoregion_relation_lcbd_iqr.png"))
+begin
+    fig = Figure()
+    p1 = scatter(
+        fig[1,1],
+        first.(_pairs_med),
+        last.(_pairs_med),
+        color=:black,
+        axis=(;
+            aspect=1,
+            xlabel="Median species LCBD",
+            ylabel="Median network LCBD",
+            limits=(_lims_med..., _lims_med...)
+        )
+    )
+    p2 = scatter(
+        fig[1,2],
+        first.(_pairs_iqr),
+        last.(_pairs_iqr),
+        color=:black,
+        axis=(;
+            aspect=1,
+            xlabel="89% IQR species LCBD",
+            ylabel="89% IQR network LCBD",
+            limits=(_lims_iqr..., _lims_iqr...),
+        )
+    )
+    fig
+end
+save(joinpath(fig_path, "ecoregion_relation_lcbd_iqr.png"), fig; px_per_unit=3.0)

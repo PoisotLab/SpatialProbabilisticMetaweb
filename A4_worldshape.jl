@@ -28,18 +28,15 @@ end
 #     bivariate!(l1, l2; kw...)
 # end
 
-function background_map(;
-    fig=nothing,
+function background_map(
+    fig = Figure();
     pos=[1,1],
     lims=(left=-145.0, right=-50.0, bottom=40.0, top=89.0),
     kw...
 )
     shapes = Shapefile.shapes(Shapefile.Table("shapefiles/land/land_50m_curved.shp"))
-    if fig==nothing
-        fig = Figure()
-    end
     ga = GeoAxis(
-        fig[pos...];
+        fig;
         source = "+proj=longlat +datum=WGS84",
         dest = "esri:102002", # Lambert Conformal Conic
         lonlims = (lims.left, lims.right),
