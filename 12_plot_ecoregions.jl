@@ -126,12 +126,16 @@ begin
     ms = ["S" "LCBD_species"; "L" "LCBD_networks"]
     ts = ["Richness" "Species LCBD"; "Links" "Network LCBD"]
     fig = Figure(; resolution=(1200,600))
-    for i in 1:2, j in 1:2
-        m = ms[i,j]
-        t = ts[i,j]
-        p = background_map(fig[i,j]; title=t, titlealign=:left)
+    g1 = fig[1,1] = GridLayout()
+    g2 = fig[1,2] = GridLayout()
+    g3 = fig[2,1] = GridLayout()
+    g4 = fig[2,2] = GridLayout()
+    for (i,g) in enumerate([g1, g2, g3, g4])
+        m = ms[i]
+        t = ts[i]
+        p = background_map(g[1,1]; title=t, titlealign=:left)
         s = surface!(ecoregion_layers["$(m)_median"]; colormap=:inferno, shading=false)
-        Colorbar(p[1,2], s; height=Relative(0.5), label=t)
+        Colorbar(g[1,2], s; height=Relative(0.5), label=t)
     end
     fig
 end
