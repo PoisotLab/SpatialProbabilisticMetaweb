@@ -19,11 +19,13 @@ end
 ## Probabilistic distributions
 
 # Define reference layer
-reference_layer = geotiff(SimpleSDMPredictor, ref_path)
+reference_layer = read_geotiff(ref_path, SimpleSDMPredictor)
 spatialrange = boundingbox(reference_layer)
 
 # Set the coordinates that do not match to zero
-lc_layer = geotiff(SimpleSDMPredictor, joinpath(input_path, "landcover_stack.tif"); spatialrange...)
+lc_layer = read_geotiff(
+    joinpath(input_path, "landcover_stack.tif"), SimpleSDMPredictor; spatialrange...
+)
 site_mismatch = setdiff(keys(reference_layer), keys(lc_layer))
 reference_layer = convert(SimpleSDMResponse, reference_layer)
 reference_layer[site_mismatch] = fill(nothing, length(site_mismatch))
@@ -44,10 +46,10 @@ p = Progress(length(map_files))
         replace("_" => " ")
     end
     if contains(map_file, "error.tif")
-        σ[sp_name] = geotiff(SimpleSDMPredictor, map_file; spatialrange...)
+        σ[sp_name] = read_geotiff(map_file, SimpleSDMPredictor; spatialrange...)
         σ[sp_name] = mask(reference_layer, σ[sp_name])
     else
-        μ[sp_name] = geotiff(SimpleSDMPredictor, map_file; spatialrange...)
+        μ[sp_name] = read_geotiff(map_file, SimpleSDMPredictor; spatialrange...)
         μ[sp_name] = mask(reference_layer, μ[sp_name])
     end
     if !(@isdefined quiet) || quiet == false

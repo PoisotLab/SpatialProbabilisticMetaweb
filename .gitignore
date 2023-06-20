@@ -1,6 +1,7 @@
 .vscode
 *.code-workspace
 data/ecoregions/
+data/input/chelsa*.tif
 data/jld2
 data/occurrences/
 data/presence_absence/
@@ -10,4 +11,10 @@ JuliaSysimage.so
 narval_tests.sh
 shapefiles/canada/
 shapefiles/ecoregions/
+shapefiles/land/ne_50m*
 xtras/*
+tmp_makie.jl
+tmp_background_shapefile.R
+
+# Except
+!xtras/*.jl

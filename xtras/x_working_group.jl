@@ -1,6 +1,6 @@
 #### Generate data for the working group ####
 
-include("A0_required.jl")
+include("../A0_required.jl")
 
 ## Check what the data looks like
 # @load joinpath("xtras", "jld2", "network_layers.jld2") layer layer_thr layer_rnd layer_rnd_thr # 350 MB file

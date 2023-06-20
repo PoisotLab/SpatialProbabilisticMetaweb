@@ -22,7 +22,9 @@ else
     @info "Running for Quebec at 10 arcmin resolution"
 end
 
-reference_layer = geotiff(SimpleSDMPredictor, joinpath(input_path, "landcover_stack.tif"))
+reference_layer = read_geotiff(
+    joinpath(input_path, "landcover_stack.tif"), SimpleSDMPredictor
+)
 
 occfiles = readdir(occ_path; join=true)
 filter!(!contains("all_occurrences"), occfiles) # remove backup files for QC data
@@ -57,14 +59,17 @@ Threads.@threads for i in 1:length(jobfiles)
                 pres[r.longitude, r.latitude] = true
             end
         end
-        Random.seed!(i)
         if (@isdefined WITHIN_RADIUS) && WITHIN_RADIUS == true
-            abs = rand(WithinRadius, pres)
+            absmask = pseudoabsencemask(WithinRadius, pres)
         else
-            abs = rand(SurfaceRangeEnvelope, pres)
+            absmask = pseudoabsencemask(SurfaceRangeEnvelope, pres)
         end
-        outfile = replace(replace(jobfiles[i], "occurrences" => "presence_absence"), ".csv" => ".tif")
-        geotiff(outfile, [convert(Float32, replace(pres, false => nothing)), convert(Float32, replace(abs, false => nothing))])
+        Random.seed!(i)
+        abs = SpeciesDistributionToolkit.sample(absmask, sum(pres); replace=false)
+        replace!(abs, false => nothing)
+        replace!(pres, false => nothing)
+        outfile = replace(jobfiles[i], "occurrences" => "presence_absence", ".csv" => ".tif")
+        write_geotiff(outfile, [convert(Float32, pres), convert(Float32, abs)])
         if !(@isdefined quiet) || quiet == false
             # Print progress bar
             next!(p)

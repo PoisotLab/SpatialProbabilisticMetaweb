@@ -47,6 +47,9 @@ include("11_get_ecoregions_measures.jl"); # requires the results of 06, 07, 09
 
 # These scripts use exported layers and can run locally
 
+# Load CairoMakie if exporting figures (otherwise GLMakie for faster interactive exploration)
+# SAVE = true
+
 # Plot LCBD results (species and networks)
 include("08_plot_lcbd_results.jl");
 

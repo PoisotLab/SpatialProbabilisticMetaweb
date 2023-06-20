@@ -3,7 +3,7 @@
 # CAN = true
 
 # Load initial network measures
-include("09_get_network_measures.jl")
+include("../09_get_network_measures.jl")
 
 ## Entropy
 

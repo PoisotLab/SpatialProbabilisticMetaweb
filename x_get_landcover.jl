@@ -16,42 +16,57 @@ end
 
 # # Load all BIOCLIM variables
 # qc_coords = (left=-80.0, right=-50.0, bottom=45.0, top=65.0)
-# layers = SimpleSDMPredictor(
-#     WorldClim, BioClim, 1:19; resolution=res, qc_coords...
-# )
+# wc_provider = RasterData(WorldClim2, BioClim)
+# wc_layers = [
+#     SimpleSDMPredictor(wc_provider; layer=l, resolution=res, qc_coords...) for
+#     l in layers(wc_provider)
+# ]
 
 # # Get the EarthEnv LandCover data
-# landcover = SimpleSDMPredictor(EarthEnv, LandCover, 1:12; qc_coords...)
-# landcover = [convert(Float16, l) for l in landcover]
-# landcover = [replace(l, 0.0 => nothing) for l in landcover]
+# lc_provider = RasterData(EarthEnv, LandCover)
+# lc_layers = [
+#     SimpleSDMPredictor(lc_provider; layer=l, qc_coords...) for l in layers(lc_provider)
+# ]
+# lc_layers = [convert(Float16, l) for l in lc_layers]
+# lc_layers = [replace(l, 0.0 => nothing) for l in lc_layers]
 
 # # Plot 'em
-# ws = worldshape(50)
-# plot(layers[1], ws; title="temperature")
-# plot(landcover[9], ws; title="urban")
-# plot(landcover[1], ws; title="needleleaf trees")
-# plot(landcover[5], ws; title="open water")
-# plot(convert(Float16, broadcast(==(100.0), landcover[5])))
+# heatmap(wc_layers[1]; colormap=:inferno, axis=(; title="temperature"))
+# heatmap(lc_layers[9]; colormap=:inferno, axis=(; title="urban"))
+# heatmap(lc_layers[1]; colormap=:inferno, axis=(; title="needleleaf trees"))
+# heatmap(lc_layers[5]; colormap=:inferno, axis=(; title="open water"))
+# heatmap(lc_layers[5] .== 100; colormap=:inferno, axis=(; title="open water"))
 
 # # Check the values range
-# extrema.(landcover)
-# sort(unique(collect(landcover[1])))
+# extrema.(lc_layers)
+# sort(unique(values(lc_layers[1])))
 
 ## Coarsen the landcover layers
 
-# Get the paths
-lc_path = joinpath(SimpleSDMLayers._layers_assets_path, "EarthEnv", "LandCover", "partial")
-lc_files = readdir(lc_path)
-
 # Define reference layer
 spatialrange = (left=-180.0, right=-40.0, bottom=18.0, top=89.0)
-reference_layer = SimpleSDMPredictor(WorldClim, BioClim, 1; resolution=res, spatialrange...)
+reference_layer = SimpleSDMPredictor(
+    RasterData(WorldClim2, BioClim); resolution=res, spatialrange...
+)
+
+# Make sure we have the landcover files locally
+lc_provider = RasterData(EarthEnv, LandCover)
+_tmp = [
+    SimpleSDMPredictor(lc_provider; layer=l, spatialrange...) for l in layers(lc_provider)
+]
+_tmp = nothing
+
+# Get the paths
+lc_path = joinpath(SimpleSDMDatasets._LAYER_PATH, "EarthEnv", "LandCover")
+lc_files = readdir(lc_path)
+filter!(startswith("consensus_full_class_"), lc_files)
 
 # Coarsen the files
+lc_ids = replace.(lc_files, "consensus_full_class_" => "", ".tif" => "")
 lc_layers = SimpleSDMResponse{Float32}[]
-for i in eachindex(lc_files)
+for id in lc_ids
     # Define paths (making sure 11 isn't read before 2)
-    lc_file = joinpath(lc_path, "landcover_partial_$i.tif")
+    lc_file = joinpath(lc_path, "consensus_full_class_$id.tif")
     out_file = tempname()
 
     # Coarsen to the reference resolution
@@ -61,7 +76,7 @@ for i in eachindex(lc_files)
     run(query);
 
     # Mask the coarsened layer with the reference layer
-    lc = geotiff(SimpleSDMPredictor, out_file)
+    lc = read_geotiff(out_file, SimpleSDMPredictor)
     lc = convert(Float32, lc)
     lc = mask(reference_layer, lc)
 
@@ -76,4 +91,4 @@ for i in eachindex(lc_files)
 end
 
 # Export as a stack
-geotiff(joinpath(out_path, "landcover_stack.tif"), lc_layers)
+write_geotiff(joinpath(out_path, "landcover_stack.tif"), lc_layers)

@@ -10,161 +10,159 @@ else
     results_path = joinpath("xtras", "results")
 end
 
-# Objects
-Co = geotiff(SimpleSDMPredictor, joinpath(results_path, "connectance.tif"))
-L = geotiff(SimpleSDMPredictor, joinpath(results_path, "links_mean.tif"))
-Lv = geotiff(SimpleSDMPredictor, joinpath(results_path, "links_var.tif"))
-Ld = geotiff(SimpleSDMPredictor, joinpath(results_path, "links_density.tif"))
-S = geotiff(SimpleSDMPredictor, joinpath(results_path, "richness_mean.tif"))
-Sv = geotiff(SimpleSDMPredictor, joinpath(results_path, "richness_uncertainty.tif"))
+# Load CairoMakie if exporting figures
+if (@isdefined SAVE) && SAVE == true
+    CairoMakie.activate!()
+end
 
-# Load worldshape shapefile to use as background on maps
-ws = worldshape(50)
+# Objects
+Co = read_geotiff(joinpath(results_path, "connectance.tif"), SimpleSDMPredictor)
+L = read_geotiff(joinpath(results_path, "links_mean.tif"), SimpleSDMPredictor)
+Lv = read_geotiff(joinpath(results_path, "links_var.tif"), SimpleSDMPredictor)
+Ld = read_geotiff(joinpath(results_path, "links_density.tif"), SimpleSDMPredictor)
+S = read_geotiff(joinpath(results_path, "richness_mean.tif"), SimpleSDMPredictor)
+Sv = read_geotiff(joinpath(results_path, "richness_uncertainty.tif"), SimpleSDMPredictor)
 
 ## Some plots
 
 # Connectance
-plot(Co, ws; c=:acton, cbtitle="Connectance", size=(650,400))
-savefig(joinpath("figures", "links_connectance.png"))
+begin
+    fig = background_map()
+    sf = surface!(Co; colormap=:acton, shading=false)
+    Colorbar(fig[1,2], sf; height=Relative(0.5), label="Connectance")
+    fig
+end
+if Makie.current_backend() == CairoMakie
+    save(joinpath("figures", "links_connectance.png"), fig; px_per_unit=3.0)
+end
 
 # Links
-plot(L, ws; c=:acton, cbtitle="Expected number of links")
-savefig(joinpath("figures", "links_mean.png"))
+begin
+    fig = background_map()
+    sf = surface!(L; colormap=:acton, shading=false)
+    Colorbar(fig[1,2], sf; height=Relative(0.5), label="Expected number of links")
+    fig
+end
+if Makie.current_backend() == CairoMakie
+    save(joinpath("figures", "links_mean.png"), fig; px_per_unit=3.0)
+end
 
 # Link variance
-plot(Lv, ws; c=:acton, cb_title="Link variance")
-savefig(joinpath("figures", "links_var.png"))
+begin
+    fig = background_map()
+    sf = surface!(Lv; colormap=:acton, shading=false)
+    Colorbar(fig[1,2], sf; height=Relative(0.5), label="Link variance")
+    fig
+end
+if Makie.current_backend() == CairoMakie
+    save(joinpath("figures", "links_var.png"), fig; px_per_unit=3.0)
+end
 
 # Link bivariate map
 begin
-    bivariate(L, Lv, ws; quantiles=true, classes=3, bv_pal_2...)
-    bivariatelegend!(
-        L,
-        Lv;
-        classes=3,
-        # inset=(1, bbox(0.04, 0.05, 0.28, 0.28, :top, :right)),
-        inset=(1, bbox(0.80, 0.02, 0.13, 0.28, :top, :right)),
-        subplot=2,
-        xlab="Links",
-        ylab="Link variance",
-        guidefontsize=7,
-        bv_pal_2...
-    )
+    fig = Figure()
+    g1 = fig[1:16, 1:4] = GridLayout()
+    g2 = fig[2:5, end] = GridLayout()
+
+    p1 = background_map(g1[1,1])
+    sf = bivariatesurface!(p1, L, Lv; bv_pal_2...)
+
+    p2 = Axis(g2[1,1]; aspect = 1, xlabel = "Links", ylabel = "Link variance")
+    l2 = bivariatelegend!(p2, L, Lv; bv_pal_2...)
+    fig
 end
-savefig(joinpath("figures", "links_bivariate.png"))
-
-# Link coefficient of variation
-Lcv = sqrt(Lv)/L
-plot(Lcv, ws; c=:cividis, cbtitle="Link coefficient of variation")
-savefig(joinpath("figures", "links_coeff_var.png"))
-
-# Link inverse-coefficient of variation or signal-to-noise ratio (SNR)
-Lsnr = L/sqrt(Lv)
-plot(Lsnr, ws; c=:cividis, cbtitle="Link signal-to-noise ratio")
-savefig(joinpath("figures", "links_coeff_var_inv.png"))
+if Makie.current_backend() == CairoMakie
+    save(joinpath("figures", "links_bivariate.png"), fig; px_per_unit=3.0)
+end
 
 ## Richness
 
-# Richness-link relationship
-histogram2d(S, L, xlab="Richness", ylab="Links", cbtitle="Sites")
-savefig(joinpath("figures", "richness_relationship.png"))
-histogram2d(S, L; xaxis=("Richness (log)", :log), yaxis=("Links (log)", :log), cbtitle="Sites")
-savefig(joinpath("figures", "richness_relationship_log.png"))
-
 # Richness-link bivariate map
 begin
-    bivariate(S, L, ws; quantiles=true, classes=3, bv_pal_2...)
-    bivariatelegend!(
-        S,
-        L;
-        classes=3,
-        # inset=(1, bbox(0.04, 0.05, 0.28, 0.28, :top, :right)),
-        inset=(1, bbox(0.80, 0.02, 0.13, 0.28, :top, :right)),
-        subplot=2,
-        xlab="Richness",
-        ylab="Links",
-        guidefontsize=7,
-        bv_pal_2...
-    )
+    fig = Figure()
+    g1 = fig[1:16, 1:4] = GridLayout()
+    g2 = fig[2:5, end] = GridLayout()
+
+    p1 = background_map(g1[1,1])
+    sf = bivariatesurface!(p1, S, L; bv_pal_2...)
+
+    p2 = Axis(g2[1,1]; aspect = 1, xlabel = "Richness", ylabel = "Links")
+    l2 = bivariatelegend!(p2, S, L; bv_pal_2...)
+    fig
 end
-savefig(joinpath("figures", "bivariate_richness_links.png"))
+if Makie.current_backend() == CairoMakie
+    save(joinpath("figures", "bivariate_richness_links.png"), fig; px_per_unit=3.0)
+end
 
 # Richness-link uncertainty bivariate map
 begin
-    bivariate(Sv, Lv, ws; quantiles=true, classes=3, bv_pal_2...)
-    bivariatelegend!(
-        Sv,
-        Lv;
-        classes=3,
-        # inset=(1, bbox(0.04, 0.05, 0.28, 0.28, :top, :right)),
-        inset=(1, bbox(0.80, 0.02, 0.13, 0.28, :top, :right)),
-        subplot=2,
-        xlab="Richness variance",
-        ylab="Link variance",
-        guidefontsize=7,
-        bv_pal_2...
-    )
+    fig = Figure()
+    g1 = fig[1:16, 1:4] = GridLayout()
+    g2 = fig[2:5, end] = GridLayout()
+
+    p1 = background_map(g1[1,1])
+    sf = bivariatesurface!(p1, Sv, Lv; bv_pal_2...)
+
+    p2 = Axis(g2[1,1]; aspect = 1, xlabel = "Richness variance", ylabel = "Link variance")
+    l2 = bivariatelegend!(p2, Sv, Lv; bv_pal_2...)
+    fig
 end
-savefig(joinpath("figures", "bivariate_richness_links_variance.png"))
+if Makie.current_backend() == CairoMakie
+    save(joinpath("figures", "bivariate_richness_links_variance.png"), fig; px_per_unit=3.0)
+end
 
 ## LCBD & network measures
 
 # Load LCBD results
 include("x_load_lcbd_results.jl");
 
-# LCBD-richness relationships
-plot(
-    histogram2d(S, lcbd_species_all["mean"]; cb=:none),
-    histogram2d(S, lcbd_networks_all["mean"]; cb=:none);
-    xaxis="Richness", yaxis="Relative LCBD", title=["Species LCBD" "Networks LCBD"],
-    size=(700, 400)
-)
-savefig(joinpath("figures", "lcbd_relationship_richness.png"))
-
-# LCBD-links relationships
-plot(
-    histogram2d(L, lcbd_species_all["mean"]; cb=:none),
-    histogram2d(L, lcbd_networks_all["mean"]; cb=:none);
-    xaxis=("Links (log)", :log), yaxis="Relative LCBD", title=["Species LCBD" "Networks LCBD"],
-    size=(700, 400)
-)
-savefig(joinpath("figures", "lcbd_relationship_links.png"))
-
 ## Compare link & richness density of unique sites
 
 # Extract the bivariate values
-biv_layer, biv_colors = get_bivariate_values(
-    lcbd_networks_all["mean"],
-    lcbd_species_all["mean"];
-    bv_pal_4...
-)
-# plot(convert(Float32, biv_layer), c=biv_colors)
+biv_layer = bivariatelayer(lcbd_species_all["mean"], lcbd_networks_all["mean"])
+biv_colors = _get_bivariate_colormap()
 
 # Get the specific sites for each group
-sites3 = broadcast(v -> v == 3 ? 1 : nothing, biv_layer)
-sites7 = broadcast(v -> v == 7 ? 1 : nothing, biv_layer)
-sites_mid = broadcast(v -> v != 3 && v != 7 ? 1 : nothing, biv_layer)
-sites = [broadcast(v -> v == i ? true : nothing, biv_layer) for i in 1:9]
-union(keys(sites[3]), keys(sites[6]), keys(sites[9]))
+sites3 = findall(==(3), biv_layer)
+sites7 = findall(==(7), biv_layer)
+sites_mid = setdiff(keys(biv_layer), union(sites3, sites7))
 
 # Plot the two extremas in a different color
+_S3 = Float64.(S[sites3])
+_S7 = Float64.(S[sites7])
+_Smid = Float64.(S[sites_mid])
+_L3 = Float64.(L[sites3])
+_L7 = Float64.(L[sites7])
+_Lmid = Float64.(L[sites_mid])
 begin
-    _p1 = plot(xaxis=("Richness (log)", :log), yaxis=("Links (log)", :log), legend=:bottomright)
-    scatter!(S[keys(S)], L[keys(S)], label="Other sites", alpha=0.1, c=:black)
-    scatter!(S[keys(sites3)], L[keys(sites3)], label="Unique species only",alpha=0.2, c=biv_colors[3])
-    scatter!(S[keys(sites7)], L[keys(sites7)], label="Unique networks only",alpha=0.2, c=biv_colors[7])
-    _p2 = plot(xaxis=("Richness"), yaxis=("Density"))
-    density!(S[keys(sites_mid)], label="Other sites", c=:black)
-    density!(S[keys(sites3)], label="Unique species only", c=biv_colors[3])
-    density!(S[keys(sites7)], label="Unique networks only", c=biv_colors[7])
-    _p3 = plot(xaxis=("Links"), yaxis=("Density"))
-    density!(L[keys(sites_mid)], label="Other sites", c=:black)
-    density!(L[keys(sites3)], label="Unique species only", c=biv_colors[3])
-    density!(L[keys(sites7)], label="Unique networks only", c=biv_colors[7])
-    _layout = @layout [a [b; c]]
-    plot(_p1, _p2, _p3; size=(800, 400), left_margin=3mm, bottom_margin=3mm, layout=_layout)
-end; # do not display as VS Code might crash
-savefig(joinpath("figures", "lcbd_bivariate_densities.png"))
+    fig = Figure()
+    ax1 = Axis(
+        fig[1:2,1]; xlabel="Richness", ylabel="Links",
+        xscale=Makie.pseudolog10, yscale=Makie.pseudolog10
+    )
+    scatter!(_Smid, _Lmid, label="Other sites", color=(:black, 0.1))
+    scatter!(_S3, _L3, label="Unique species only", color=(biv_colors[3], 0.2))
+    scatter!(_S7, _L7, label="Unique networks only", color=(biv_colors[7], 0.2))
+    axislegend(ax1, position = :rb)
+    ax2 = Axis(fig[1,2]; xlabel="Richness", ylabel="Density")
+    density!(ax2, _Smid; color=(:black, 0.3), strokecolor=:black, strokewidth=3)
+    density!(ax2, _S3; color=(biv_colors[3], 0.3), strokecolor=biv_colors[3], strokewidth=3)
+    density!(ax2, _S7; color=(biv_colors[7], 0.3), strokecolor=biv_colors[7], strokewidth=3)
+    labels = ["Other sites", "Unique species only", "Unique networks only"]
+    elements = [
+        PolyElement(polycolor = (col, 0.3), polystrokecolor=col, polystrokewidth=3)
+        for col in [:black, biv_colors[3], biv_colors[7]]
+    ]
+    axislegend(ax2, elements, labels)
+    ax3 = Axis(fig[2,2]; xlabel="Links", ylabel="Density")
+    density!(ax3, _Lmid; color=(:black, 0.3), strokecolor=:black, strokewidth=3)
+    density!(ax3, _L3; color=(biv_colors[3], 0.3), strokecolor=biv_colors[3], strokewidth=3)
+    density!(ax3, _L7; color=(biv_colors[7], 0.3), strokecolor=biv_colors[7], strokewidth=3)
+    fig
+end
+if Makie.current_backend() == CairoMakie
+    save(joinpath("figures", "lcbd_bivariate_densities.png"), fig; px_per_unit=3.0)
+end
 
 ## Compare sampling options
 

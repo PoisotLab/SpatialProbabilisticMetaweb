@@ -1,69 +1,102 @@
-"""
-    Extract the values from a bivariate map. Mostly follows the internal codes
-    from `bivariate()`. Returns a layer with the color category number for each
-    pixel and a vector with the specific colors.
-"""
-function get_bivariate_values(
+function bivariatelayer(l1, l2; n_stops=3, rscale=0.0:0.01:1.0)
+    # Rescale layers
+    r1 = convert(SimpleSDMResponse, rescale(l1, rscale));
+    r2 = convert(SimpleSDMResponse, rescale(l2, rscale));
+
+    # Get classes
+    r1[keys(l1)] = round.((n_stops - 1) .* values(r1); digits=0) .+ 1;
+    r2[keys(l2)] = round.((n_stops - 1) .* values(r2); digits=0) .+ 1;
+
+    # Convert as integers
+    r1 = convert(Int64, r1)
+    r2 = convert(Int64, r2)
+
+    # Get bivariate combinations
+    function bivariator(n1, n2)
+        function bv(v1, v2)
+            return n2 * (v2 - 1) + v1
+        end
+        return bv
+    end
+    b = bivariator(n_stops, n_stops).(r1, r2)
+
+    return b
+end
+
+function _get_bivariate_colormap(;
+    n_stops=3,
+    p0 = colorant"#e8e8e8ff",
+    p1 = colorant"#5ac8c8ff",
+    p2 = colorant"#be64acff",
+)
+    # Generate colormap
+    cm1 = LinRange(p0, p1, n_stops)
+    cm2 = LinRange(p0, p2, n_stops)
+    cmat = ColorBlendModes.BlendMultiply.(cm1, cm2')
+    cmap = vec(cmat)
+end
+
+function bivariateheatmap!(
+    f,
     l1,
     l2;
-    classes=3,
-    p0=colorant"#e8e8e8ff",
-    p1=colorant"#64acbeff",
-    p2=colorant"#c85a5aff",
-    quantiles=true,
+    n_stops=3,
+    rscale=0.0:0.01:1.0,
+    p0 = colorant"#e8e8e8ff",
+    p1 = colorant"#5ac8c8ff",
+    p2 = colorant"#be64acff",
+    shading=false
 )
-    # Verifications
-    SimpleSDMLayers._layers_are_compatible(l1, l2)
-    # Color ranges
-    c1 = LinRange(p0, p1, classes)
-    c2 = LinRange(p0, p2, classes)
-    # Quantile breaks
-    breakpoints = LinRange(0.0, 1.0, classes + 1)
-    # Rescale values as quantiles (with 10 times the number of classes)
-    if quantiles
-        q1 = rescale(l1, collect(LinRange(0.0, 1.0, 10classes)))
-        q2 = rescale(l2, collect(LinRange(0.0, 1.0, 10classes)))
-    else
-        q1 = rescale(l1, (0.0, 1.0))
-        q2 = rescale(l2, (0.0, 1.0))
-    end
-    # Layer for the classifies values
-    classified = similar(l1, Int)
-    # Empty array for the colors (requires ColorBlendModes)
-    cols = typeof(p0)[]
-    # Get the values for all classes
-    for i in 1:classes
-        # Anonymous function to check in which class a value belongs (between which breakpoints)
-        # We need an exception for the last class
-        if isequal(classes)(i)
-            fi = (v) -> breakpoints[i] < v <= breakpoints[i + 1]
-        else
-            fi = (v) -> breakpoints[i] <= v < breakpoints[i + 1]
-        end
-        # Check if the values belong is this class
-        m1 = broadcast(fi, q1)
-        # Now repeat for the 2nd layer
-        for j in 1:classes
-            if isequal(classes)(j)
-                fj = (v) -> breakpoints[j] < v <= breakpoints[j + 1]
-            else
-                fj = (v) -> breakpoints[j] <= v < breakpoints[j + 1]
-            end
-            # Assign 2nd class
-            m2 = broadcast(fj, q2)
-            # Get the corresponding color (requires ColorBlendModes)
-            push!(cols, ColorBlendModes.BlendMultiply(c1[i], c2[j]))
-            # Get the locations where both classes match
-            m = reduce(*, [m1, m2])
-            replace!(m, false => nothing)
-            # Assign value corresponding to the class-combination number
-            if length(m) > 0
-                classified[keys(m)] = fill(length(cols), length(m))
-            end
-        end
-    end
-    # Assign unclassified values to 1st class (if any)
-    replace!(classified, 0 => 1)
+    # Generate colormap
+    cmap = _get_bivariate_colormap(n_stops=3, p0=p0, p1=p1, p2=p2)
 
-    return (layer=classified, colors=cols)
+    # Get bivariate layer
+    b = bivariatelayer(l1, l2; n_stops=n_stops, rscale=rscale)
+
+    # Create bivariate figure
+    # m_biv = Axis(f[1, 1:3]; aspect = DataAspect())
+    heatmap!(f, b; colormap = cmap, colorrange = (1, n_stops * n_stops))
+
+    return f
+end
+
+function bivariatesurface!(
+    f,
+    l1,
+    l2;
+    n_stops=3,
+    rscale=0.0:0.01:1.0,
+    p0 = colorant"#e8e8e8ff",
+    p1 = colorant"#5ac8c8ff",
+    p2 = colorant"#be64acff",
+    shading=false
+)
+    # Generate colormap
+    cmap = _get_bivariate_colormap(n_stops=3, p0=p0, p1=p1, p2=p2)
+
+    # Get bivariate layer
+    b = bivariatelayer(l1, l2; n_stops=n_stops, rscale=rscale)
+
+    # Create bivariate figure
+    # m_biv = Axis(f[1, 1:3]; aspect = DataAspect())
+    surface!(f, b; colormap = cmap, colorrange = (1, n_stops * n_stops), shading=shading)
+
+    return f
+end
+
+function bivariatelegend!(
+    ax, l1, l2;
+    n_stops=3,
+    p0 = colorant"#e8e8e8ff",
+    p1 = colorant"#5ac8c8ff",
+    p2 = colorant"#be64acff",
+)
+    # Generate colormap
+    cmap = _get_bivariate_colormap(n_stops=3, p0=p0, p1=p1, p2=p2)
+
+    # Add bivariate legend
+    # m_leg = Axis(f[1, 4]; aspect = 1, xlabel = "Temperature", ylabel = "Precipitation")
+    x = LinRange(minimum(l1), maximum(l1), n_stops)
+    y = LinRange(minimum(l2), maximum(l2), n_stops)
+    heatmap!(ax, x, y, reshape(1:(n_stops * n_stops), (n_stops, n_stops)); colormap = cmap)
 end
