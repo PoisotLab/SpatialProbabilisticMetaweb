@@ -2,7 +2,7 @@
 
 julia_version = "1.9.0"
 manifest_format = "2.0"
-project_hash = "db3a370f068b5a9e07ded015974678eece48dad8"
+project_hash = "09d9343e0f07dbad9067876c3a1c8e09ddbe445f"
 
 [[deps.AbstractFFTs]]
 deps = ["LinearAlgebra"]
@@ -600,6 +600,11 @@ deps = ["Colors", "Downloads", "GeoInterface", "GeoJSON", "GeometryBasics", "Ima
 git-tree-sha1 = "bd2f9bcf2a5cb949cf13993a3cf53cc8d1d99c23"
 uuid = "db073c08-6b98-4ee5-b6a4-5efafb3259c6"
 version = "0.5.0"
+
+[[deps.GeometricalPredicates]]
+git-tree-sha1 = "6c9f24b54b8bf2e3496b5b3c25f5a0aebacd95d5"
+uuid = "fd0ad045-b25c-564e-8f9c-8ef5c5f21267"
+version = "0.4.2"
 
 [[deps.GeometryBasics]]
 deps = ["EarCut_jll", "GeoInterface", "IterTools", "LinearAlgebra", "StaticArrays", "StructArrays", "Tables"]
@@ -1668,6 +1673,12 @@ git-tree-sha1 = "1feb45f88d133a655e001435632f019a9a1bcdb6"
 uuid = "62fd8b95-f654-4bbd-a8a5-9c27f68ccd50"
 version = "0.1.1"
 
+[[deps.TernaryDiagrams]]
+deps = ["ColorSchemes", "DocStringExtensions", "GeometricalPredicates", "LinearAlgebra", "Makie", "VoronoiDelaunay"]
+git-tree-sha1 = "3806370b9094a4edacf03d0610fc189551040f9d"
+uuid = "54198458-1476-45ac-9e44-88a4201bfea6"
+version = "0.1.0"
+
 [[deps.Test]]
 deps = ["InteractiveUtils", "Logging", "Random", "Serialization"]
 uuid = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
@@ -1723,6 +1734,12 @@ deps = ["REPL"]
 git-tree-sha1 = "53915e50200959667e78a92a418594b428dffddf"
 uuid = "1cfade01-22cf-5700-b092-accc4b62d6e1"
 version = "0.4.1"
+
+[[deps.VoronoiDelaunay]]
+deps = ["Colors", "GeometricalPredicates", "Random"]
+git-tree-sha1 = "622ff938ca2ccd56d00357dbecd8e67002dbaa40"
+uuid = "72f80fcb-8c52-57d9-aff0-40c1a3526986"
+version = "0.4.4"
 
 [[deps.Wayland_jll]]
 deps = ["Artifacts", "Expat_jll", "JLLWrappers", "Libdl", "Libffi_jll", "Pkg", "XML2_jll"]

@@ -49,22 +49,19 @@ end
 
 # Bivariate richness map
 begin
-    bivariate(S_all["mean"], Sv, ws; quantiles=true, classes=3, bv_pal_2...)
-    bivariatelegend!(
-        S_all["mean"],
-        Sv;
-        classes=3,
-        # inset=(1, bbox(0.0, 0.17, 0.10, 0.28, :top, :right)),
-        inset=(1, bbox(0.80, 0.02, 0.13, 0.28, :top, :right)),
-        subplot=2,
-        xlab="Expected richness",
-        ylab="Richness variance",
-        guidefontsize=7,
-        bv_pal_2...
-    )
+    fig = Figure()
+    g1 = fig[1:16, 1:4] = GridLayout()
+    g2 = fig[2:5, end] = GridLayout()
+
+    p1 = background_map(g1[1,1])
+    sf = bivariatesurface!(p1, S_all["mean"], Sv; bv_pal_2...)
+
+    p2 = Axis(g2[1,1]; aspect=1, xlabel = "Expected richness", ylabel = "Richness variance")
+    l2 = bivariatelegend!(p2, S_all["mean"], Sv; bv_pal_2...)
+    fig
 end
 if Makie.current_backend() == CairoMakie
-    savefig(joinpath("figures", "richness_bivariate.png"))
+    save(joinpath("figures", "richness_bivariate.png"), fig; px_per_unit=3.0)
 end
 
 ## LCBD plots
@@ -93,24 +90,19 @@ end
 
 # Bivariate species-networks LCBD for mean only
 begin
-    bivariate(
-        lcbd_networks_all["mean"], lcbd_species_all["mean"], ws;
-        quantiles=true, bv_pal_4..., classes=3,
-    )
-    bivariatelegend!(
-        lcbd_networks_all["mean"],
-        lcbd_species_all["mean"];
-        classes=3,
-        inset=(1, bbox(0.80, 0.02, 0.13, 0.28, :top, :right)),
-        subplot=2,
-        xlab="Networks LCBD",
-        ylab="Species LCBD",
-        guidefontsize=7,
-        bv_pal_4...
-    )
+    fig = Figure()
+    g1 = fig[1:16, 1:4] = GridLayout()
+    g2 = fig[2:5, end] = GridLayout()
+
+    p1 = background_map(g1[1,1])
+    sf = bivariatesurface!(p1, lcbd_species_all["mean"], lcbd_networks_all["mean"])
+
+    p2 = Axis(g2[1,1]; aspect = 1, xlabel = "Species LCBD", ylabel = "Network LCBD")
+    l2 = bivariatelegend!(p2, lcbd_species_all["mean"], lcbd_networks_all["mean"])
+    fig
 end
 if Makie.current_backend() == CairoMakie
-    savefig(joinpath("figures", "lcbd_bivariate_mean.png"))
+    save(joinpath("figures", "lcbd_bivariate_mean.png"), fig; px_per_unit=3.0)
 end
 
 ## Sampling options
