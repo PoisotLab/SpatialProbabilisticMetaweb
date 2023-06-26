@@ -32,8 +32,8 @@ eco_file = joinpath("shapefiles", "ecoregions", "Ecoregions2017.shp")
 out_file = out_path
 sy, sx = size(reference_layer)
 l, r, b, t = spatialrange
-query = `gdal_rasterize -a ECO_ID $eco_file $out_file -ts $sx $sy -te $l $b $r $t`
-@time run(query);
+query = `$(GDAL.gdal_rasterize_path()) -a ECO_ID $eco_file $out_file -ts $sx $sy -te $l $b $r $t`;
+@time run(query); # ~ 50 sec.
 
 # Read and replace zero values
 ecoregions = read_geotiff(out_path, SimpleSDMResponse)
@@ -43,4 +43,4 @@ replace!(ecoregions, 0.0 => nothing)
 ecoregions = mask(reference_layer, ecoregions)
 
 # Reexport
-write_geotiff(out_path, ecoregions)
+write_geotiff(out_path, convert(Float64, ecoregions))
