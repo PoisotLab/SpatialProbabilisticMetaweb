@@ -5,57 +5,37 @@ CAN = true
 if (@isdefined CAN) && CAN == true
     res = 2.5;
     input_path = joinpath("data", "input");
+    ref_path = joinpath("data", "input", "canada_ref_2.tif");
     @info "Running for Canada at 2.5 arcmin resolution"
 else
     res = 10.0;
     input_path = joinpath("xtras", "input");
+    ref_path = joinpath("data", "input", "quebec_ref_10.tif");
     @info "Running for Quebec at 10 arcmin resolution"
 end
 
-# # Load all BIOCLIM variables
-# qc_coords = (left=-80.0, right=-50.0, bottom=45.0, top=65.0)
-# wc_provider = RasterData(WorldClim2, BioClim)
-# wc_layers = [
-#     SimpleSDMPredictor(wc_provider; layer=l, resolution=res, qc_coords...) for
-#     l in layers(wc_provider)
-# ]
-
-# # Get the EarthEnv LandCover data
-# lc_provider = RasterData(EarthEnv, LandCover)
-# lc_layers = [
-#     SimpleSDMPredictor(lc_provider; layer=l, qc_coords...) for l in layers(lc_provider)
-# ]
-# lc_layers = [convert(Float16, l) for l in lc_layers]
-# lc_layers = [replace(l, 0.0 => nothing) for l in lc_layers]
-
-# # Plot 'em
-# heatmap(wc_layers[1]; colormap=:inferno, axis=(; title="temperature"))
-# heatmap(lc_layers[9]; colormap=:inferno, axis=(; title="urban"))
-# heatmap(lc_layers[1]; colormap=:inferno, axis=(; title="needleleaf trees"))
-# heatmap(lc_layers[5]; colormap=:inferno, axis=(; title="open water"))
-# heatmap(lc_layers[5] .== 100; colormap=:inferno, axis=(; title="open water"))
-
-# # Check the values range
-# extrema.(lc_layers)
-# sort(unique(values(lc_layers[1])))
-
 ## Coarsen the landcover layers
 
-# Define reference layer
-reference_layer = read_geotiff(
+# Define spatial range
+ch2 = read_geotiff(
     joinpath(input_path, "chelsa2_stack.tif"), SimpleSDMPredictor; bandnumber=1
 )
-spatialrange = boundingbox(reference_layer)
+spatialrange = boundingbox(ch2)
 
-# Make sure we have the landcover files locally
-lc_provider = RasterData(EarthEnv, LandCover)
-_tmp = [
-    SimpleSDMPredictor(lc_provider; layer=l, spatialrange...) for l in layers(lc_provider)
-]
-_tmp = nothing
+# Load Canada reference layer for verifications later on
+reference_layer = read_geotiff(ref_path, SimpleSDMPredictor)
 
 # Get the paths
 lc_path = joinpath(SimpleSDMDatasets._LAYER_PATH, "EarthEnv", "LandCover")
+
+# Make sure we have the landcover files locally
+if !isdir(lc_path)
+    lc_provider = RasterData(EarthEnv, LandCover)
+    @threads for l in layers(ch2_provider)
+        SimpleSDMPredictor(lc_provider; layer=l, spatialrange...)
+    end
+    GC.gc()
+end
 lc_files = readdir(lc_path)
 filter!(startswith("consensus_full_class_"), lc_files)
 
@@ -69,19 +49,19 @@ lc_files_ordered = [
 lc_layers = SimpleSDMResponse{Float32}[]
 for file in lc_files_ordered
     # Coarsen to the reference resolution
-    sy, sx = size(reference_layer)
+    sy, sx = size(ch2)
     l, r, b, t = spatialrange
     out_file = tempname()
-    query = `gdalwarp -r average $file $out_file -ts $sx $sy -te $l $b $r $t`
+    query = `$(GDAL.gdalwarp_path()) -r average $file $out_file -ts $sx $sy -te $l $b $r $t`
     run(query);
 
-    # Mask the coarsened layer with the reference layer
+    # Mask the coarsened layer with the CHELSA layer
     lc = read_geotiff(out_file, SimpleSDMPredictor)
     lc = convert(Float32, lc)
-    lc = mask(reference_layer, lc)
+    lc = mask(ch2, lc)
 
     # Warn if the sites with data differ
-    diff_sites = setdiff(keys(lc), keys(reference_layer))
+    diff_sites = setdiff(keys(ch2), keys(lc))
     if length(diff_sites) != 0
         @warn "$(length(diff_sites)) sites that do not match between layers"
     end
