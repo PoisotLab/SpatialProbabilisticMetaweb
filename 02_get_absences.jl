@@ -9,13 +9,11 @@ include("A0_required.jl")
 # Option to run for CAN
 # CAN = true
 if (@isdefined CAN) && CAN == true
-    res = 2.5;
     occ_path = joinpath("data", "occurrences");
     pa_path = joinpath("data", "presence_absence");
     input_path = joinpath("data", "input");
     @info "Running for Canada at 2.5 arcmin resolution"
 else
-    res = 10.0;
     occ_path = joinpath("xtras", "occurrences");
     pa_path = joinpath("xtras", "presence_absence");
     input_path = joinpath("xtras", "input");

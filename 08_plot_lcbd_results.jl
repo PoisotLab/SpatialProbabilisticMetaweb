@@ -3,13 +3,6 @@
 CAN = true
 include("A0_required.jl");
 
-# Set corresponding resolution
-if (@isdefined CAN) && CAN == true
-    res = 2.5
-else
-    res = 10.0
-end
-
 # Load CairoMakie if exporting figures
 if (@isdefined SAVE) && SAVE == true
     CairoMakie.activate!()
