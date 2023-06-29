@@ -50,13 +50,13 @@ end
 # We need a few zero types for distributions, which will allow to use them in cell of layers
 Base.zero(::Type{Normal{T}}) where T = Normal(zero(T), zero(T))
 Base.zero(::Type{Bernoulli{T}}) where {T} = Bernoulli(zero(T))
-Base.zero(::Type{Truncated{Normal{T}, Continuous, T}}) where {T} = Truncated(zero(Normal{T}), zero(T), one(T))
+Base.zero(::Type{Truncated{Normal{T}, Continuous, T, T, T}}) where {T} = Truncated(zero(Normal{T}), zero(T), one(T))
 
 # Create layers of Truncated Normal distributions given the mean & variance
 D = Dict{String, SimpleSDMResponse}()
 p = Progress(length(μ))
 @threads for sp in String.(keys(μ))
-    _t = similar(μ[sp], Truncated{Normal{Float64}, Continuous, Float64})
+    _t = similar(μ[sp], Truncated{Normal{Float64}, Continuous, Float64, Float64, Float64})
     for site in keys(μ[sp])
         _t[site] = Truncated(Normal(Float64(μ[sp][site]), Float64(σ[sp][site])), 0.0, 1.0)
     end
