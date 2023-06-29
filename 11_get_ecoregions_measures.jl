@@ -6,12 +6,12 @@ include("A0_required.jl");
 # Load the corresponding sdm results if dealing with QC or CAN data
 if (@isdefined CAN) && CAN == true
     eco_path = joinpath("data", "input", "canada_ecoregions.tif");
+    ref_path = joinpath("data", "input", "canada_ref_2.tif")
     results_path = joinpath("data", "results");
-    ecoresults_path = joinpath("data", "results", "ecoregions");
 else
     eco_path = joinpath("data", "input", "quebec_ecoregions.tif")
+    ref_path = joinpath("data", "input", "quebec_ref_10.tif")
     results_path = joinpath("xtras", "results");
-    ecoresults_path = joinpath("xtras", "results", "ecoregions");
 end
 
 # Load ecoregions
@@ -82,6 +82,7 @@ for m in ["LCBD_species", "LCBD_networks"], f in summary_fs
 end
 
 # Export layers
+ecoresults_path = joinpath(results_path, "ecoregions");
 isdir(ecoresults_path) || mkdir(ecoresults_path)
 for o in opt
     path = joinpath(ecoresults_path, "ecoregion_$(o.m)_$(o.fs).tif")

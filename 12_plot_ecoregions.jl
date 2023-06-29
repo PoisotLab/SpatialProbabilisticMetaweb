@@ -71,7 +71,7 @@ end
 ecoregion_plots = Dict{String, Figure}()
 for (m,t) in zip(measures, measures_ts)
     begin
-        f = Figure(; resolution=(800,800))
+        f = Figure(; resolution=(850,800))
 
         p1 = background_map(f[1,1]; title="Median", titlealign=:left)
         p2 = background_map(f[2,1]; title="89% IQR", titlealign=:left)

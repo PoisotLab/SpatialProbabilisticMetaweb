@@ -146,4 +146,4 @@ if length(diff_sites) > 0
 end
 
 # Reexport ecoregions
-write_geotiff(out_file_can, convert(Float64, ecoregions))
+write_geotiff(out_file_can, convert(Float64, ecoregions_can))
