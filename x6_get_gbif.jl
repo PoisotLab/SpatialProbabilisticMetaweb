@@ -130,16 +130,3 @@ for sp in mammals
 end
 # CSV.write(joinpath("data", "clean", "gbif_occurrences.csv"), occ_df)
 
-## Investigate mismatch with previous data
-old = CSV.read("xtras/backup/Aeorestes_cinereus.csv", DataFrame)
-new = CSV.read("data/occurrences/Aeorestes_cinereus.csv", DataFrame)
-select!(old, [:name, :longitude, :latitude])
-sort!(old, [:longitude, :latitude])
-sort!(new, [:longitude, :latitude])
-
-@rtransform!(old, :id = string(:longitude, ";", :latitude))
-old_ids = unique(old.id)
-@rtransform!(new, :id = string(:longitude, ";", :latitude))
-@rtransform!(new, :match = in(:id, old_ids))
-sum(new.match)/nrow(new)
-nrow(old)/nrow(new)
