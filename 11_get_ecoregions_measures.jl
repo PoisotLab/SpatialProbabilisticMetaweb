@@ -5,11 +5,11 @@ include("A0_required.jl");
 
 # Load the corresponding sdm results if dealing with QC or CAN data
 if (@isdefined CAN) && CAN == true
-    eco_path = joinpath("data", "input", "canada_ecoregions.tif");
+    eco_path = joinpath("data", "input", "canada_ecoregions_can.tif");
     ref_path = joinpath("data", "input", "canada_ref_2.tif")
     results_path = joinpath("data", "results");
 else
-    eco_path = joinpath("data", "input", "quebec_ecoregions.tif")
+    eco_path = joinpath("data", "input", "quebec_ecoregions_can.tif")
     ref_path = joinpath("data", "input", "quebec_ref_10.tif")
     results_path = joinpath("xtras", "results");
 end
