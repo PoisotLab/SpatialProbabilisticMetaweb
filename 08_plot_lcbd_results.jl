@@ -108,7 +108,7 @@ begin
     layers_all = S_all
     cbmin = mapreduce(minimum, min, values(layers_all))
     cbmax = mapreduce(maximum, max, values(layers_all))
-    fig = Figure(; resolution=(1200,600))
+    fig = Figure(; resolution=(1250,600))
     for i in 1:2, j in 1:2
         o = options[i,j]
         l = layers_all[o]
