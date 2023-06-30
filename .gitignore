@@ -2,13 +2,14 @@
 *.code-workspace
 data/ecoregions/
 data/input/chelsa*.tif
+data/input/landcover_stack.tif
 data/jld2
 data/occurrences/
 data/presence_absence/
 data/results/
 data/sdms/
 JuliaSysimage.so
-narval_tests.sh
+narval*.sh
 shapefiles/canada/
 shapefiles/ecoregions/
 shapefiles/land/ne_50m*

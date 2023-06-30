@@ -67,9 +67,10 @@ include("12_plot_ecoregions.jl");
 # elements which are version-controlled and available on the repo (e.g. in the
 # data/input/ folder).
 
-# include("x_canada_shapefile.jl"); # do not run as-is
-include("x_get_ecoregions.jl");
-include("x_get_landcover.jl");
+include("x1_get_canada_shapefile.jl");
+include("x2_get_climate.jl");
+include("x3_get_landcover.jl");
+include("x4_get_ecoregions.jl");
 # include("x_gbif_download.jl"); # outdated
 include("x_load_results.jl");
 include("x_reconcile_metaweb.jl");

@@ -71,7 +71,7 @@ end
 ecoregion_plots = Dict{String, Figure}()
 for (m,t) in zip(measures, measures_ts)
     begin
-        f = Figure(; resolution=(800,800))
+        f = Figure(; resolution=(850,800))
 
         p1 = background_map(f[1,1]; title="Median", titlealign=:left)
         p2 = background_map(f[2,1]; title="89% IQR", titlealign=:left)
@@ -105,7 +105,7 @@ end
 begin
     ms = ["S" "Sv"; "L" "Lv"]
     ts = ["Richness" "Richness variance"; "Links" "Link variance"]
-    fig = Figure(; resolution=(1200,600))
+    fig = Figure(; resolution=(1275,600))
     for i in 1:2, j in 1:2
         m = ms[i,j]
         t = ts[i,j]
@@ -125,7 +125,7 @@ end
 begin
     ms = ["S" "LCBD_species"; "L" "LCBD_networks"]
     ts = ["Richness" "Species LCBD"; "Links" "Network LCBD"]
-    fig = Figure(; resolution=(1200,600))
+    fig = Figure(; resolution=(1275,600))
     for i in 1:2, j in 1:2
         m = ms[i,j]
         t = ts[i,j]

@@ -2,13 +2,13 @@
 #SBATCH --account=ctb-tpoisot
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=64
-#SBATCH --mem=200G
-#SBATCH --time=03:30:00
+#SBATCH --mem=240G
+#SBATCH --time=06:00:00
 #SBATCH --job-name=07_get_network_lcbd.jl
 #SBATCH --output=jobs/job_07_get_network_lcbd-%J.out
 
 module load StdEnv/2020
 module load julia/1.8.1
 
-cd $HOME/scratch/2022-SpatialProbabilisticMetaweb
+cd $HOME/projects/def-tpoisot/2022-SpatialProbabilisticMetaweb/
 julia --project --threads=63 -e 'CAN = true; quiet = true; include("07_get_network_lcbd.jl")'

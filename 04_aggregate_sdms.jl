@@ -7,12 +7,10 @@ include("A0_required.jl");
 if (@isdefined CAN) && CAN == true
     ref_path = joinpath("data", "input", "canada_ref_2.tif");
     sdm_path = joinpath("data", "sdms");
-    input_path = joinpath("data", "input");
     @info "Running for Canada at 2.5 arcmin resolution"
 else
     ref_path = joinpath("data", "input", "quebec_ref_10.tif");
     sdm_path = joinpath("xtras", "sdms");
-    input_path = joinpath("xtras", "input");
     @info "Running for Quebec at 10 arcmin resolution"
 end
 
@@ -21,15 +19,6 @@ end
 # Define reference layer
 reference_layer = read_geotiff(ref_path, SimpleSDMPredictor)
 spatialrange = boundingbox(reference_layer)
-
-# Set the coordinates that do not match to zero
-lc_layer = read_geotiff(
-    joinpath(input_path, "landcover_stack.tif"), SimpleSDMPredictor; spatialrange...
-)
-site_mismatch = setdiff(keys(reference_layer), keys(lc_layer))
-reference_layer = convert(SimpleSDMResponse, reference_layer)
-reference_layer[site_mismatch] = fill(nothing, length(site_mismatch))
-reference_layer = convert(SimpleSDMPredictor, reference_layer)
 
 # Select files to load
 map_files = readdir(sdm_path; join=true)
@@ -61,13 +50,13 @@ end
 # We need a few zero types for distributions, which will allow to use them in cell of layers
 Base.zero(::Type{Normal{T}}) where T = Normal(zero(T), zero(T))
 Base.zero(::Type{Bernoulli{T}}) where {T} = Bernoulli(zero(T))
-Base.zero(::Type{Truncated{Normal{T}, Continuous, T}}) where {T} = Truncated(zero(Normal{T}), zero(T), one(T))
+Base.zero(::Type{Truncated{Normal{T}, Continuous, T, T, T}}) where {T} = Truncated(zero(Normal{T}), zero(T), one(T))
 
 # Create layers of Truncated Normal distributions given the mean & variance
 D = Dict{String, SimpleSDMResponse}()
 p = Progress(length(μ))
 @threads for sp in String.(keys(μ))
-    _t = similar(μ[sp], Truncated{Normal{Float64}, Continuous, Float64})
+    _t = similar(μ[sp], Truncated{Normal{Float64}, Continuous, Float64, Float64, Float64})
     for site in keys(μ[sp])
         _t[site] = Truncated(Normal(Float64(μ[sp][site]), Float64(σ[sp][site])), 0.0, 1.0)
     end

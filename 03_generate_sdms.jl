@@ -17,22 +17,10 @@ else
 end
 
 # Load all BIOCLIM and EarthEnv variables
-data_provider = RasterData(WorldClim2, BioClim)
-training_extent = (left=-180.0, right=-40.0, bottom=18.0, top=89.0)
-wc_layers = [
-    SimpleSDMPredictor(data_provider; layer = l, resolution=res, training_extent...) for
-    l in layers(data_provider)
-]
+wc_path = joinpath(input_path, "chelsa2_stack.tif")
+wc_layers = [read_geotiff(wc_path, SimpleSDMPredictor; bandnumber=i) for i in 1:19]
 lc_path = joinpath(input_path, "landcover_stack.tif")
 lc_layers = [read_geotiff(lc_path, SimpleSDMPredictor; bandnumber=i) for i in 1:12]
-
-# Set the coordinates that do not match to zero
-site_mismatch = setdiff(keys(wc_layers[1]), keys(lc_layers[1]))
-wc_layers = convert.(SimpleSDMResponse, wc_layers)
-for wc in wc_layers
-    wc[site_mismatch] = fill(nothing, length(site_mismatch))
-end
-wc_layers = convert.(SimpleSDMPredictor, wc_layers)
 
 # Assemble all layers
 all_layers = [wc_layers..., lc_layers...]

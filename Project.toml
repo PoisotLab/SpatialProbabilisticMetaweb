@@ -1,4 +1,5 @@
 [deps]
+ArchGDAL = "c9ce4bd3-c3d5-55b8-8973-c0e20141b8c3"
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
 Chain = "8be319e6-bccf-4806-a6f7-6fae938471bc"
@@ -9,6 +10,7 @@ Colors = "5ae59095-9a9b-59fe-a467-6f913c188581"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 DataFramesMeta = "1313f7d8-7da2-5740-9ea0-a2ca25f37964"
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
+Downloads = "f43a241f-c20a-4ad4-852c-f6b1247861c6"
 EcologicalNetworks = "f03a62fe-f8ab-5b77-a061-bb599b765229"
 EvoTrees = "f6006082-12f8-11e9-0c9c-0d5d367ab1e5"
 GDAL = "add2ef01-049f-52c4-9ee2-e494f65e021a"
@@ -24,6 +26,7 @@ Shapefile = "8e980c4a-a4fe-5da2-b3a7-4b4b0353a2f4"
 SpeciesDistributionToolkit = "72b53823-5c0b-4575-ad0e-8e97227ad13b"
 StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 TernaryDiagrams = "54198458-1476-45ac-9e44-88a4201bfea6"
+ZipFile = "a5390f91-8eb1-5f08-bee0-b1d1ffed6cea"
 
 [compat]
 EvoTrees = "0.10.0"
