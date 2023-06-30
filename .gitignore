@@ -14,8 +14,7 @@ shapefiles/canada/
 shapefiles/ecoregions/
 shapefiles/land/ne_50m*
 xtras/*
-tmp_makie.jl
-tmp_background_shapefile.R
+tmp*
 
 # Except
 !xtras/*.jl
