@@ -8,7 +8,7 @@
 #SBATCH --output=jobs/job_09_get_network_measures-%J.out
 
 module load StdEnv/2020
-module load julia/1.8.1
+module load julia/1.9.1
 
 cd $HOME/projects/def-tpoisot/2022-SpatialProbabilisticMetaweb/
 julia --project --threads=63 -e 'CAN = true; quiet = true; include("09_get_network_measures.jl")'
