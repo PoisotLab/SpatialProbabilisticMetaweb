@@ -71,9 +71,9 @@ include("x1_get_canada_shapefile.jl");
 include("x2_get_climate.jl");
 include("x3_get_landcover.jl");
 include("x4_get_ecoregions.jl");
-# include("x_gbif_download.jl"); # outdated
+include("x5_reconcile_metaweb.jl");
+include("x6_get_gbif.jl");
 include("x_load_results.jl");
-include("x_reconcile_metaweb.jl");
 
 ## Additional analyses
 
