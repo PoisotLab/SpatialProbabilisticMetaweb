@@ -102,6 +102,8 @@ if Makie.current_backend() == CairoMakie
 end
 
 ## Compare with richness
+
+# Compare with variance measures for the ecoregion
 begin
     ms = ["S" "Sv"; "L" "Lv"]
     ts = ["Richness" "Richness variance"; "Links" "Link variance"]
@@ -117,6 +119,25 @@ begin
 end
 if Makie.current_backend() == CairoMakie
     save(joinpath(fig_path, "ecoregion_comparison.png"), fig; px_per_unit=3.0)
+end
+
+# Compare with IQR values for the ecoregion
+begin
+    ms = ["S_median" "L_median"; "S_iqr89" "L_iqr89"]
+    ts = ["Richness" "Links"; "Richness IQR" "Links IQR"]
+    cs = [:cividis :viridis; :cividis :viridis]
+    fig = Figure(; resolution=(1275,600))
+    for i in 1:2, j in 1:2
+        m = ms[i,j]
+        t = ts[i,j]
+        p = background_map(fig[i,j]; title=t, titlealign=:left)
+        s = surface!(ecoregion_layers["$(m)"]; colormap=cs[i,j], shading=false)
+        Colorbar(p[1,2], s; height=Relative(0.5), label=t)
+    end
+    fig
+end
+if Makie.current_backend() == CairoMakie
+    save(joinpath(fig_path, "ecoregion_comparison_iqr.png"), fig; px_per_unit=3.0)
 end
 
 ## Compare with LCBD
@@ -137,6 +158,25 @@ begin
 end
 if Makie.current_backend() == CairoMakie
     save(joinpath(fig_path, "ecoregion_comparison_lcbd.png"), fig; px_per_unit=3.0)
+end
+
+# Bivariate LCBD figure for ecoregion values
+begin
+    _L1 = ecoregion_layers["LCBD_species_median"]
+    _L2 = ecoregion_layers["LCBD_networks_median"]
+    fig = Figure()
+    g1 = fig[1:16, 1:4] = GridLayout()
+    g2 = fig[2:5, end] = GridLayout()
+
+    p1 = background_map(g1[1,1])
+    sf = bivariatesurface!(p1, _L1, _L2)
+
+    p2 = Axis(g2[1,1]; aspect = 1, xlabel = "Species LCBD", ylabel = "Network LCBD")
+    l2 = bivariatelegend!(p2, _L1, _L2)
+    fig
+end
+if Makie.current_backend() == CairoMakie
+    save(joinpath(fig_path, "ecoregion_LCBD_bivariate.png"), fig; px_per_unit=3.0)
 end
 
 ## Relationship between LCBD median and IQR
