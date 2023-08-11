@@ -161,20 +161,24 @@ if Makie.current_backend() == CairoMakie
 end
 
 # Bivariate LCBD figure for ecoregion values
-begin
-    _L1 = ecoregion_layers["LCBD_species_median"]
-    _L2 = ecoregion_layers["LCBD_networks_median"]
-    fig = Figure()
+function make_bivariate_figure(L1, L2, fig = Figure(); pal=bv_pal_2, kw...)
     g1 = fig[1:16, 1:4] = GridLayout()
     g2 = fig[2:5, end] = GridLayout()
 
     p1 = background_map(g1[1,1])
-    sf = bivariatesurface!(p1, _L1, _L2)
+    sf = bivariatesurface!(p1, L1, L2; pal..., kw...)
 
     p2 = Axis(g2[1,1]; aspect = 1, xlabel = "Species LCBD", ylabel = "Network LCBD")
-    l2 = bivariatelegend!(p2, _L1, _L2)
+    l2 = bivariatelegend!(p2, L1, L2; pal..., kw...)
     fig
 end
+fig = make_bivariate_figure(
+    ecoregion_layers["LCBD_species_median"],
+    ecoregion_layers["LCBD_networks_median"];
+    # pal=bv_pal_2,
+    # rev=true,
+    cmap=vec(cmat2[3:-1:1,:])
+)
 if Makie.current_backend() == CairoMakie
     save(joinpath(fig_path, "ecoregion_LCBD_bivariate.png"), fig; px_per_unit=3.0)
 end
@@ -184,41 +188,41 @@ end
 # Show probability densities
 function make_density_figure(fig = Figure(;resolution=(800, 400)))
     ax1 = Axis(
-        fig[1,1],
+        fig[1:3,1],
         # title="Median",
         xlabel="Relative LCBD value",
         ylabel="Probability Density"
     )
     ax2 = Axis(
-        fig[1,2],
+        fig[1:3,2],
         # title="89% IQR",
         xlabel="89% IQR",
     )
     p1 = density!(ax1,
         unique(values(ecoregion_layers["LCBD_species_median"]));
-        color=(bv_pal_4[3], 0.3),
-        strokecolor=bv_pal_4[3],
+        color=(bv_pal_2[3], 0.3),
+        strokecolor=bv_pal_2[3],
         strokewidth=3,
     )
     p2 = density!(ax1,
         unique(values(ecoregion_layers["LCBD_networks_median"]));
-        color=(bv_pal_4[2], 0.3),
-        strokecolor=bv_pal_4[2],
+        color=(bv_pal_2[2], 0.3),
+        strokecolor=bv_pal_2[2],
         strokewidth=3,
     )
     p3 = density!(ax2,
         unique(values(ecoregion_layers["LCBD_species_iqr89"]));
-        color=(bv_pal_4[3], 0.3),
-        strokecolor=bv_pal_4[3],
+        color=(bv_pal_2[3], 0.3),
+        strokecolor=bv_pal_2[3],
         strokewidth=3,
     )
     p4 = density!(ax2,
         unique(values(ecoregion_layers["LCBD_networks_iqr89"]));
-        color=(bv_pal_4[2], 0.3),
-        strokecolor=bv_pal_4[2],
+        color=(bv_pal_2[2], 0.3),
+        strokecolor=bv_pal_2[2],
         strokewidth=3,
     )
-    Legend(fig[1,3], [p1, p2], ["Species LCBD", "Network LCBD"])
+    Legend(fig[4,:], [p1, p2], ["Species LCBD", "Network LCBD"])
     fig
 end
 fig = make_density_figure()
@@ -226,8 +230,9 @@ if Makie.current_backend() == CairoMakie
     save(joinpath(fig_path, "ecoregion_relation_lcbd_densities.png"), fig; px_per_unit=3.0)
 end
 
+# 3 panel version
 begin
-    fig = Figure(resolution=(800,1000))
+    fig = Figure(resolution=(850,1000))
     # Define layout
     g1 = fig[1:2,1] = GridLayout()
     g2 = fig[3:4,1] = GridLayout()
@@ -236,7 +241,7 @@ begin
     p1 = background_map(g1[1,1])
     sf1 = surface!(
         ecoregion_layers["LCBD_species_median"];
-        colormap=cgrad([p0, bv_pal_4[3]]),
+        colormap=cgrad([p0, bv_pal_2[3]]),
         shading=false
     )
     Colorbar(g1[1,2], sf1; height=Relative(0.5), label="Species LCBD")
@@ -244,7 +249,7 @@ begin
     p2 = background_map(g2[1,1])
     sf2 = surface!(
         ecoregion_layers["LCBD_networks_median"];
-        colormap=cgrad([p0, bv_pal_4[2]]),
+        colormap=cgrad([p0, bv_pal_2[2]]),
         shading=false
     )
     Colorbar(g2[1,2], sf2; height=Relative(0.5), label="Network LCBD")
@@ -254,6 +259,62 @@ begin
 end
 if Makie.current_backend() == CairoMakie
     save(joinpath(fig_path, "ecoregion_LCBD_all_included.png"), fig; px_per_unit=3.0)
+end
+
+# 4 panel version
+begin
+    fig = Figure(resolution=(1500,800))
+    # Define layout
+    # g1 = fig[1:4,1] = GridLayout()
+    # g2 = fig[5:8,1] = GridLayout()
+    # g3 = fig[1:6,2] = GridLayout()
+    # g4 = fig[6:7,2] = GridLayout()
+    g1 = fig[1:4,1:2] = GridLayout()
+    g2 = fig[1:4,3:4] = GridLayout()
+    g3 = fig[5:8,1:2] = GridLayout()
+    g4 = fig[5:8,3:4] = GridLayout()
+    # g3 = fig[2:4,1:3] = GridLayout()
+    # g1 = fig[1:2,4:5] = GridLayout()
+    # g2 = fig[3:4,4:5] = GridLayout()
+    # g4 = fig[5,4:5] = GridLayout()
+    # Species LCBD
+    p1 = background_map(g1[1,1])
+    sf1 = surface!(
+        ecoregion_layers["LCBD_species_median"];
+        colormap=cgrad([p0, bv_pal_2[3]]),
+        shading=false
+    )
+    Colorbar(g1[1,2], sf1; height=Relative(0.5), label="Species LCBD")
+    # Network LCBD
+    p2 = background_map(g2[1,1])
+    sf2 = surface!(
+        ecoregion_layers["LCBD_networks_median"];
+        colormap=cgrad([p0, bv_pal_2[2]]),
+        shading=false
+    )
+    Colorbar(g2[1,2], sf2; height=Relative(0.5), label="Network LCBD")
+    # Bivariate
+    p3 = make_bivariate_figure(
+        ecoregion_layers["LCBD_species_median"],
+        ecoregion_layers["LCBD_networks_median"],
+        g3;
+        cmap=vec(cmat2[3:-1:1,:])
+    )
+    # Density maps
+    p4 = make_density_figure(g4)
+    # Labels
+    for (label, layout) in zip(["A", "B", "C", "D"], [g1, g2, g3, g4])
+        Label(layout[1, 1, TopLeft()], label,
+            fontsize = 26,
+            font = :bold,
+            # padding = (0, 5, 5, 0),
+            # halign = :right
+        )
+    end
+    fig
+end
+if Makie.current_backend() == CairoMakie
+    save(joinpath(fig_path, "ecoregion_LCBD_4panels.png"), fig; px_per_unit=3.0)
 end
 
 # Side-by-side median-median and iqr-iqr relationships

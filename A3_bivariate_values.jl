@@ -28,11 +28,16 @@ function _get_bivariate_colormap(;
     p0 = colorant"#e8e8e8ff",
     p1 = colorant"#5ac8c8ff",
     p2 = colorant"#be64acff",
+    rev = false
 )
     # Generate colormap
     cm1 = LinRange(p0, p1, n_stops)
     cm2 = LinRange(p0, p2, n_stops)
-    cmat = ColorBlendModes.BlendMultiply.(cm1, cm2')
+    if rev
+        cmat = ColorBlendModes.BlendMultiply.(cm2, cm1')
+    else
+        cmat = ColorBlendModes.BlendMultiply.(cm1, cm2')
+    end
     cmap = vec(cmat)
 end
 
@@ -45,10 +50,14 @@ function bivariateheatmap!(
     p0 = colorant"#e8e8e8ff",
     p1 = colorant"#5ac8c8ff",
     p2 = colorant"#be64acff",
-    shading=false
+    shading=false,
+    rev=false,
+    cmap=nothing
 )
     # Generate colormap
-    cmap = _get_bivariate_colormap(n_stops=3, p0=p0, p1=p1, p2=p2)
+    if isnothing(cmap)
+        cmap = _get_bivariate_colormap(n_stops=3, p0=p0, p1=p1, p2=p2, rev=rev)
+    end
 
     # Get bivariate layer
     b = bivariatelayer(l1, l2; n_stops=n_stops, rscale=rscale)
@@ -69,10 +78,14 @@ function bivariatesurface!(
     p0 = colorant"#e8e8e8ff",
     p1 = colorant"#5ac8c8ff",
     p2 = colorant"#be64acff",
-    shading=false
+    shading=false,
+    rev=false,
+    cmap=nothing
 )
     # Generate colormap
-    cmap = _get_bivariate_colormap(n_stops=3, p0=p0, p1=p1, p2=p2)
+    if isnothing(cmap)
+        cmap = _get_bivariate_colormap(n_stops=3, p0=p0, p1=p1, p2=p2, rev=rev)
+    end
 
     # Get bivariate layer
     b = bivariatelayer(l1, l2; n_stops=n_stops, rscale=rscale)
@@ -90,9 +103,13 @@ function bivariatelegend!(
     p0 = colorant"#e8e8e8ff",
     p1 = colorant"#5ac8c8ff",
     p2 = colorant"#be64acff",
+    rev = false,
+    cmap = nothing
 )
     # Generate colormap
-    cmap = _get_bivariate_colormap(n_stops=3, p0=p0, p1=p1, p2=p2)
+    if isnothing(cmap)
+        cmap = _get_bivariate_colormap(n_stops=3, p0=p0, p1=p1, p2=p2, rev=rev)
+    end
 
     # Add bivariate legend
     # m_leg = Axis(f[1, 4]; aspect = 1, xlabel = "Temperature", ylabel = "Precipitation")
