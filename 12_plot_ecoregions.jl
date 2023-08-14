@@ -168,7 +168,8 @@ function make_bivariate_figure(L1, L2, fig = Figure(); pal=bv_pal_2, kw...)
     p1 = background_map(g1[1,1])
     sf = bivariatesurface!(p1, L1, L2; pal..., kw...)
 
-    p2 = Axis(g2[1,1]; aspect = 1, xlabel = "Species LCBD", ylabel = "Network LCBD")
+    p2 = Axis(g2[1,1]; aspect = 1, xlabel = "Species LCBD", ylabel = "Network LCBD",
+              xticks=0.3:0.2:0.7)
     l2 = bivariatelegend!(p2, L1, L2; pal..., kw...)
     fig
 end
@@ -269,10 +270,10 @@ begin
     # g2 = fig[5:8,1] = GridLayout()
     # g3 = fig[1:6,2] = GridLayout()
     # g4 = fig[6:7,2] = GridLayout()
-    g1 = fig[1:4,1:2] = GridLayout()
-    g2 = fig[1:4,3:4] = GridLayout()
-    g3 = fig[5:8,1:2] = GridLayout()
-    g4 = fig[5:8,3:4] = GridLayout()
+    g1 = fig[1:2,1] = GridLayout()
+    g2 = fig[1:2,2] = GridLayout()
+    g3 = fig[3:4,1] = GridLayout()
+    g4 = fig[3:4,2] = GridLayout()
     # g3 = fig[2:4,1:3] = GridLayout()
     # g1 = fig[1:2,4:5] = GridLayout()
     # g2 = fig[3:4,4:5] = GridLayout()
