@@ -201,26 +201,26 @@ function make_density_figure(fig = Figure(;resolution=(800, 400)))
     )
     p1 = density!(ax1,
         unique(values(ecoregion_layers["LCBD_species_median"]));
-        color=(bv_pal_2[3], 0.3),
-        strokecolor=bv_pal_2[3],
+        color=(bv_pal_2[2], 0.3),
+        strokecolor=bv_pal_2[2],
         strokewidth=3,
     )
     p2 = density!(ax1,
         unique(values(ecoregion_layers["LCBD_networks_median"]));
-        color=(bv_pal_2[2], 0.3),
-        strokecolor=bv_pal_2[2],
-        strokewidth=3,
-    )
-    p3 = density!(ax2,
-        unique(values(ecoregion_layers["LCBD_species_iqr89"]));
         color=(bv_pal_2[3], 0.3),
         strokecolor=bv_pal_2[3],
         strokewidth=3,
     )
-    p4 = density!(ax2,
-        unique(values(ecoregion_layers["LCBD_networks_iqr89"]));
+    p3 = density!(ax2,
+        unique(values(ecoregion_layers["LCBD_species_iqr89"]));
         color=(bv_pal_2[2], 0.3),
         strokecolor=bv_pal_2[2],
+        strokewidth=3,
+    )
+    p4 = density!(ax2,
+        unique(values(ecoregion_layers["LCBD_networks_iqr89"]));
+        color=(bv_pal_2[3], 0.3),
+        strokecolor=bv_pal_2[3],
         strokewidth=3,
     )
     Legend(fig[4,:], [p1, p2], ["Species LCBD", "Network LCBD"])
@@ -242,7 +242,7 @@ begin
     p1 = background_map(g1[1,1])
     sf1 = surface!(
         ecoregion_layers["LCBD_species_median"];
-        colormap=cgrad([p0, bv_pal_2[3]]),
+        colormap=cgrad([p0, bv_pal_2[2]]),
         shading=false
     )
     Colorbar(g1[1,2], sf1; height=Relative(0.5), label="Species LCBD")
@@ -250,7 +250,7 @@ begin
     p2 = background_map(g2[1,1])
     sf2 = surface!(
         ecoregion_layers["LCBD_networks_median"];
-        colormap=cgrad([p0, bv_pal_2[2]]),
+        colormap=cgrad([p0, bv_pal_2[3]]),
         shading=false
     )
     Colorbar(g2[1,2], sf2; height=Relative(0.5), label="Network LCBD")
@@ -282,7 +282,7 @@ begin
     p1 = background_map(g1[1,1])
     sf1 = surface!(
         ecoregion_layers["LCBD_species_median"];
-        colormap=cgrad([p0, bv_pal_2[3]]),
+        colormap=cgrad([p0, bv_pal_2[2]]),
         shading=false
     )
     Colorbar(g1[1,2], sf1; height=Relative(0.5), label="Species LCBD")
@@ -290,7 +290,7 @@ begin
     p2 = background_map(g2[1,1])
     sf2 = surface!(
         ecoregion_layers["LCBD_networks_median"];
-        colormap=cgrad([p0, bv_pal_2[2]]),
+        colormap=cgrad([p0, bv_pal_2[3]]),
         shading=false
     )
     Colorbar(g2[1,2], sf2; height=Relative(0.5), label="Network LCBD")
