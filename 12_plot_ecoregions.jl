@@ -124,15 +124,18 @@ end
 # Compare with IQR values for the ecoregion
 begin
     ms = ["S_median" "L_median"; "S_iqr89" "L_iqr89"]
-    ts = ["Richness" "Links"; "Richness IQR" "Links IQR"]
+    ts = ["A) Richness" "B) Links"; "C) Richness IQR" "D) Links IQR"]
+    cts = ["Expected Richness" "Expected number of links";
+           "Richness 89% IQR" "Links 89% IQR"]
     cs = [:cividis :viridis; :cividis :viridis]
     fig = Figure(; resolution=(1275,600))
     for i in 1:2, j in 1:2
         m = ms[i,j]
         t = ts[i,j]
+        ct = cts[i,j]
         p = background_map(fig[i,j]; title=t, titlealign=:left)
         s = surface!(ecoregion_layers["$(m)"]; colormap=cs[i,j], shading=false)
-        Colorbar(p[1,2], s; height=Relative(0.5), label=t)
+        Colorbar(p[1,2], s; height=Relative(0.5), label=ct)
     end
     fig
 end
