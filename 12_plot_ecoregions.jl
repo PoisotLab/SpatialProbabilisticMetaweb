@@ -140,19 +140,6 @@ begin
     end
     fig
 end
-begin
-    p = background_map()
-    s = surface!(
-        ecoregion_layers["L_median"];
-        colormap=cgrad([p0, bv_pal_2[3]]),
-        shading=false,
-        colorscale=Makie.pseudolog10 # requires CairoMakie
-    )
-    Colorbar(p[1,2], s; height=Relative(0.5), scale=Makie.pseudolog10)
-    p
-end
-heatmap(ecoregion_layers["L_median"]; colormap=cgrad([p0, bv_pal_2[3]], scale=:log10))
-heatmap(ecoregion_layers["L_median"]; colormap=cgrad(:viridis, scale=:log10))
 if Makie.current_backend() == CairoMakie
     save(joinpath(fig_path, "ecoregion_comparison_iqr.png"), fig; px_per_unit=3.0)
 end
