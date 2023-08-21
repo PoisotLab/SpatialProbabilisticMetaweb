@@ -13,8 +13,10 @@ cmat2 = [
     colorant"#b8d6be" colorant"#90b2b3" colorant"#567994"
     colorant"#e8e8e8" colorant"#b5c0da" colorant"#6c83b5"
 ]
+cmap2 = vec(cmat2[3:-1:1,:])
 cmat5 = [
     colorant"#f3b300" colorant"#b36600" colorant"#000000"
     colorant"#f3e6b3" colorant"#b3b3b3" colorant"#376387"
     colorant"#f3f3f3" colorant"#b4d3e1" colorant"#509dc2"
 ]
+cmap5 = vec(cmat5[3:-1:1,:])

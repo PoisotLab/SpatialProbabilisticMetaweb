@@ -144,6 +144,45 @@ if Makie.current_backend() == CairoMakie
     save(joinpath(fig_path, "ecoregion_comparison_iqr.png"), fig; px_per_unit=3.0)
 end
 
+# Double bivariate for median and IQR
+begin
+    fig = Figure(; resolution=(800,850), figure_padding=20)
+
+    ga = fig[1,1] = GridLayout()
+    gb = fig[2,1] = GridLayout()
+
+    # Median bivariate
+    L1 = ecoregion_layers["S_median"]
+    L2 = ecoregion_layers["L_median"]
+
+    g1 = ga[1:16, 1:4] = GridLayout()
+    g2 = ga[2:5, 4] = GridLayout()
+
+    p1 = background_map(g1[1,1], title="A", titlealign=:left, titlesize=20)
+    sf = bivariatesurface!(p1, L1, L2; cmap=cmap2)
+
+    p2 = Axis(g2[1,1]; aspect = 1, xlabel = "Richness", ylabel = "Links", xticks = 20:20:60)
+    l2 = bivariatelegend!(p2, L1, L2; cmap=cmap2)
+
+    # IQR bivariate
+    L3 = ecoregion_layers["S_iqr89"]
+    L4 = ecoregion_layers["L_iqr89"]
+
+    g3 = gb[1:16, 1:4] = GridLayout()
+    g4 = gb[2:5, 4] = GridLayout()
+
+    p1 = background_map(g3[1,1], title="B", titlealign=:left, titlesize=20)
+    sf = bivariatesurface!(p1, L3, L4; cmap=cmap2)
+
+    p2 = Axis(g4[1,1]; aspect = 1, xlabel = "Richness IQR", ylabel = "Links IQR")
+    l2 = bivariatelegend!(p2, L3, L4; cmap=cmap2)
+
+    fig
+end
+if Makie.current_backend() == CairoMakie
+    save(joinpath(fig_path, "ecoregion_bivariates.png"), fig; px_per_unit=3.0)
+end
+
 ## Compare with LCBD
 
 # Get relative LCBD values
@@ -182,7 +221,7 @@ fig = make_bivariate_figure(
     ecoregion_layers["LCBD_networks_median"];
     # pal=bv_pal_2,
     # rev=true,
-    cmap=vec(cmat2[3:-1:1,:])
+    cmap=cmap2
 )
 if Makie.current_backend() == CairoMakie
     save(joinpath(fig_path, "ecoregion_LCBD_bivariate.png"), fig; px_per_unit=3.0)
@@ -303,7 +342,7 @@ begin
         ecoregion_layers["LCBD_species_median"],
         ecoregion_layers["LCBD_networks_median"],
         g3;
-        cmap=vec(cmat2[3:-1:1,:])
+        cmap=cmap2
     )
     # Density maps
     p4 = make_density_figure(g4)
