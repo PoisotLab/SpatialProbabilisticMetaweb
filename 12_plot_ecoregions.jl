@@ -127,7 +127,8 @@ begin
     ts = ["A) Richness" "B) Links"; "C) Richness IQR" "D) Links IQR"]
     cts = ["Expected Richness" "Expected number of links";
            "Richness 89% IQR" "Links 89% IQR"]
-    cs = [:cividis :viridis; :cividis :viridis]
+    cs = [cgrad([p0, bv_pal_2[2]]) cgrad([p0, bv_pal_2[3]]);
+          cgrad([p0, bv_pal_2[2]]) cgrad([p0, bv_pal_2[3]])]
     fig = Figure(; resolution=(1275,600))
     for i in 1:2, j in 1:2
         m = ms[i,j]
