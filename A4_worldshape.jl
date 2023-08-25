@@ -16,7 +16,7 @@ function background_map(
         kw...
     )
     foreach(shapes) do sh
-        poly!(ga, sh; shading=false, strokecolor=:darkgrey, strokewidth=1, color=:lightgrey)
+        poly!(ga, sh; shading=false, strokecolor=:darkgrey, strokewidth=1, color=:transparent)
     end
     if tuple
         return (fig=fig, ga=ga)
