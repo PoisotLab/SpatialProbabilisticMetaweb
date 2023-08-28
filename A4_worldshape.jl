@@ -4,7 +4,7 @@ function background_map(
     tuple=false,
     kw...
 )
-    shapes = Shapefile.shapes(Shapefile.Table("shapefiles/land/land_50m_curved.shp"))
+    shapes = Shapefile.shapes(Shapefile.Table("data/shapefiles/land/land_50m_curved.shp"))
     ga = GeoAxis(
         fig isa Figure ? fig[1,1] : fig;
         source = "+proj=longlat +datum=WGS84",

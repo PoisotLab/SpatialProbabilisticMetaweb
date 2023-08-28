@@ -6,15 +6,16 @@ data/occurrences/*
 data/presence_absence/*
 data/results/*
 data/sdms/*
+data/shapefiles/canada/
+data/shapefiles/ecoregions/
 JuliaSysimage.so
 narval*.sh
-shapefiles/canada/*
-shapefiles/ecoregions/*
-shapefiles/land/ne_50m*
 xtras/*
 tmp*
 
 # Except
-!data/*/.gitkeep
-!shapefiles/*/.gitkeep
+!data/shapefiles/land/land_50m_curved.shp
 !xtras/*.jl
+
+# Gitkeep files
+!data/*/.gitkeep

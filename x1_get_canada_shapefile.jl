@@ -3,7 +3,7 @@ include("A0_required.jl")
 ## Get Canada reference file
 
 # Download shapefile
-path = joinpath("shapefiles", "canada")
+path = joinpath("data", "shapefiles", "canada")
 isdir(path) || mkdir(path);
 shp_file = joinpath(path, "canada.shp")
 if !isfile(shp_file)

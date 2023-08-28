@@ -19,7 +19,7 @@ spatialrange = boundingbox(reference_layer)
 ## Ecoregions2017
 
 # Download ecoregions from https://ecoregions.appspot.com/  (Dinerstein et al. 2017)
-path = joinpath("shapefiles", "ecoregions")
+path = joinpath("data", "shapefiles", "ecoregions")
 isdir(path) || mkdir(path);
 shp_file = joinpath(path, "Ecoregions2017.shp")
 if !isfile(shp_file)
@@ -37,7 +37,7 @@ if !isfile(shp_file)
 end
 
 # Rasterize the ecoregions
-eco_file = joinpath("shapefiles", "ecoregions", "Ecoregions2017.shp")
+eco_file = joinpath("data", "shapefiles", "ecoregions", "Ecoregions2017.shp")
 out_file = out_path
 sy, sx = size(reference_layer)
 l, r, b, t = spatialrange
