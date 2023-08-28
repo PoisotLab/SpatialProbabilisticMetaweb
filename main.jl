@@ -11,7 +11,7 @@ include("A0_required.jl");
 ## Part I - Prepare data ####
 
 # Get occurrences from GBIF
-# include("01_get_occurrences.jl"); # outdated
+include("01_get_occurrences.jl");
 
 # Create pseudo-absence
 # WITHIN_RADIUS = true # to use WithinRadius option (needs to run on Narval for Canada)
