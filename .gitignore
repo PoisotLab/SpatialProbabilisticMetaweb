@@ -1,20 +1,20 @@
 .vscode
 *.code-workspace
-data/ecoregions/
 data/input/chelsa*.tif
 data/input/landcover_stack.tif
-data/jld2
-data/occurrences/
-data/presence_absence/
-data/results/
-data/sdms/
+data/occurrences/*
+data/presence_absence/*
+data/results/*
+data/sdms/*
 JuliaSysimage.so
 narval*.sh
-shapefiles/canada/
-shapefiles/ecoregions/
+shapefiles/canada/*
+shapefiles/ecoregions/*
 shapefiles/land/ne_50m*
 xtras/*
 tmp*
 
 # Except
+!data/*/.gitkeep
+!shapefiles/*/.gitkeep
 !xtras/*.jl

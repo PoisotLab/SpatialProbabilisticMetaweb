@@ -26,6 +26,7 @@ reference_layer = read_geotiff(
 
 occfiles = readdir(occ_path; join=true)
 filter!(!contains("all_occurrences"), occfiles) # remove backup files for QC data
+filter!(!contains(".gitkeep"), occfiles)
 
 # Divide files if using job array
 if (@isdefined JOBARRAY) && JOBARRAY == true
