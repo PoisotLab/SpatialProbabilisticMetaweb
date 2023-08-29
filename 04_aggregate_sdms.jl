@@ -22,7 +22,7 @@ spatialrange = boundingbox(reference_layer)
 
 # Select files to load
 map_files = readdir(sdm_path; join=true)
-filter!(!contains(".gitkeep"), occfiles)
+filter!(!contains(".gitkeep"), map_files)
 
 # Load predictions mean & variance layers
 μ = Dict{String,SimpleSDMPredictor}()
