@@ -101,7 +101,11 @@ end
 ## Sampling options
 
 options = reshape(options, (2,2))
-titles = reshape(titles, (2,2))
+# titles = reshape(titles, (2,2))
+titles = [
+    "A) Mean value" "C) Random value";
+    "B) Mean value + threshold" "D) Random value + threshold"
+]
 
 # All richness options
 begin
