@@ -1,6 +1,9 @@
 # SpatialProbabilisticMetaweb
 
-Code repo for the manuscript *Downscaling metawebs: propagation of uncertainties in species distribution and interaction probability* (in prep [here](https://github.com/PoisotLab/ms_spatial_metaweb)).
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.8350065.svg)](https://doi.org/10.5281/zenodo.8350065)
+
+Code repo for the manuscript *Spatially explicit predictions of food web structure from regional level data* available as a preprint on [EcoEvoRxiv](https://ecoevorxiv.org/repository/view/5941/) (manuscript preparation on [GitHub](https://github.com/PoisotLab/ms_spatial_metaweb)).
 
 ## Scripts
 
