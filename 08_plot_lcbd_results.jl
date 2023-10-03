@@ -9,7 +9,7 @@ if (@isdefined SAVE) && SAVE == true
 end
 
 # Load LCBD results
-include("x_load_lcbd_results.jl");
+include("scripts/x_load_lcbd_results.jl");
 
 # Check results
 S_all

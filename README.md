@@ -7,15 +7,14 @@ Code repo for the manuscript *Spatially explicit predictions of food web structu
 
 ## Scripts
 
-All scripts are in the top level folder. [`main.jl`](main.jl) contains instructions to run all analysis scripts. Briefly:
+All scripts for the main analyses are numbered and in the top level folder. [`00_main.jl`](00_main.jl) contains instructions to run all analysis steps. Additional scripts are in the `scripts/` folder, where:
 
-- `01_...` and other numbered scripts contain the main analysis steps.
-- `A0_...` and similar scripts define useful functions for the analyses.
-- `x1_...` and further scripts are preparation scripts that produce elements available on the repo (e.g. in the data/input/ folder).
+- `lib/`  contains useful functions for the analyses.
+- `prep/`  contains preparation scripts that produce elements available on the repo (e.g. in the `data/input/` folder) and required to run the main analyses.
 
 ## Data
 
-Most data files are too large to be hosted here, especially intermediate analysis files, so *do not expect to be able to run the scripts directly yet*. Almost all files in `data` can be downloaded or produced using the scripts though. The long-term goal is to have everything necessary to reproduce a smaller-scale example of the analyses.
+Most data files are too large to be hosted here, especially intermediate analysis files, so *do not expect to be able to run the top-level scripts directly*. Almost all files in `data/` can be downloaded or produced using the scripts in `scripts/prep/`. Note that running the analyses at full-scale is resource-intensive and required the use of high-memory compute clusters.
 
 ## Other folders
 

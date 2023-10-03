@@ -19,3 +19,4 @@ tmp*
 
 # Gitkeep files
 !data/*/.gitkeep
+!xtras/.gitkeep

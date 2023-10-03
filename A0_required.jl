@@ -31,7 +31,7 @@ using SpeciesDistributionToolkit: _read_geotiff as read_geotiff
 using SpeciesDistributionToolkit: _write_geotiff as write_geotiff
 using SpeciesDistributionToolkit: boundingbox
 
-include("A1_LCBD.jl")
-include("A2_colors.jl")
-include("A3_bivariate_values.jl")
-include("A4_worldshape.jl")
+include("scripts/lib/A1_LCBD.jl")
+include("scripts/lib/A2_colors.jl")
+include("scripts/lib/A3_bivariate_values.jl")
+include("scripts/lib/A4_worldshape.jl")

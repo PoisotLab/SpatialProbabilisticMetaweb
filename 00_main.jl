@@ -67,19 +67,19 @@ include("12_plot_ecoregions.jl");
 # elements which are version-controlled and available on the repo (e.g. in the
 # data/input/ folder).
 
-include("x1_get_canada_shapefile.jl");
-include("x2_get_climate.jl");
-include("x3_get_landcover.jl");
-include("x4_get_ecoregions.jl");
-include("x5_reconcile_metaweb.jl");
-include("x6_get_gbif.jl");
-include("x_load_results.jl");
+include("scripts/prep/P1_get_canada_shapefile.jl");
+include("scripts/prep/P2_get_climate.jl");
+include("scripts/prep/P3_get_landcover.jl");
+include("scripts/prep/P4_get_ecoregions.jl");
+include("scripts/prep/P5_reconcile_metaweb.jl");
+include("scripts/prep/P6_get_gbif.jl");
+include("scripts/x_load_results.jl");
 
 ## Additional analyses
 
 # These has-beens were actually really cool in their own time, you know. We
 # can't throw away our past just like that.
 
-# include("x_get_network_extras.jl");
-# include("x_get_ecoregions_metaweb.jl");
-# include("x_working_group.jl");
+# include("xtras/archive/x_get_network_extras.jl");
+# include("xtras/archive/x_get_ecoregions_metaweb.jl");
+# include("xtras/archive/x_working_group.jl");
