@@ -26,7 +26,7 @@ begin
     fig
 end
 if Makie.current_backend() == CairoMakie
-    save(joinpath("figures", "richness_mean.png"), fig; px_per_unit=3.0)
+    save(joinpath("figures", "richness_mean.png"), fig)
 end
 
 # Richness variance for mean only
@@ -37,7 +37,7 @@ begin
     fig
 end
 if Makie.current_backend() == CairoMakie
-    save(joinpath("figures", "richness_var.png"), fig; px_per_unit=3.0)
+    save(joinpath("figures", "richness_var.png"), fig)
 end
 
 # Bivariate richness map
@@ -54,7 +54,7 @@ begin
     fig
 end
 if Makie.current_backend() == CairoMakie
-    save(joinpath("figures", "richness_bivariate.png"), fig; px_per_unit=3.0)
+    save(joinpath("figures", "richness_bivariate.png"), fig)
 end
 
 ## LCBD plots
@@ -67,7 +67,7 @@ begin
     fig
 end
 if Makie.current_backend() == CairoMakie
-    save(joinpath("figures", "lcbd_mean_species.png"), fig; px_per_unit=3.0)
+    save(joinpath("figures", "lcbd_mean_species.png"), fig)
 end
 
 # Network LCBD
@@ -78,7 +78,7 @@ begin
     fig
 end
 if Makie.current_backend() == CairoMakie
-    save(joinpath("figures", "lcbd_mean_networks.png"), fig; px_per_unit=3.0)
+    save(joinpath("figures", "lcbd_mean_networks.png"), fig)
 end
 
 # Bivariate species-networks LCBD for mean only
@@ -95,7 +95,7 @@ begin
     fig
 end
 if Makie.current_backend() == CairoMakie
-    save(joinpath("figures", "lcbd_bivariate_mean.png"), fig; px_per_unit=3.0)
+    save(joinpath("figures", "lcbd_bivariate_mean.png"), fig)
 end
 
 ## Sampling options
@@ -126,7 +126,7 @@ begin
     fig
 end
 if Makie.current_backend() == CairoMakie
-    save(joinpath("figures", "sampling_options", "richness_all.png"), fig; px_per_unit=3.0)
+    save(joinpath("figures", "sampling_options", "richness_all.png"), fig)
 end
 
 # All species LCBD options
@@ -151,7 +151,7 @@ begin
     fig
 end
 if Makie.current_backend() == CairoMakie
-    save(joinpath("figures", "sampling_options", "lcbd_species_all.png"), fig; px_per_unit=3.0)
+    save(joinpath("figures", "sampling_options", "lcbd_species_all.png"), fig)
 end
 =#
 
@@ -178,7 +178,7 @@ begin
     fig
 end
 if Makie.current_backend() == CairoMakie
-    save(joinpath("figures", "sampling_options", "lcbd_networks_all.png"), fig; px_per_unit=3.0)
+    save(joinpath("figures", "sampling_options", "lcbd_networks_all.png"), fig)
 end
 
 # Bivariate species-networks LCBD

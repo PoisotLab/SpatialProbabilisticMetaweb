@@ -35,3 +35,9 @@ include("scripts/lib/A1_LCBD.jl")
 include("scripts/lib/A2_colors.jl")
 include("scripts/lib/A3_bivariate_values.jl")
 include("scripts/lib/A4_worldshape.jl")
+
+# Set default resolution for figures
+set_theme!()
+update_theme!(
+    CairoMakie=(; px_per_unit=3),
+)

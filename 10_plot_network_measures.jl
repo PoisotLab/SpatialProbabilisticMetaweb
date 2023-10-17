@@ -33,7 +33,7 @@ begin
     fig
 end
 if Makie.current_backend() == CairoMakie
-    save(joinpath("figures", "links_connectance.png"), fig; px_per_unit=3.0)
+    save(joinpath("figures", "links_connectance.png"), fig)
 end
 
 # Links
@@ -44,7 +44,7 @@ begin
     fig
 end
 if Makie.current_backend() == CairoMakie
-    save(joinpath("figures", "links_mean.png"), fig; px_per_unit=3.0)
+    save(joinpath("figures", "links_mean.png"), fig)
 end
 
 # Link variance
@@ -55,7 +55,7 @@ begin
     fig
 end
 if Makie.current_backend() == CairoMakie
-    save(joinpath("figures", "links_var.png"), fig; px_per_unit=3.0)
+    save(joinpath("figures", "links_var.png"), fig)
 end
 
 # Link bivariate map
@@ -72,7 +72,7 @@ begin
     fig
 end
 if Makie.current_backend() == CairoMakie
-    save(joinpath("figures", "links_bivariate.png"), fig; px_per_unit=3.0)
+    save(joinpath("figures", "links_bivariate.png"), fig)
 end
 
 ## Richness
@@ -91,7 +91,7 @@ begin
     fig
 end
 if Makie.current_backend() == CairoMakie
-    save(joinpath("figures", "bivariate_richness_links.png"), fig; px_per_unit=3.0)
+    save(joinpath("figures", "bivariate_richness_links.png"), fig)
 end
 
 # Richness-link uncertainty bivariate map
@@ -108,7 +108,7 @@ begin
     fig
 end
 if Makie.current_backend() == CairoMakie
-    save(joinpath("figures", "bivariate_richness_links_variance.png"), fig; px_per_unit=3.0)
+    save(joinpath("figures", "bivariate_richness_links_variance.png"), fig)
 end
 
 ## LCBD & network measures
@@ -161,7 +161,7 @@ begin
     fig
 end
 if Makie.current_backend() == CairoMakie
-    save(joinpath("figures", "lcbd_bivariate_densities.png"), fig; px_per_unit=3.0)
+    save(joinpath("figures", "lcbd_bivariate_densities.png"), fig)
 end
 
 ## Compare sampling options
