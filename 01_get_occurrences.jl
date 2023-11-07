@@ -123,10 +123,11 @@ select!(occ_df, [:species, :decimalLongitude, :decimalLatitude])
 rename!(occ_df, [:name, :longitude, :latitude])
 
 # Split by species and export
+occ_path = joinpath("data", "occurrences")
+ispath(occ_path) || mkpath(occ_path)
 for sp in mammals
     sp_df = filter(:name => ==(sp), occ_df)
     sp = replace(sp, " " => "_")
-    CSV.write(joinpath("data", "occurrences", "$sp.csv"), sp_df)
+    CSV.write(joinpath(occ_path, "$sp.csv"), sp_df)
 end
 # CSV.write(joinpath("data", "clean", "gbif_occurrences.csv"), occ_df)
-
