@@ -1,6 +1,6 @@
 #### Reconcile the species list from the metaweb with the updated GBIF taxonomy
 
-include("A0_required.jl")
+include("../../A0_required.jl")
 
 # Download and parse the metaweb
 mw_path = joinpath("data", "input", "canadian_thresholded.csv")

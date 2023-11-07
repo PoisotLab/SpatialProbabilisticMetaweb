@@ -1,18 +1,21 @@
-include("A0_required.jl");
+include("../../A0_required.jl");
 
 # Option to run for CAN
 CAN = true
 if (@isdefined CAN) && CAN == true
     res = 2.5;
-    input_path = joinpath("data", "input");
+    out_path = joinpath("data", "input");
     ref_path = joinpath("data", "input", "canada_ref_2.tif");
     @info "Running for Canada at 2.5 arcmin resolution"
 else
     res = 10.0;
-    input_path = joinpath("xtras", "input");
+    out_path = joinpath("xtras", "input");
     ref_path = joinpath("data", "input", "quebec_ref_10.tif");
     @info "Running for Quebec at 10 arcmin resolution"
 end
+
+# Make sure paths exist
+ispath(out_path) || mkpath(out_path)
 
 ## Coarsen the CHELSA layers
 
@@ -55,7 +58,7 @@ ch1 = coarsen_layer(ch1_files[1], spatialrange, (res/60, res/60))
 ch1 = broadcast(!isnothing, ch1)
 
 # Export
-write_geotiff(joinpath(input_path, "chelsa1_mask.tif"), convert(Float32, ch1))
+write_geotiff(joinpath(out_path, "chelsa1_mask.tif"), convert(Float32, ch1))
 
 ## Coarsen CHELSA2 layers
 
@@ -117,4 +120,4 @@ if length(diff_sites) != 0
 end
 
 # Export CHELSA layers as a stack
-write_geotiff(joinpath(input_path, "chelsa2_stack.tif"), ch_layers)
+write_geotiff(joinpath(out_path, "chelsa2_stack.tif"), ch_layers)
