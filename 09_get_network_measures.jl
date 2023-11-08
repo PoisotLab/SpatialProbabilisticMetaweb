@@ -58,3 +58,35 @@ write_geotiff(joinpath(results_path, "connectance.tif"), Co)
 write_geotiff(joinpath(results_path, "links_mean.tif"), L)
 write_geotiff(joinpath(results_path, "links_var.tif"), Lv)
 write_geotiff(joinpath(results_path, "links_density.tif"), Ld)
+
+## Motifs
+
+# Define motifs to evaluate
+S3 = unipartitemotifs().S3
+S4 = unipartitemotifs().S4
+
+# Create a mini layer for New Brunswick
+# NB = true
+if (@isdefined NB) && NB == true
+    nb_ref = read_geotiff(joinpath("data", "input", "newbrunswick_ref_10.tif"), SimpleSDMPredictor)
+    nb_layer = clip(layer; boundingbox(nb_ref)...)
+    _non_nb_keys = setdiff(keys(nb_layer), keys(nb_ref))
+    nb_layer[_non_nb_keys] = fill(nothing, length(_non_nb_keys))
+    layer = nb_layer
+    GC.gc()
+end
+
+# Create layers for the motifs
+S3_layer = similar(nb_layer, Float64)
+S4_layer = similar(nb_layer, Float64)
+p = Progress(length(nb_layer))
+@time @threads for k in keys(nb_layer)
+    S3_layer[k] = first(expected_motif_count(find_motif(nb_layer[k], S3)))
+    S4_layer[k] = first(expected_motif_count(find_motif(nb_layer[k], S4)))
+    next!(p)
+end
+
+# Export the motifs layers
+isdir(results_path) || mkpath(results_path)
+write_geotiff(joinpath(results_path, "S3.tif"), S3_layer)
+write_geotiff(joinpath(results_path, "S4.tif"), S4_layer)
