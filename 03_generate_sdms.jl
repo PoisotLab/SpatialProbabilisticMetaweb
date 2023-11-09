@@ -34,8 +34,10 @@ df = [
     DataFrame(
         species = String[],
         occurrences = Int64[],
-        AUC = Float64[],
+        ROCAUC = Float64[],
+        PRAUC = Float64[],
         J = Float64[],
+        MCC = Float64[],
         cutoff = Float64[]
     ) for i in 1:Threads.nthreads()
 ]
@@ -148,15 +150,21 @@ p = Progress(length(pa_files))
     tpr = tp ./ (tp .+ fn);
     fpr = fp ./ (fp .+ tn);
     J = (tp ./ (tp .+ fn)) + (tn ./ (tn .+ fp)) .- 1.0;
-
+    ppv = tp ./ (tp .+ fp)
+    MCC = (tp.*tn.-fp.*fn)./sqrt.((tp.+fp).*(tp.+fn).*(tn.+fp).*(tn.+fn));
+    
     dx = [reverse(fpr)[i] - reverse(fpr)[i - 1] for i in 2:length(fpr)]
     dy = [reverse(tpr)[i] + reverse(tpr)[i - 1] for i in 2:length(tpr)]
-    AUC = sum(dx .* (dy ./ 2.0))
+    ROCAUC = sum(dx .* (dy ./ 2.0))
 
-    thr_index = last(findmax(J))
+    dx = [reverse(tpr)[i] - reverse(tpr)[i - 1] for i in 2:length(tpr)]
+    dy = [reverse(ppv)[i] + reverse(ppv)[i - 1] for i in 2:length(ppv)]
+    PRAUC = sum(dx .* (dy ./ 2.0))
+
+    thr_index = last(findmax(MCC))
     τ = cutoff[thr_index]
 
-    push!(df[Threads.threadid()], (spname, length(xy_presence), AUC, maximum(J), τ))
+    push!(df[Threads.threadid()], (spname, length(xy_presence), ROCAUC, PRAUC, J[thr_index], MCC[thr_index], τ))
 
     # Finalize layers
     range_mask = distribution .>= τ

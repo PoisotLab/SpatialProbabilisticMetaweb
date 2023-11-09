@@ -49,7 +49,7 @@ ispath(pa_path) || mkpath(pa_path)
 
 p = Progress(length(occfiles))
 
-Threads.@threads for i in 1:length(jobfiles)
+Threads.@threads for i in axes(jobfiles, 1)
     try
         pres = similar(reference_layer, Bool)
         df = DataFrame(CSV.File(jobfiles[i]; stringtype=String))
@@ -61,10 +61,10 @@ Threads.@threads for i in 1:length(jobfiles)
         if (@isdefined WITHIN_RADIUS) && WITHIN_RADIUS == true
             absmask = pseudoabsencemask(WithinRadius, pres)
         else
-            absmask = pseudoabsencemask(SurfaceRangeEnvelope, pres)
+            absmask = pseudoabsencemask(DistanceToEvent, pres) # * cellsize(pres)
         end
         Random.seed!(i)
-        abs = SpeciesDistributionToolkit.sample(absmask, sum(pres); replace=false)
+        abs = backgroundpoints(absmask, sum(pres); replace=false)
         replace!(abs, false => nothing)
         replace!(pres, false => nothing)
         outfile = replace(jobfiles[i], "occurrences" => "presence_absence", ".csv" => ".tif")
