@@ -77,12 +77,12 @@ if (@isdefined NB) && NB == true
 end
 
 # Create layers for the motifs
-S3_layer = similar(nb_layer, Float64)
-S4_layer = similar(nb_layer, Float64)
-p = Progress(length(nb_layer))
-@time @threads for k in keys(nb_layer)
-    S3_layer[k] = first(expected_motif_count(find_motif(nb_layer[k], S3)))
-    S4_layer[k] = first(expected_motif_count(find_motif(nb_layer[k], S4)))
+S3_layer = similar(layer, Float64)
+S4_layer = similar(layer, Float64)
+p = Progress(length(layer))
+@time @threads for k in keys(layer)
+    S3_layer[k] = first(expected_motif_count(find_motif(layer[k], S3)))
+    S4_layer[k] = first(expected_motif_count(find_motif(layer[k], S4)))
     next!(p)
 end
 
