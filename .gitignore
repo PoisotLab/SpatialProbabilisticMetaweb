@@ -9,7 +9,7 @@ data/results/*
 data/sdms/*
 data/shapefiles/canada/
 data/shapefiles/ecoregions/
-jobs/*.out
+jobs/out
 JuliaSysimage.so
 narval*.sh
 xtras/*

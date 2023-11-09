@@ -5,7 +5,7 @@
 #SBATCH --mem=160G
 #SBATCH --time=01:00:00
 #SBATCH --job-name=06_get_species_lcbd
-#SBATCH --output=jobs/job_06_get_species_lcbd-%J.out
+#SBATCH --output=jobs/out/job_06_get_species_lcbd-%J.out
 
 module load StdEnv/2020
 module load julia/1.9.1

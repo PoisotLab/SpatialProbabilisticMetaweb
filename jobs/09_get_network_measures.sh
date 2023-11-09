@@ -5,7 +5,7 @@
 #SBATCH --mem=1000G
 #SBATCH --time=06:00:00
 #SBATCH --job-name=09_get_network_measures.jl
-#SBATCH --output=jobs/job_09_get_network_measures-%J.out
+#SBATCH --output=jobs/out/job_09_get_network_measures-%J.out
 
 module load StdEnv/2020
 module load julia/1.9.1
