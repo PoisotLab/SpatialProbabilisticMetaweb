@@ -48,7 +48,7 @@ filter!(contains(".tif"), pa_files)
 
 # Run SDMs, one species per loop
 p = Progress(length(pa_files))
-@threads for i in 1:length(pa_files)
+@threads for i in axes(pa_files, 1)
     # Seed for reproducibility
     Random.seed!(i)
 
@@ -151,7 +151,9 @@ p = Progress(length(pa_files))
     fpr = fp ./ (fp .+ tn);
     J = (tp ./ (tp .+ fn)) + (tn ./ (tn .+ fp)) .- 1.0;
     ppv = tp ./ (tp .+ fp)
+    ppv[findall(isnan, ppv)] .= 1.0
     MCC = (tp.*tn.-fp.*fn)./sqrt.((tp.+fp).*(tp.+fn).*(tn.+fp).*(tn.+fn));
+    MCC[findall(isnan, MCC)] .= 0.0
     
     dx = [reverse(fpr)[i] - reverse(fpr)[i - 1] for i in 2:length(fpr)]
     dy = [reverse(tpr)[i] + reverse(tpr)[i - 1] for i in 2:length(tpr)]
@@ -177,6 +179,8 @@ p = Progress(length(pa_files))
         next!(p)
     end
 end
+
+tally = vcat(df...)
 
 # Export model statistics
 CSV.write(joinpath(input_path, "sdm_fit_results.csv"), vcat(df...))
