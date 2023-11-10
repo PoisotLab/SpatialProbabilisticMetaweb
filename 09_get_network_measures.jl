@@ -62,8 +62,8 @@ write_geotiff(joinpath(results_path, "links_density.tif"), Ld)
 ## Motifs
 
 # Define motifs to evaluate
-S3 = unipartitemotifs().S3
 S4 = unipartitemotifs().S4
+S5 = unipartitemotifs().S5
 
 # Create a mini layer for New Brunswick
 # NB = true
@@ -77,16 +77,16 @@ if (@isdefined NB) && NB == true
 end
 
 # Create layers for the motifs
-S3_layer = similar(layer, Float64)
 S4_layer = similar(layer, Float64)
+S5_layer = similar(layer, Float64)
 p = Progress(length(layer))
 @time @threads for k in keys(layer)
-    S3_layer[k] = first(expected_motif_count(find_motif(layer[k], S3)))
     S4_layer[k] = first(expected_motif_count(find_motif(layer[k], S4)))
+    S5_layer[k] = first(expected_motif_count(find_motif(layer[k], S5)))
     next!(p)
 end
 
 # Export the motifs layers
 isdir(results_path) || mkpath(results_path)
-write_geotiff(joinpath(results_path, "S3.tif"), S3_layer)
 write_geotiff(joinpath(results_path, "S4.tif"), S4_layer)
+write_geotiff(joinpath(results_path, "S5.tif"), S5_layer)
