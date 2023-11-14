@@ -8,6 +8,18 @@ include("A0_required.jl");
 # CAN = true # to run script for Canada, which is resource-intensive
 # quiet = true # whether to disable progress bar (mostly for clusters)
 
+## Preparation scripts
+
+# These scripts are not part of the analysis pipeline but produce required
+# elements which are version-controlled and available on the repo (e.g. in the
+# data/input/ folder).
+
+include("scripts/prep/P1_get_canada_shapefile.jl");
+include("scripts/prep/P2_get_climate.jl");
+include("scripts/prep/P3_get_landcover.jl");
+include("scripts/prep/P4_get_ecoregions.jl");
+include("scripts/prep/P5_reconcile_metaweb.jl");
+
 ## Part I - Prepare data ####
 
 # Get occurrences from GBIF
@@ -58,22 +70,6 @@ include("10_plot_network_measures.jl");
 
 # Plot ecoregion results
 include("12_plot_ecoregions.jl");
-
-## Others ####
-
-## Preparation scripts
-
-# These scripts are not part of the analysis pipeline but produce required
-# elements which are version-controlled and available on the repo (e.g. in the
-# data/input/ folder).
-
-include("scripts/prep/P1_get_canada_shapefile.jl");
-include("scripts/prep/P2_get_climate.jl");
-include("scripts/prep/P3_get_landcover.jl");
-include("scripts/prep/P4_get_ecoregions.jl");
-include("scripts/prep/P5_reconcile_metaweb.jl");
-include("scripts/prep/P6_get_gbif.jl");
-include("scripts/x_load_results.jl");
 
 ## Additional analyses
 

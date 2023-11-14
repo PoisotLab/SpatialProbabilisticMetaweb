@@ -1,21 +1,23 @@
-include("A0_required.jl")
+include("../../A0_required.jl")
+
+# Make sure paths exist
+shp_path = joinpath("data", "shapefiles", "canada")
+isdir(shp_path) || mkdir(shp_path);
 
 ## Get Canada reference file
 
 # Download shapefile
-path = joinpath("data", "shapefiles", "canada")
-isdir(path) || mkdir(path);
-shp_file = joinpath(path, "canada.shp")
+shp_file = joinpath(shp_path, "canada.shp")
 if !isfile(shp_file)
     # Download archive
     url = "https://www12.statcan.gc.ca/census-recensement/2021/geo/sip-pis/boundary-limites/files-fichiers/lpr_000b21a_e.zip"
-    zip_file = joinpath(path, "canada.zip")
+    zip_file = joinpath(shp_path, "canada.zip")
     isfile(zip_file) || Downloads.download(url, zip_file);
     # Unzip files
     r = ZipFile.Reader(zip_file)
     for f in r.files
         n = replace(f.name, "lpr_000b21a_e" => "canada")
-        write(joinpath(path, n), read(f, String))
+        write(joinpath(shp_path, n), read(f, String))
     end
     # Remove archive
     rm(zip_file)
@@ -24,7 +26,7 @@ end
 ## Rasterize
 
 # Reproject to WGS84
-tmp_file = joinpath(path, "tmp.shp")
+tmp_file = joinpath(shp_path, "tmp.shp")
 isfile(tmp_file) || run(`$(GDAL.ogr2ogr_path()) $tmp_file $shp_file -t_srs EPSG:4326`); # 16 min.
 
 # Get file coordinates
@@ -47,7 +49,9 @@ coords = (
 l, r, b, t = coords
 
 # Rasterize
-out_file = joinpath("data", "input", "canada_ref_2.tif")
+out_path = joinpath("data", "input")
+ispath(out_path) || mkpath(out_path)
+out_file = joinpath(out_path, "canada_ref_2.tif")
 @time run(`$(GDAL.gdal_rasterize_path()) -a PRUID $tmp_file $out_file -tr $rx $ry -te $l $b $r $t`);
 
 # Replace zero values
@@ -63,7 +67,7 @@ rx, ry = (10/60, 10/60) # 10 arcmin
 l, r, b, t = (left=-80.0, right=-50.0, bottom=45.0, top=65.0)
 
 # Rasterize
-out_file = joinpath("data", "input", "quebec_ref_10.tif")
+out_file = joinpath(out_path, "quebec_ref_10.tif")
 @time run(`$(GDAL.gdal_rasterize_path()) -a PRUID $tmp_file $out_file -tr $rx $ry -te $l $b $r $t`);
 
 # Replace zero values

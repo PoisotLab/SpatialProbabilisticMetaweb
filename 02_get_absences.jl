@@ -14,7 +14,7 @@ if (@isdefined CAN) && CAN == true
     input_path = joinpath("data", "input");
     @info "Running for Canada at 2.5 arcmin resolution"
 else
-    occ_path = joinpath("xtras", "occurrences");
+    occ_path = joinpath("data", "occurrences");
     pa_path = joinpath("xtras", "presence_absence");
     input_path = joinpath("xtras", "input");
     @info "Running for Quebec at 10 arcmin resolution"
@@ -24,7 +24,7 @@ reference_layer = read_geotiff(
     joinpath(input_path, "landcover_stack.tif"), SimpleSDMPredictor
 )
 
-occfiles = readdir(occ_path; join=true)
+occfiles = readdir(occ_path)
 filter!(!contains("all_occurrences"), occfiles) # remove backup files for QC data
 filter!(!contains(".gitkeep"), occfiles)
 
@@ -52,7 +52,8 @@ p = Progress(length(occfiles))
 Threads.@threads for i in axes(jobfiles, 1)
     try
         pres = similar(reference_layer, Bool)
-        df = DataFrame(CSV.File(jobfiles[i]; stringtype=String))
+        occ_file = joinpath(occ_path, jobfiles[i])
+        df = DataFrame(CSV.File(occ_file; stringtype=String))
         for r in eachrow(df)
             if !isnothing(pres[r.longitude, r.latitude])
                 pres[r.longitude, r.latitude] = true
@@ -67,8 +68,8 @@ Threads.@threads for i in axes(jobfiles, 1)
         abs = backgroundpoints(absmask, sum(pres); replace=false)
         replace!(abs, false => nothing)
         replace!(pres, false => nothing)
-        outfile = replace(jobfiles[i], "occurrences" => "presence_absence", ".csv" => ".tif")
-        write_geotiff(outfile, [convert(Float32, pres), convert(Float32, abs)])
+        pa_file = replace(joinpath(pa_path, jobfiles[i]), ".csv" => ".tif")
+        write_geotiff(pa_file, [convert(Float32, pres), convert(Float32, abs)])
         if !(@isdefined quiet) || quiet == false
             # Print progress bar
             next!(p)

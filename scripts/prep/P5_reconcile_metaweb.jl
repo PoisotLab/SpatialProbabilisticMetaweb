@@ -1,18 +1,25 @@
 #### Reconcile the species list from the metaweb with the updated GBIF taxonomy
 
-include("A0_required.jl")
+include("../../A0_required.jl")
 
 # Download and parse the metaweb
 mw_path = joinpath("data", "input", "canadian_thresholded.csv")
 mw_output = DataFrame(CSV.File(mw_path; stringtype=String))
 
-# Turn the metaweb into a network
-sp = GBIF.taxon.(unique(vcat(mw_output.from, mw_output.to)))
+# Reconcile species names with GBIF
+mw_sp = unique(vcat(mw_output.from, mw_output.to))
+mw_taxon = GBIF.taxon.(mw_sp)
 
 # Assemble GBIF and metaweb name
-spdf = DataFrame(sp)
+spdf = DataFrame(mw_taxon)
 spdf.speciesid = [sp.first for sp in spdf.species]
 select!(spdf, [:name, :speciesid])
+
+# The :name column should be the metaweb name, while the :speciesid should be
+# the reconciled name from GBIF
+# However, one species is causing some issues (one character difference) so we
+# need to make sure we keep the metaweb names
+spdf.name = mw_sp
 
 # Assemble as dictionary
 spdict = Dict()

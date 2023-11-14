@@ -1,4 +1,4 @@
-include("A0_required.jl");
+include("../../A0_required.jl");
 
 # Option to run for CAN
 CAN = true
@@ -31,7 +31,7 @@ lc_path = joinpath(SimpleSDMDatasets._LAYER_PATH, "EarthEnv", "LandCover")
 # Make sure we have the landcover files locally
 if !isdir(lc_path)
     lc_provider = RasterData(EarthEnv, LandCover)
-    @threads for l in layers(ch2_provider)
+    @threads for l in layers(lc_provider)
         SimpleSDMPredictor(lc_provider; layer=l, spatialrange...)
     end
     GC.gc()
