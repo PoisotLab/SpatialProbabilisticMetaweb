@@ -12,6 +12,7 @@ JuliaSysimage.so
 narval*.sh
 xtras/*
 tmp*
+Manifest.toml
 
 # Except
 !data/shapefiles/land/land_50m_curved.shp
