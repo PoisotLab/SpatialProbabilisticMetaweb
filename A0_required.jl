@@ -15,7 +15,7 @@ using GDAL
 using GeoMakie
 if get(ENV, "CC_CLUSTER", "local") == "local"
     # Load GLMakie only if local, not on clusters
-    using CairoMakie
+    using GLMakie
 end
 using JLD2, CodecZlib
 using ProgressMeter
