@@ -2,8 +2,8 @@
 #SBATCH --account=ctb-tpoisot
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=64
-#SBATCH --mem=120G
-#SBATCH --time=01:30:00
+#SBATCH --mem=248G
+#SBATCH --time=02:00:00
 #SBATCH --job-name=03_generate_sdms
 #SBATCH --output=jobs/out/%x-%J.out
 
