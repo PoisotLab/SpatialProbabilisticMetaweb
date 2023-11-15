@@ -154,7 +154,7 @@ p = Progress(length(pa_files))
     ppv[findall(isnan, ppv)] .= 1.0
     MCC = (tp.*tn.-fp.*fn)./sqrt.((tp.+fp).*(tp.+fn).*(tn.+fp).*(tn.+fn));
     MCC[findall(isnan, MCC)] .= 0.0
-    
+
     dx = [reverse(fpr)[i] - reverse(fpr)[i - 1] for i in 2:length(fpr)]
     dy = [reverse(tpr)[i] + reverse(tpr)[i - 1] for i in 2:length(tpr)]
     ROCAUC = sum(dx .* (dy ./ 2.0))
@@ -183,4 +183,5 @@ end
 tally = vcat(df...)
 
 # Export model statistics
-CSV.write(joinpath(input_path, "sdm_fit_results.csv"), vcat(df...))
+sort!(tally, :species)
+CSV.write(joinpath(input_path, "sdm_fit_results.csv"), tally)
