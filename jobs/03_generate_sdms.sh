@@ -5,7 +5,7 @@
 #SBATCH --mem=120G
 #SBATCH --time=01:30:00
 #SBATCH --job-name=03_generate_sdms
-#SBATCH --output=jobs/out/job_03_generate_sdms-%J.out
+#SBATCH --output=jobs/out/%x-%J.out
 
 module load StdEnv/2020
 module load julia/1.9.1

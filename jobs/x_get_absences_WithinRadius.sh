@@ -5,8 +5,8 @@
 #SBATCH --cpus-per-task=64
 #SBATCH --mem=100G
 #SBATCH --time=08:00:00
-#SBATCH --job-name=02_get_absences
-#SBATCH --output=jobs/out/job_02_get_absences-%J.out
+#SBATCH --job-name=x_get_absences_WithinRadius
+#SBATCH --output=jobs/out/%x-%J.out
 
 module load StdEnv/2020
 module load julia/1.9.1
