@@ -72,14 +72,17 @@ SX_layer = similar(layer, Float64)
 p = Progress(length(layer))
 @threads for k in keys(layer)
     SX_layer[k] = first(expected_motif_count(find_motif(layer[k], SX)))
-    next!(p)
+    if !(@isdefined quiet) || quiet == false
+        # Print progress bar
+        next!(p)
+    end
 end
 
 # Export the motifs layers
 motifs_path = joinpath(results_path, "motifs")
 isdir(motifs_path) || mkpath(motifs_path)
 if (@isdefined JOBARRAY) && JOBARRAY == true
-    write_geotiff(joinpath(motifs_path, "$MOTIF-$_jobid.tif"), SX_layer)
+    write_geotiff(joinpath(motifs_path, "$MOTIF-$(string(_jobid; pad=4)).tif"), SX_layer)
 else
     write_geotiff(joinpath(motifs_path, "$MOTIF.tif"), SX_layer)
 end
