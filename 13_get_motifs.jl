@@ -1,6 +1,8 @@
 #### Network motifs ####
 
 # CAN = true
+# JOBARRAY = true
+# MOTIF = :S4
 include("05_assemble_networks.jl"); # Load networks
 
 # Load the corresponding sdm results if dealing with QC or CAN data
@@ -49,8 +51,10 @@ layer = SimpleSDMResponse(_mat, reference_layer);
 ## Motifs
 
 # Define motifs to evaluate
-S4 = unipartitemotifs().S4
-S5 = unipartitemotifs().S5
+if !(@isdefined MOTIF)
+    MOTIF = :S4
+end
+SX = getproperty(unipartitemotifs(), MOTIF)
 
 # Create a mini layer for New Brunswick
 # NB = true
@@ -64,16 +68,18 @@ if (@isdefined NB) && NB == true
 end
 
 # Create layers for the motifs
-S4_layer = similar(layer, Float64)
-S5_layer = similar(layer, Float64)
+SX_layer = similar(layer, Float64)
 p = Progress(length(layer))
-@time @threads for k in keys(layer)
-    S4_layer[k] = first(expected_motif_count(find_motif(layer[k], S4)))
-    S5_layer[k] = first(expected_motif_count(find_motif(layer[k], S5)))
+@threads for k in keys(layer)
+    SX_layer[k] = first(expected_motif_count(find_motif(layer[k], SX)))
     next!(p)
 end
 
 # Export the motifs layers
-isdir(results_path) || mkpath(results_path)
-write_geotiff(joinpath(results_path, "S4.tif"), S4_layer)
-write_geotiff(joinpath(results_path, "S5.tif"), S5_layer)
+motifs_path = joinpath(results_path, "motifs")
+isdir(motifs_path) || mkpath(motifs_path)
+if (@isdefined JOBARRAY) && JOBARRAY == true
+    write_geotiff(joinpath(motifs_path, "$MOTIF-$_jobid.tif"), SX_layer)
+else
+    write_geotiff(joinpath(motifs_path, "$MOTIF.tif"), SX_layer)
+end

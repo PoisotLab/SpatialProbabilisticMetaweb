@@ -1,13 +1,14 @@
 ## Probabilistic distributions
 
 # CAN = true
+# JOBARRAY = true
 include("04_aggregate_sdms.jl");
 
 D # Truncated Normal distribution per pixel
 
 ## Metaweb
 
-# Load the previous non-reconciled metaweb if dealing with QC data
+# Load model fit
 if (@isdefined CAN) && CAN == true
     fit_path = joinpath("data", "input", "sdm_fit_results.csv")
 else
@@ -141,7 +142,13 @@ function assemble_networks(
 end
 
 # Assembly based on average
-networks = assemble_networks(reference_layer, P, D, cutoffs); # 2.5 min
+if (@isdefined JOBARRAY) && JOBARRAY == true
+    # Job array tasks can run over a single region
+    networks = assemble_networks(reference_layer, P, D, cutoffs; n_regions=(1,1));
+else
+    # Single jobs should be divided into a few regions
+    networks = assemble_networks(reference_layer, P, D, cutoffs; n_regions=(3,3));
+end
 
 # Different assembly options
 #=
