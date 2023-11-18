@@ -15,6 +15,7 @@ narval*.sh
 xtras/*
 tmp*
 Manifest.toml
+*.zip
 
 # Except
 !data/shapefiles/land/land_50m_curved.shp
