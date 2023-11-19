@@ -128,10 +128,10 @@ sites7 = findall(==(7), biv_layer)
 sites_mid = setdiff(keys(biv_layer), union(sites3, sites7))
 
 # Plot the two extremas in a different color
-_S3 = Float64.(S[sites3])
+_S3 = try Float64.(S[sites3]) catch; Vector{Float64}[] end
 _S7 = Float64.(S[sites7])
 _Smid = Float64.(S[sites_mid])
-_L3 = Float64.(L[sites3])
+_L3 = try Float64.(L[sites3]) catch; Vector{Float64}[] end
 _L7 = Float64.(L[sites7])
 _Lmid = Float64.(L[sites_mid])
 begin
@@ -141,12 +141,12 @@ begin
         xscale=Makie.pseudolog10, yscale=Makie.pseudolog10
     )
     scatter!(_Smid, _Lmid, label="Other sites", color=(:black, 0.1))
-    scatter!(_S3, _L3, label="Unique species only", color=(biv_colors[3], 0.2))
+    try scatter!(_S3, _L3, label="Unique species only", color=(biv_colors[3], 0.2)) catch; end
     scatter!(_S7, _L7, label="Unique networks only", color=(biv_colors[7], 0.2))
     axislegend(ax1, position = :rb)
     ax2 = Axis(fig[1,2]; xlabel="Richness", ylabel="Density")
     density!(ax2, _Smid; color=(:black, 0.3), strokecolor=:black, strokewidth=3)
-    density!(ax2, _S3; color=(biv_colors[3], 0.3), strokecolor=biv_colors[3], strokewidth=3)
+    try density!(ax2, _S3; color=(biv_colors[3], 0.3), strokecolor=biv_colors[3], strokewidth=3) catch; end
     density!(ax2, _S7; color=(biv_colors[7], 0.3), strokecolor=biv_colors[7], strokewidth=3)
     labels = ["Other sites", "Unique species only", "Unique networks only"]
     elements = [
@@ -156,7 +156,7 @@ begin
     axislegend(ax2, elements, labels)
     ax3 = Axis(fig[2,2]; xlabel="Links", ylabel="Density")
     density!(ax3, _Lmid; color=(:black, 0.3), strokecolor=:black, strokewidth=3)
-    density!(ax3, _L3; color=(biv_colors[3], 0.3), strokecolor=biv_colors[3], strokewidth=3)
+    try density!(ax3, _L3; color=(biv_colors[3], 0.3), strokecolor=biv_colors[3], strokewidth=3) catch; end
     density!(ax3, _L7; color=(biv_colors[7], 0.3), strokecolor=biv_colors[7], strokewidth=3)
     fig
 end
