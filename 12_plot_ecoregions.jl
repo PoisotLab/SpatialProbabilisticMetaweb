@@ -49,6 +49,20 @@ for o in opt
 end
 ecoregion_layers
 
+# We need to fix an issue with the network LCBN layers before we compare with species LCBD
+# Some sites had no links, so their LCBD values was set to nothing to avoid NaNs everywhere
+# Now we'll also set them to NaN for species LCBD to compare the rest of the two layers
+if length(ecoregion_layers["LCBD_species_median"]) > length(ecoregion_layers["LCBD_networks_median"])
+    _nan_sites = setdiff(
+        keys(ecoregion_layers["LCBD_species_median"]),
+        keys(ecoregion_layers["LCBD_networks_median"])
+    )
+    @info "Creating a species LCBD layers without $(length(_nan_sites)) sites with missing network LCBD values"
+    for f in ["median", "iqr89"]
+        ecoregion_layers["LCBD_species_$f"][_nan_sites] = fill(nothing, length(_nan_sites))
+    end
+end
+
 ## Make some plots!!
 
 # Plot results

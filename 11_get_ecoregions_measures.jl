@@ -51,7 +51,8 @@ end
 function ecoregionalize(layer, ecoregions_stack; f=median, keepzeros=true)
     l_eco = similar(layer)
     @threads for e in ecoregions_stack
-        l_eco[keys(e)] = fill(f(layer[keys(e)]), length(e))
+        k = intersect(keys(e), keys(layer))
+        l_eco[k] = fill(f(layer[k]), length(k))
     end
     if !keepzeros
         replace!(l_eco, 0.0 => nothing)
@@ -69,7 +70,7 @@ opt
 
 # Summarize by ecoregion
 ecoregion_layers = Dict{String, SimpleSDMResponse}()
-for o in opt
+@showprogress "Ecoregions:" for o in opt
     ecoregion_layers["$(o.m)_$(o.fs)"] = ecoregionalize(
         local_layers[o.m], ecoregions_stack; f=o.fs
     )
@@ -84,8 +85,7 @@ end
 # Export layers
 ecoresults_path = joinpath(results_path, "ecoregions");
 isdir(ecoresults_path) || mkdir(ecoresults_path)
-for o in opt
-    path = joinpath(ecoresults_path, "ecoregion_$(o.m)_$(o.fs).tif")
-    layer = ecoregion_layers["$(o.m)_$(o.fs)"]
+for (key, layer) in ecoregion_layers
+    path = joinpath(ecoresults_path, "ecoregion_$key.tif")
     write_geotiff(path, layer)
 end

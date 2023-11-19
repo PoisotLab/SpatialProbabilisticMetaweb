@@ -114,12 +114,12 @@ end
 ## LCBD & network measures
 
 # Load LCBD results
-include("x_load_lcbd_results.jl");
+include(joinpath("scripts", "x_load_lcbd_results.jl"));
 
 ## Compare link & richness density of unique sites
 
 # Extract the bivariate values
-biv_layer = bivariatelayer(lcbd_species_all["mean"], lcbd_networks_all["mean"])
+biv_layer = bivariatelayer(lcbd_species_nan, lcbd_networks_all["mean"])
 biv_colors = _get_bivariate_colormap()
 
 # Get the specific sites for each group

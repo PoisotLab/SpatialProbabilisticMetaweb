@@ -88,10 +88,10 @@ begin
     g2 = fig[2:5, end] = GridLayout()
 
     p1 = background_map(g1[1,1])
-    sf = bivariatesurface!(p1, lcbd_species_all["mean"], lcbd_networks_all["mean"])
+    sf = bivariatesurface!(p1, lcbd_species_nan, lcbd_networks_all["mean"])
 
     p2 = Axis(g2[1,1]; aspect = 1, xlabel = "Species LCBD", ylabel = "Network LCBD")
-    l2 = bivariatelegend!(p2, lcbd_species_all["mean"], lcbd_networks_all["mean"])
+    l2 = bivariatelegend!(p2, lcbd_species_nan, lcbd_networks_all["mean"])
     fig
 end
 if Makie.current_backend() == CairoMakie
