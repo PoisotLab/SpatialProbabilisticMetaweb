@@ -1,5 +1,6 @@
 #### Plot motifs ####
 
+SAVE = true
 CAN = true
 include("A0_required.jl");
 
@@ -8,11 +9,6 @@ if (@isdefined CAN) && CAN == true
     results_path = joinpath("data", "results")
 else
     results_path = joinpath("xtras", "results")
-end
-
-# Load CairoMakie if exporting figures
-if (@isdefined SAVE) && SAVE == true
-    CairoMakie.activate!()
 end
 
 # Load motif results
@@ -28,7 +24,7 @@ begin
     Colorbar(fig[1,2], sf; height=Relative(0.5), label="log(S4 + 1)")
     fig
 end
-if Makie.current_backend() == CairoMakie
+if (@isdefined SAVE) && SAVE == true
     save(joinpath("figures", "motifs_S4.png"), fig)
 end
 
@@ -39,7 +35,7 @@ begin
     Colorbar(fig[1,2], sf; height=Relative(0.5), label="log(S5 + 1)")
     fig
 end
-if Makie.current_backend() == CairoMakie
+if (@isdefined SAVE) && SAVE == true
     save(joinpath("figures", "motifs_S5.png"), fig)
 end
 
@@ -59,7 +55,7 @@ begin
     lines!(0:10, 0:10; color=:red)
     fig
 end
-if Makie.current_backend() == CairoMakie
+if (@isdefined SAVE) && SAVE == true
     save(joinpath("figures", "motifs_S4-S5-rel.png"), fig)
 end
 
@@ -70,7 +66,7 @@ begin
     Colorbar(fig[1,2], sf; height=Relative(0.5), label="Log ratio log1p(S4/S5)")
     fig
 end
-if Makie.current_backend() == CairoMakie
+if (@isdefined SAVE) && SAVE == true
     save(joinpath("figures", "motifs_S4-S5-logratio.png"), fig)
 end
 

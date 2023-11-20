@@ -1,5 +1,6 @@
 #### Ecoregion plots
 
+SAVE = true
 CAN = true
 include("A0_required.jl");
 
@@ -8,11 +9,6 @@ if (@isdefined CAN) && CAN == true
     ecoresults_path = joinpath("data", "results", "ecoregions");
 else
     ecoresults_path = joinpath("xtras", "results", "ecoregions");
-end
-
-# Load CairoMakie if exporting figures
-if (@isdefined SAVE) && SAVE == true
-    CairoMakie.activate!()
 end
 
 ## Basic network measures
@@ -77,7 +73,7 @@ begin
     end
     fig
 end
-if Makie.current_backend() == CairoMakie
+if (@isdefined SAVE) && SAVE == true
     save(joinpath(fig_path, "ecoregion_all_median.png"), fig)
 end
 
@@ -109,7 +105,7 @@ ecoregion_plots["LCBD_species"]
 ecoregion_plots["LCBD_networks"]
 
 # Export
-if Makie.current_backend() == CairoMakie
+if (@isdefined SAVE) && SAVE == true
     @threads for m in String.(keys(ecoregion_plots))
         save(joinpath(fig_path, "ecoregion_$m.png"), ecoregion_plots[m])
     end
@@ -131,7 +127,7 @@ begin
     end
     fig
 end
-if Makie.current_backend() == CairoMakie
+if (@isdefined SAVE) && SAVE == true
     save(joinpath(fig_path, "ecoregion_comparison.png"), fig)
 end
 
@@ -154,7 +150,7 @@ begin
     end
     fig
 end
-if Makie.current_backend() == CairoMakie
+if (@isdefined SAVE) && SAVE == true
     save(joinpath(fig_path, "ecoregion_comparison_iqr.png"), fig)
 end
 
@@ -193,7 +189,7 @@ begin
 
     fig
 end
-if Makie.current_backend() == CairoMakie
+if (@isdefined SAVE) && SAVE == true
     save(joinpath(fig_path, "ecoregion_bivariates.png"), fig)
 end
 
@@ -213,7 +209,7 @@ begin
     end
     fig
 end
-if Makie.current_backend() == CairoMakie
+if (@isdefined SAVE) && SAVE == true
     save(joinpath(fig_path, "ecoregion_comparison_lcbd.png"), fig)
 end
 
@@ -237,7 +233,7 @@ fig = make_bivariate_figure(
     # rev=true,
     cmap=cmap2
 )
-if Makie.current_backend() == CairoMakie
+if (@isdefined SAVE) && SAVE == true
     save(joinpath(fig_path, "ecoregion_LCBD_bivariate.png"), fig)
 end
 
@@ -284,7 +280,7 @@ function make_density_figure(fig = Figure(;resolution=(800, 400)))
     fig
 end
 fig = make_density_figure()
-if Makie.current_backend() == CairoMakie
+if (@isdefined SAVE) && SAVE == true
     save(joinpath(fig_path, "ecoregion_relation_lcbd_densities.png"), fig)
 end
 
@@ -315,7 +311,7 @@ begin
     p3 = make_density_figure(g3)
     fig
 end
-if Makie.current_backend() == CairoMakie
+if (@isdefined SAVE) && SAVE == true
     save(joinpath(fig_path, "ecoregion_LCBD_all_included.png"), fig)
 end
 
@@ -371,7 +367,7 @@ begin
     end
     fig
 end
-if Makie.current_backend() == CairoMakie
+if (@isdefined SAVE) && SAVE == true
     save(joinpath(fig_path, "ecoregion_LCBD_4panels.png"), fig)
 end
 
@@ -412,6 +408,6 @@ begin
     )
     fig
 end
-if Makie.current_backend() == CairoMakie
+if (@isdefined SAVE) && SAVE == true
     save(joinpath(fig_path, "ecoregion_relation_lcbd_iqr.png"), fig)
 end

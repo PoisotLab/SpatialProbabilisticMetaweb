@@ -1,5 +1,6 @@
 #### Plot network measures ####
 
+SAVE = true
 CAN = true
 include("A0_required.jl");
 
@@ -8,11 +9,6 @@ if (@isdefined CAN) && CAN == true
     results_path = joinpath("data", "results")
 else
     results_path = joinpath("xtras", "results")
-end
-
-# Load CairoMakie if exporting figures
-if (@isdefined SAVE) && SAVE == true
-    CairoMakie.activate!()
 end
 
 # Objects
@@ -32,7 +28,7 @@ begin
     Colorbar(fig[1,2], sf; height=Relative(0.5), label="Connectance")
     fig
 end
-if Makie.current_backend() == CairoMakie
+if (@isdefined SAVE) && SAVE == true
     save(joinpath("figures", "links_connectance.png"), fig)
 end
 
@@ -43,7 +39,7 @@ begin
     Colorbar(fig[1,2], sf; height=Relative(0.5), label="Expected number of links")
     fig
 end
-if Makie.current_backend() == CairoMakie
+if (@isdefined SAVE) && SAVE == true
     save(joinpath("figures", "links_mean.png"), fig)
 end
 
@@ -54,7 +50,7 @@ begin
     Colorbar(fig[1,2], sf; height=Relative(0.5), label="Link variance")
     fig
 end
-if Makie.current_backend() == CairoMakie
+if (@isdefined SAVE) && SAVE == true
     save(joinpath("figures", "links_var.png"), fig)
 end
 
@@ -71,7 +67,7 @@ begin
     l2 = bivariatelegend!(p2, L, Lv; bv_pal_2...)
     fig
 end
-if Makie.current_backend() == CairoMakie
+if (@isdefined SAVE) && SAVE == true
     save(joinpath("figures", "links_bivariate.png"), fig)
 end
 
@@ -90,7 +86,7 @@ begin
     l2 = bivariatelegend!(p2, S, L; bv_pal_2...)
     fig
 end
-if Makie.current_backend() == CairoMakie
+if (@isdefined SAVE) && SAVE == true
     save(joinpath("figures", "bivariate_richness_links.png"), fig)
 end
 
@@ -107,7 +103,7 @@ begin
     l2 = bivariatelegend!(p2, Sv, Lv; bv_pal_2...)
     fig
 end
-if Makie.current_backend() == CairoMakie
+if (@isdefined SAVE) && SAVE == true
     save(joinpath("figures", "bivariate_richness_links_variance.png"), fig)
 end
 
@@ -160,7 +156,7 @@ begin
     density!(ax3, _L7; color=(biv_colors[7], 0.3), strokecolor=biv_colors[7], strokewidth=3)
     fig
 end
-if Makie.current_backend() == CairoMakie
+if (@isdefined SAVE) && SAVE == true
     save(joinpath("figures", "lcbd_bivariate_densities.png"), fig)
 end
 
