@@ -18,10 +18,12 @@ isdir(fig_path) || mkdir(fig_path)
 
 # Define the network measures to use
 network_measures = ["Co", "L", "Lv", "Ld"]
-measures = [network_measures..., "S", "Sv", "LCBD_species", "LCBD_networks"]
+motifs = ["S1", "S2", "S4", "S5"]
+measures = ["S", "Sv", "LCBD_species", "LCBD_networks", network_measures..., motifs...]
 measures_ts = [
+    "Richness", "Richness variance", "Relative species LCBD", "Relative network LCBD",
     "Connectance", "Number of links", "Link variance", "Linkage density",
-    "Richness", "Richness variance", "Relative species LCBD", "Relative network LCBD"
+    motifs...
 ]
 summary_fs = ["median", "iqr89"]
 summary_ts = ["median", "89% IQR"]
@@ -61,25 +63,9 @@ end
 
 ## Make some plots!!
 
-# Plot results
-begin
-    fig = Figure(; resolution=(1200,600))
-    for i in 1:2, j in 1:2
-        m = reshape(network_measures, (2,2))[i,j]
-        t = reshape(measures_ts[1:4], (2,2))[i,j]
-        p = background_map(fig[i,j]; title=t, titlealign=:left)
-        s = surface!(ecoregion_layers["$(m)_median"]; colormap=:inferno, shading=false)
-        Colorbar(p[1,2], s; height=Relative(0.5))
-    end
-    fig
-end
-if (@isdefined SAVE) && SAVE == true
-    save(joinpath(fig_path, "ecoregion_all_median.png"), fig)
-end
-
-# Some variations
+# Single figures
 ecoregion_plots = Dict{String, Figure}()
-for (m,t) in zip(measures, measures_ts)
+@showprogress "Ecoregion single figures:" for (m,t) in zip(measures, measures_ts)
     begin
         f = Figure(; resolution=(850,800))
 
@@ -94,22 +80,24 @@ for (m,t) in zip(measures, measures_ts)
 
         ecoregion_plots[m] = f;
     end;
+    if (@isdefined SAVE) && SAVE == true
+        save(joinpath(fig_path, "ecoregion_single_$m.png"), ecoregion_plots[m])
+    end
 end
-ecoregion_plots["Co"]
-ecoregion_plots["L"]
-ecoregion_plots["Lv"]
-ecoregion_plots["Ld"]
+
+# Check results
 ecoregion_plots["S"]
 ecoregion_plots["Sv"]
 ecoregion_plots["LCBD_species"]
 ecoregion_plots["LCBD_networks"]
-
-# Export
-if (@isdefined SAVE) && SAVE == true
-    @threads for m in String.(keys(ecoregion_plots))
-        save(joinpath(fig_path, "ecoregion_$m.png"), ecoregion_plots[m])
-    end
-end
+ecoregion_plots["Co"]
+ecoregion_plots["L"]
+ecoregion_plots["Lv"]
+ecoregion_plots["Ld"]
+ecoregion_plots["S1"]
+ecoregion_plots["S2"]
+ecoregion_plots["S4"]
+ecoregion_plots["S5"]
 
 ## Compare with richness
 
@@ -233,9 +221,6 @@ fig = make_bivariate_figure(
     # rev=true,
     cmap=cmap2
 )
-if (@isdefined SAVE) && SAVE == true
-    save(joinpath(fig_path, "ecoregion_LCBD_bivariate.png"), fig)
-end
 
 ## Relationship between LCBD median and IQR
 
@@ -280,57 +265,15 @@ function make_density_figure(fig = Figure(;resolution=(800, 400)))
     fig
 end
 fig = make_density_figure()
-if (@isdefined SAVE) && SAVE == true
-    save(joinpath(fig_path, "ecoregion_relation_lcbd_densities.png"), fig)
-end
-
-# 3 panel version
-begin
-    fig = Figure(resolution=(850,1000))
-    # Define layout
-    g1 = fig[1:2,1] = GridLayout()
-    g2 = fig[3:4,1] = GridLayout()
-    g3 = fig[5,1] = GridLayout()
-    # Species LCBD
-    p1 = background_map(g1[1,1])
-    sf1 = surface!(
-        ecoregion_layers["LCBD_species_median"];
-        colormap=cgrad([p0, bv_pal_2[2]]),
-        shading=false
-    )
-    Colorbar(g1[1,2], sf1; height=Relative(0.5), label="Species LCBD")
-    # Network LCBD
-    p2 = background_map(g2[1,1])
-    sf2 = surface!(
-        ecoregion_layers["LCBD_networks_median"];
-        colormap=cgrad([p0, bv_pal_2[3]]),
-        shading=false
-    )
-    Colorbar(g2[1,2], sf2; height=Relative(0.5), label="Network LCBD")
-    # Density maps
-    p3 = make_density_figure(g3)
-    fig
-end
-if (@isdefined SAVE) && SAVE == true
-    save(joinpath(fig_path, "ecoregion_LCBD_all_included.png"), fig)
-end
 
 # 4 panel version
 begin
     fig = Figure(resolution=(1500,800))
     # Define layout
-    # g1 = fig[1:4,1] = GridLayout()
-    # g2 = fig[5:8,1] = GridLayout()
-    # g3 = fig[1:6,2] = GridLayout()
-    # g4 = fig[6:7,2] = GridLayout()
     g1 = fig[1:2,1] = GridLayout()
     g2 = fig[1:2,2] = GridLayout()
     g3 = fig[3:4,1] = GridLayout()
     g4 = fig[3:4,2] = GridLayout()
-    # g3 = fig[2:4,1:3] = GridLayout()
-    # g1 = fig[1:2,4:5] = GridLayout()
-    # g2 = fig[3:4,4:5] = GridLayout()
-    # g4 = fig[5,4:5] = GridLayout()
     # Species LCBD
     p1 = background_map(g1[1,1])
     sf1 = surface!(

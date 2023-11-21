@@ -43,7 +43,7 @@ filenames = [
 quantile055(x) = quantile(x, 0.055)
 quantile945(x) = quantile(x, 0.945)
 iqr89(x) = quantile945(x) - quantile055(x)
-summary_fs = [median, quantile055, quantile945, iqr89]
+summary_fs = [median, iqr89]
 
 # Load layers to summarize by ecoregion
 local_layers = Dict{String, SimpleSDMPredictor}()
