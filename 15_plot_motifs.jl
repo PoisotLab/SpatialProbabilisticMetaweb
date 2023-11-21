@@ -12,81 +12,73 @@ else
 end
 
 # Load motif results
-S4 = read_geotiff(joinpath(results_path, "S4.tif"), SimpleSDMPredictor)
-S5 = read_geotiff(joinpath(results_path, "S5.tif"), SimpleSDMPredictor)
+motifs = Dict{String, SimpleSDMLayer}()
+for SX in ["S1", "S2", "S4", "S5"]
+    motifs[SX] = read_geotiff(joinpath(results_path, "$SX.tif"), SimpleSDMPredictor)
+end
+S1 = motifs["S1"]
+S2 = motifs["S2"]
+S4 = motifs["S4"]
+S5 = motifs["S5"]
 
 ## Plot
 
-# S4
+# Plot single motifs
+for (motif, layer) in motifs
+    begin
+        fig = background_map()
+        sf = surface!(log1p(layer); shading=false)
+        Colorbar(fig[1,2], sf; height=Relative(0.5), label="log($motif + 1)")
+        fig
+    end
+    if (@isdefined SAVE) && SAVE == true
+        save(joinpath("figures", "motifs_$motif.png"), fig)
+    end
+end
+
+# S1-S2 comparison - Normalized difference trophic index
 begin
     fig = background_map()
-    sf = surface!(log1p(S4); shading=false)
-    Colorbar(fig[1,2], sf; height=Relative(0.5), label="log(S4 + 1)")
+    sf = surface!((S1-S2)/(S1+S2); shading=false, colorrange=(-1/2,1/2), colormap=:roma)
+    Colorbar(fig[1,2], sf; height=Relative(0.5), label="S1-S2 Normalized Difference Trophic Index")
     fig
 end
 if (@isdefined SAVE) && SAVE == true
-    save(joinpath("figures", "motifs_S4.png"), fig)
+    save(joinpath("figures", "motifs_NDI_trophic.png"), fig)
 end
 
-# S5
+# S4-S5 comparison - Normalized difference competition index
 begin
     fig = background_map()
-    sf = surface!(log1p(S5); shading=false)
-    Colorbar(fig[1,2], sf; height=Relative(0.5), label="log(S5 + 1)")
+    sf = surface!((S4-S5)/(S4+S5); shading=false, colorrange=(-1/2,1/2), colormap=:roma)
+    Colorbar(fig[1,2], sf; height=Relative(0.5), label="S4-S5 Normalized Difference Competition Index")
     fig
 end
 if (@isdefined SAVE) && SAVE == true
-    save(joinpath("figures", "motifs_S5.png"), fig)
+    save(joinpath("figures", "motifs_NDI_competition.png"), fig)
 end
 
-# Relationship
-common_sites = intersect(findall(!isnothing, S4.grid), findall(!isnothing, S5.grid))
-begin
-    fig = Figure()
-    ax = Axis(fig[1,1],
-        xlabel=("log(S4 + 1)"), ylabel=("log(S5 + 1)"),
-        aspect=1, yticks=0:2:10, xticks=0:2:10, limits=((nothing, 10), (nothing, 10))
-    )
-    hexbin!(
-        log1p.(S4[common_sites]),
-        log1p.(S5[common_sites]);
-        bins=50
-    )
-    lines!(0:10, 0:10; color=:red)
-    fig
-end
-if (@isdefined SAVE) && SAVE == true
-    save(joinpath("figures", "motifs_S4-S5-rel.png"), fig)
-end
-
-# Log ratio
-begin
-    fig = background_map()
-    sf = surface!(log1p(S4/S5); shading=false, colormap=:broc)
-    Colorbar(fig[1,2], sf; height=Relative(0.5), label="Log ratio log1p(S4/S5)")
-    fig
-end
-if (@isdefined SAVE) && SAVE == true
-    save(joinpath("figures", "motifs_S4-S5-logratio.png"), fig)
-end
-
-# Additional attempt
-begin
-    fig = background_map()
-    sf = surface!(log((S4+1)/(S5+1)); shading=false, colormap=:jet)
-    Colorbar(fig[1,2], sf; height=Relative(0.5), label="Log ratio log((S4+1) / (S5+1))")
-    fig
-end
-
-# Remove sites with zero
-sites_zeros = union(findall(iszero, S4), findall(iszero, S5))
-S4_nozero = convert(SimpleSDMResponse, copy(S4))
-S4_nozero[sites_zeros] = fill(nothing, length(sites_zeros))
-S5_nozero = convert(SimpleSDMResponse, copy(S5))
-S5_nozero[sites_zeros] = fill(nothing, length(sites_zeros))
-begin
-    fig = background_map()
-    sf = surface!(log1p(S4_nozero/S5_nozero); shading=false, colormap=:jet)
-    Colorbar(fig[1,2], sf; height=Relative(0.5), label="Log ratio log1p(S4/S5)")
-    fig
+# Relationships
+rel_pairs = ["S1" => "S2", "S4" => "S5"]
+for pair in rel_pairs
+    SA = motifs[pair.first]
+    SB = motifs[pair.second]
+    common_sites = intersect(findall(!isnothing, SA.grid), findall(!isnothing, SB.grid))
+    begin
+        fig = Figure()
+        ax = Axis(fig[1,1],
+            xlabel=("log($(pair.first)+ 1)"), ylabel=("log($(pair.second) + 1)"),
+            aspect=1, yticks=0:2:10, xticks=0:2:10, limits=((nothing, 10), (nothing, 10))
+        )
+        hexbin!(
+            log1p.(SA[common_sites]),
+            log1p.(SB[common_sites]);
+            bins=50
+        )
+        lines!(0:10, 0:10; color=:red)
+        fig
+    end
+    if (@isdefined SAVE) && SAVE == true
+        save(joinpath("figures", "motifs_rel_$(pair.first)-$(pair.second).png"), fig)
+    end
 end

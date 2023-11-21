@@ -28,11 +28,15 @@ end
 ## Basic summary statistics
 
 # Define the network measures to use
-measures = ["Co", "L", "Lv", "Ld", "S", "Sv", "LCBD_species", "LCBD_networks"]
+measures = [
+    "Co", "L", "Lv", "Ld", "S", "Sv", "LCBD_species", "LCBD_networks",
+    "S1", "S2", "S4", "S5",
+]
 filenames = [
     "connectance", "links_mean", "links_var", "links_density",
     "richness_mean", "richness_uncertainty",
-    "lcbd_species_mean", "lcbd_networks_mean"
+    "lcbd_species_mean", "lcbd_networks_mean",
+    "S1", "S2", "S4", "S5",
 ]
 
 # Define the summary functions we will use

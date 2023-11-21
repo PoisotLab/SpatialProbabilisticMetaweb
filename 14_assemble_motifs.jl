@@ -14,7 +14,8 @@ end
 
 # Assemble target motifs
 motifs = Dict{String, SimpleSDMResponse}()
-for SX in ["S4", "S5"]
+SX_all = unique(first.(split.(readdir(joinpath("data", "results", "motifs")), "-")))
+for SX in SX_all
     # Load the files for the motif
     @info "Loading motif $SX"
     files = readdir(joinpath(results_path, "motifs"); join=true)
@@ -42,5 +43,7 @@ end
 GC.gc()
 
 # Load motif results
+S1 = read_geotiff(joinpath(results_path, "S1.tif"), SimpleSDMPredictor)
+S2 = read_geotiff(joinpath(results_path, "S2.tif"), SimpleSDMPredictor)
 S4 = read_geotiff(joinpath(results_path, "S4.tif"), SimpleSDMPredictor)
 S5 = read_geotiff(joinpath(results_path, "S5.tif"), SimpleSDMPredictor)
