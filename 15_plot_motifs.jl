@@ -126,7 +126,7 @@ end
 for SX in ["S1", "S2", "S4", "S5"]
     begin
         fig = background_map()
-        sf = surface!(log1p(motifs["$(SX)_mean"]); shading=false)
+        sf = surface!(log1p(motifs["$(SX)_median"]); shading=false)
         Colorbar(fig[1,2], sf; height=Relative(0.5), label="log($SX + 1)")
         fig
     end
@@ -138,7 +138,7 @@ end
 # S1-S2 comparison - Normalized difference trophic index
 begin
     fig = background_map()
-    sf = surface!(motifs["NDTI_mean"]; shading=false, colorrange=(-1/2,1/2), colormap=:roma)
+    sf = surface!(motifs["NDTI_median"]; shading=false, colorrange=(-1/2,1/2), colormap=:roma)
     Colorbar(fig[1,2], sf; height=Relative(0.5), label="Normalized Difference Trophic Index")
     fig
 end
@@ -149,7 +149,7 @@ end
 # S4-S5 comparison - Normalized difference competition index
 begin
     fig = background_map()
-    sf = surface!(motifs["NDCI_mean"]; shading=false, colorrange=(-1/2,1/2), colormap=:roma)
+    sf = surface!(motifs["NDCI_median"]; shading=false, colorrange=(-1/2,1/2), colormap=:roma)
     Colorbar(fig[1,2], sf; height=Relative(0.5), label="Normalized Difference Competition Index")
     fig
 end
