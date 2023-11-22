@@ -84,3 +84,57 @@ for pair in rel_pairs
         save(joinpath("figures", "motifs_rel_$(pair.first)-$(pair.second).png"), fig)
     end
 end
+
+## Ecoregion motifs figures
+
+# Load ecoregion motif layers
+for SX in ["S1", "S2", "S4", "S5"]
+    motifs["$(SX)_eco"] = read_geotiff(
+        joinpath(results_path, "ecoregions", "ecoregion_$(SX)_median.tif"), SimpleSDMPredictor
+    )
+    motifs["$(SX)_eco"] = replace(motifs["$(SX)_eco"], 0.0 => nothing)
+end
+
+# Plot ecoregion motifs
+for SX in ["S1", "S2", "S4", "S5"]
+    begin
+        fig = background_map()
+        sf = surface!(log1p(motifs["$(SX)_eco"]); shading=false)
+        Colorbar(fig[1,2], sf; height=Relative(0.5), label="log($SX + 1)")
+        fig
+    end
+    if (@isdefined SAVE) && SAVE == true
+        save(joinpath("figures", "ecoregions", "motifs_ecoregion_$SX.png"), fig)
+    end
+end
+
+# Extract region layers
+S1_eco = motifs["S1_eco"]
+S2_eco = motifs["S2_eco"]
+S4_eco = motifs["S4_eco"]
+S5_eco = motifs["S5_eco"]
+
+# S1-S2 comparison - Normalized difference trophic index
+begin
+    fig = background_map()
+    NDTI_eco = (S1_eco-S2_eco)/(S1_eco+S2_eco)
+    sf = surface!(NDTI_eco; shading=false, colorrange=(-1/2,1/2), colormap=:roma)
+    Colorbar(fig[1,2], sf; height=Relative(0.5), label="Normalized Difference Trophic Index")
+    fig
+end
+if (@isdefined SAVE) && SAVE == true
+    save(joinpath("figures", "ecoregions", "motifs_ecoregion_NDI_trophic.png"), fig)
+end
+
+# S4-S5 comparison - Normalized difference competition index
+begin
+    fig = background_map()
+    NDCI_eco = (S4_eco-S5_eco)/(S4_eco+S5_eco)
+    sf = surface!(NDCI_eco; shading=false, colorrange=(-1/2,1/2), colormap=:roma)
+    Colorbar(fig[1,2], sf; height=Relative(0.5), label="Normalized Difference Competition Index")
+    fig
+end
+if (@isdefined SAVE) && SAVE == true
+    save(joinpath("figures", "ecoregions", "motifs_ecoregion_NDI_competition.png"), fig)
+end
+
