@@ -138,3 +138,69 @@ if (@isdefined SAVE) && SAVE == true
     save(joinpath("figures", "ecoregions", "motifs_ecoregion_NDI_competition.png"), fig)
 end
 
+# Investigate mean vs median
+NDTI_median = (motifs["S1_median"]-motifs["S2_median"])/(motifs["S1_median"]+motifs["S2_median"])
+NDCI_median = (motifs["S4_median"]-motifs["S5_median"])/(motifs["S4_median"]+motifs["S5_median"])
+
+NDTI_mean = (motifs["S1_mean"]-motifs["S2_mean"])/(motifs["S1_mean"]+motifs["S2_mean"])
+NDCI_mean = (motifs["S4_mean"]-motifs["S5_mean"])/(motifs["S4_mean"]+motifs["S5_mean"])
+
+# Are the values the same?
+values(NDTI_mean) == values(NDTI_median)
+sort(values(NDTI_mean))
+sort(values(NDTI_median)) # not quite
+
+# What's going on with the northern ecoregion??
+eco_path = joinpath("data", "input", "canada_ecoregions.tif");
+ecoregions = read_geotiff(eco_path, SimpleSDMPredictor)
+
+ecoregion_412 = replace(ecoregions .== 412, 0.0 => nothing)
+NDCI_412 = mask(ecoregion_412, NDCI)
+NDCI_412_mean = mask(ecoregion_412, NDCI_mean)
+NDCI_412_median = mask(ecoregion_412, NDCI_median)
+
+heatmap(ecoregion_412)
+heatmap(NDCI; colormap=:roma, colorrange=(-0.5,0.5))
+heatmap(NDCI_412; colormap=:roma, colorrange=(-0.5,0.5))
+hist(filter(!isnan, values(NDCI_412)))
+v412=(mean=unique(values(NDCI_412_mean)), median=unique(values(NDCI_412_median)))
+
+# How about the ecoregion next to it?
+ecoregion_414 = replace(ecoregions .== 414, 0.0 => nothing)
+NDCI_414 = mask(ecoregion_414, NDCI)
+NDCI_414_mean = mask(ecoregion_414, NDCI_mean)
+NDCI_414_median = mask(ecoregion_414, NDCI_median)
+
+heatmap(ecoregion_414)
+heatmap(NDCI_414; colormap=:roma, colorrange=(-0.5,0.5))
+hist(filter(!isnan, values(NDCI_414)))
+v414=(mean=unique(values(NDCI_414_mean)), median=unique(values(NDCI_414_median)))
+v412
+
+# What if we calculate NDCI before we ecoregionalize?
+ecoregions_ids = unique(values(ecoregions))
+ecoregions_stack = [convert(Float32, ecoregions .== id) for id in ecoregions_ids]
+for e in ecoregions_stack
+    replace!(e, 0.0 => nothing)
+end
+function ecoregionalize(layer, ecoregions_stack; f=median, keepzeros=true)
+    l_eco = similar(layer)
+    @threads for e in ecoregions_stack
+        k = intersect(keys(e), keys(layer))
+        l_eco[k] = fill(f(layer[k]), length(k))
+    end
+    if !keepzeros
+        replace!(l_eco, 0.0 => nothing)
+    end
+    return l_eco
+end
+quantile055(x) = quantile(x, 0.055)
+quantile945(x) = quantile(x, 0.945)
+iqr89(x) = quantile945(x) - quantile055(x)
+
+NDCI_eco_median = ecoregionalize(NDCI, ecoregions_stack; f=x-> median(filter(!isnan, (x))))
+NDCI_eco_mean = ecoregionalize(NDCI, ecoregions_stack; f=x-> mean(filter(!isnan, (x))))
+NDCI_eco_iqr89 = ecoregionalize(NDCI, ecoregions_stack; f=x-> iqr89(filter(!isnan, (x))))
+heatmap(NDCI_eco_median; colormap=:roma, colorrange=(-0.5,0.5))
+heatmap(NDCI_eco_mean; colormap=:roma, colorrange=(-0.5,0.5))
+heatmap(NDCI_eco_iqr89) # bingo
