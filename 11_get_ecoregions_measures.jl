@@ -93,3 +93,12 @@ for (key, layer) in ecoregion_layers
     path = joinpath(ecoresults_path, "ecoregion_$key.tif")
     write_geotiff(path, layer)
 end
+
+# Additionally, we also want the mean for the motifs
+for SX in ["S1", "S2", "S4", "S5"]
+    layer = ecoregionalize(
+        local_layers[SX], ecoregions_stack; f=mean
+    )
+    path = joinpath(ecoresults_path, "ecoregion_$(SX)_mean.tif")
+    write_geotiff(path, layer)
+end

@@ -88,18 +88,18 @@ end
 ## Ecoregion motifs figures
 
 # Load ecoregion motif layers
-for SX in ["S1", "S2", "S4", "S5"]
-    motifs["$(SX)_eco"] = read_geotiff(
-        joinpath(results_path, "ecoregions", "ecoregion_$(SX)_median.tif"), SimpleSDMPredictor
+for SX in ["S1", "S2", "S4", "S5"], f in [mean, median]
+    motifs["$(SX)_$f"] = read_geotiff(
+        joinpath(results_path, "ecoregions", "ecoregion_$(SX)_$f.tif"), SimpleSDMPredictor
     )
-    motifs["$(SX)_eco"] = replace(motifs["$(SX)_eco"], 0.0 => nothing)
+    motifs["$(SX)_$f"] = replace(motifs["$(SX)_$f"], 0.0 => nothing)
 end
 
 # Plot ecoregion motifs
 for SX in ["S1", "S2", "S4", "S5"]
     begin
         fig = background_map()
-        sf = surface!(log1p(motifs["$(SX)_eco"]); shading=false)
+        sf = surface!(log1p(motifs["$(SX)_mean"]); shading=false)
         Colorbar(fig[1,2], sf; height=Relative(0.5), label="log($SX + 1)")
         fig
     end
@@ -109,10 +109,10 @@ for SX in ["S1", "S2", "S4", "S5"]
 end
 
 # Extract region layers
-S1_eco = motifs["S1_eco"]
-S2_eco = motifs["S2_eco"]
-S4_eco = motifs["S4_eco"]
-S5_eco = motifs["S5_eco"]
+S1_eco = motifs["S1_mean"]
+S2_eco = motifs["S2_mean"]
+S4_eco = motifs["S4_mean"]
+S5_eco = motifs["S5_mean"]
 
 # S1-S2 comparison - Normalized difference trophic index
 begin
