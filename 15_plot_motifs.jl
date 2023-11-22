@@ -38,9 +38,10 @@ end
 
 # S1-S2 comparison - Normalized difference trophic index
 begin
+    NDTI = (S1-S2)/(S1+S2)
     fig = background_map()
-    sf = surface!((S1-S2)/(S1+S2); shading=false, colorrange=(-1/2,1/2), colormap=:roma)
-    Colorbar(fig[1,2], sf; height=Relative(0.5), label="S1-S2 Normalized Difference Trophic Index")
+    sf = surface!(NDTI; shading=false, colorrange=(-1/2,1/2), colormap=:roma)
+    Colorbar(fig[1,2], sf; height=Relative(0.5), label="Normalized Difference Trophic Index")
     fig
 end
 if (@isdefined SAVE) && SAVE == true
@@ -49,9 +50,10 @@ end
 
 # S4-S5 comparison - Normalized difference competition index
 begin
+    NDCI = (S4-S5)/(S4+S5)
     fig = background_map()
-    sf = surface!((S4-S5)/(S4+S5); shading=false, colorrange=(-1/2,1/2), colormap=:roma)
-    Colorbar(fig[1,2], sf; height=Relative(0.5), label="S4-S5 Normalized Difference Competition Index")
+    sf = surface!(NDCI; shading=false, colorrange=(-1/2,1/2), colormap=:roma)
+    Colorbar(fig[1,2], sf; height=Relative(0.5), label="Normalized Difference Competition Index")
     fig
 end
 if (@isdefined SAVE) && SAVE == true
