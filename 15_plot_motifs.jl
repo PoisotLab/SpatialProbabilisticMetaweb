@@ -87,10 +87,37 @@ end
 
 ## Ecoregion motifs figures
 
-# Load ecoregion motif layers
-for SX in ["S1", "S2", "S4", "S5"], f in [mean, median]
-    motifs["$(SX)_$f"] = read_geotiff(
-        joinpath(results_path, "ecoregions", "ecoregion_$(SX)_$f.tif"), SimpleSDMPredictor
+# Elements needed to create ecoregions
+eco_path = joinpath("data", "input", "canada_ecoregions.tif");
+ecoregions = read_geotiff(eco_path, SimpleSDMPredictor)
+ecoregions_ids = unique(values(ecoregions))
+ecoregions_stack = [convert(Float32, ecoregions .== id) for id in ecoregions_ids]
+for e in ecoregions_stack
+    replace!(e, 0.0 => nothing)
+end
+function ecoregionalize(layer, ecoregions_stack; f=median, keepzeros=true)
+    l_eco = similar(layer)
+    @threads for e in ecoregions_stack
+        k = intersect(keys(e), keys(layer))
+        l_eco[k] = fill(f(layer[k]), length(k))
+    end
+    if !keepzeros
+        replace!(l_eco, 0.0 => nothing)
+    end
+    return l_eco
+end
+quantile055(x) = quantile(x, 0.055)
+quantile945(x) = quantile(x, 0.945)
+iqr89(x) = quantile945(x) - quantile055(x)
+
+# Add NDI layers to motif Dict
+motifs["NDTI"] = NDTI
+motifs["NDCI"] = NDCI
+
+# Create ecoregion motif layers
+for SX in ["S1", "S2", "S4", "S5", "NDTI", "NDCI"], f in [mean, median, iqr89]
+    motifs["$(SX)_$f"] = ecoregionalize(
+        motifs["$SX"], ecoregions_stack; f=x -> f(filter(!isnan, (x)))
     )
     motifs["$(SX)_$f"] = replace(motifs["$(SX)_$f"], 0.0 => nothing)
 end
@@ -108,17 +135,10 @@ for SX in ["S1", "S2", "S4", "S5"]
     end
 end
 
-# Extract region layers
-S1_eco = motifs["S1_mean"]
-S2_eco = motifs["S2_mean"]
-S4_eco = motifs["S4_mean"]
-S5_eco = motifs["S5_mean"]
-
 # S1-S2 comparison - Normalized difference trophic index
 begin
     fig = background_map()
-    NDTI_eco = (S1_eco-S2_eco)/(S1_eco+S2_eco)
-    sf = surface!(NDTI_eco; shading=false, colorrange=(-1/2,1/2), colormap=:roma)
+    sf = surface!(motifs["NDTI_mean"]; shading=false, colorrange=(-1/2,1/2), colormap=:roma)
     Colorbar(fig[1,2], sf; height=Relative(0.5), label="Normalized Difference Trophic Index")
     fig
 end
@@ -129,8 +149,7 @@ end
 # S4-S5 comparison - Normalized difference competition index
 begin
     fig = background_map()
-    NDCI_eco = (S4_eco-S5_eco)/(S4_eco+S5_eco)
-    sf = surface!(NDCI_eco; shading=false, colorrange=(-1/2,1/2), colormap=:roma)
+    sf = surface!(motifs["NDCI_mean"]; shading=false, colorrange=(-1/2,1/2), colormap=:roma)
     Colorbar(fig[1,2], sf; height=Relative(0.5), label="Normalized Difference Competition Index")
     fig
 end
@@ -138,3 +157,26 @@ if (@isdefined SAVE) && SAVE == true
     save(joinpath("figures", "ecoregions", "motifs_ecoregion_NDI_competition.png"), fig)
 end
 
+## Repeat for IQR
+
+# S1-S2 comparison - Normalized difference trophic index
+begin
+    fig = background_map()
+    sf = surface!(motifs["NDTI_iqr89"]; shading=false)
+    Colorbar(fig[1,2], sf; height=Relative(0.5), label="Normalized Difference Trophic Index 89% IQR")
+    fig
+end
+if (@isdefined SAVE) && SAVE == true
+    save(joinpath("figures", "ecoregions", "motifs_ecoregion_NDI_trophic_iqr.png"), fig)
+end
+
+# S4-S5 comparison - Normalized difference competition index
+begin
+    fig = background_map()
+    sf = surface!(motifs["NDCI_iqr89"]; shading=false)
+    Colorbar(fig[1,2], sf; height=Relative(0.5), label="Normalized Difference Competition Index 89% IQR")
+    fig
+end
+if (@isdefined SAVE) && SAVE == true
+    save(joinpath("figures", "ecoregions", "motifs_ecoregion_NDI_competition_iqr.png"), fig)
+end
