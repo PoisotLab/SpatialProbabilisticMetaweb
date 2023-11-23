@@ -21,10 +21,6 @@ S2 = motifs["S2"]
 S4 = motifs["S4"]
 S5 = motifs["S5"]
 
-# Get the Trophic & Competition Normalized Difference Indexes
-NDTI = (S1-S2)/(S1+S2)
-NDCI = (S4-S5)/(S4+S5)
-
 ## Plot
 
 # Plot single motifs
@@ -42,6 +38,7 @@ end
 
 # S1-S2 comparison - Normalized difference trophic index
 begin
+    NDTI = (S1-S2)/(S1+S2)
     fig = background_map()
     sf = surface!(NDTI; shading=false, colorrange=(-1/2,1/2), colormap=:roma)
     Colorbar(fig[1,2], sf; height=Relative(0.5), label="Normalized Difference Trophic Index")
@@ -53,6 +50,7 @@ end
 
 # S4-S5 comparison - Normalized difference competition index
 begin
+    NDCI = (S4-S5)/(S4+S5)
     fig = background_map()
     sf = surface!(NDCI; shading=false, colorrange=(-1/2,1/2), colormap=:roma)
     Colorbar(fig[1,2], sf; height=Relative(0.5), label="Normalized Difference Competition Index")
@@ -182,19 +180,3 @@ end
 if (@isdefined SAVE) && SAVE == true
     save(joinpath("figures", "ecoregions", "motifs_ecoregion_NDI_competition_iqr.png"), fig)
 end
-
-ecoregion_412 = replace(ecoregions .== 412, 0.0 => nothing)
-NDCI_412 = mask(ecoregion_412, NDCI)
-fig = hist(filter(!isnan, values(NDCI_412)); axis=(;
-    title="Distribution of NDCI values in the northernmost ecoregion",
-    xlabel="NDCI values", ylabel="Frequency")
-)
-save("hist_NDCI_northernmost.png", fig)
-
-ecoregion_414 = replace(ecoregions .== 414, 0.0 => nothing)
-NDCI_414 = mask(ecoregion_414, NDCI)
-fig = hist(filter(!isnan, values(NDCI_414)); axis=(;
-    title="Distribution of NDCI values in the 2nd northernmost ecoregion",
-    xlabel="NDCI values", ylabel="Frequency")
-)
-save("hist_NDCI_2nd.png", fig)
