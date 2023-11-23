@@ -21,6 +21,10 @@ S2 = motifs["S2"]
 S4 = motifs["S4"]
 S5 = motifs["S5"]
 
+# Get normalized difference indexes
+NDTI = (S1-S2)/(S1+S2)
+NDCI = (S4-S5)/(S4+S5)
+
 ## Plot
 
 # Plot single motifs
@@ -87,28 +91,8 @@ end
 
 ## Ecoregion motifs figures
 
-# Elements needed to create ecoregions
-eco_path = joinpath("data", "input", "canada_ecoregions.tif");
-ecoregions = read_geotiff(eco_path, SimpleSDMPredictor)
-ecoregions_ids = unique(values(ecoregions))
-ecoregions_stack = [convert(Float32, ecoregions .== id) for id in ecoregions_ids]
-for e in ecoregions_stack
-    replace!(e, 0.0 => nothing)
-end
-function ecoregionalize(layer, ecoregions_stack; f=median, keepzeros=true)
-    l_eco = similar(layer)
-    @threads for e in ecoregions_stack
-        k = intersect(keys(e), keys(layer))
-        l_eco[k] = fill(f(layer[k]), length(k))
-    end
-    if !keepzeros
-        replace!(l_eco, 0.0 => nothing)
-    end
-    return l_eco
-end
-quantile055(x) = quantile(x, 0.055)
-quantile945(x) = quantile(x, 0.945)
-iqr89(x) = quantile945(x) - quantile055(x)
+# Load ecoregion objects and functions
+include("scripts/lib/A5_ecoregions.jl")
 
 # Add NDI layers to motif Dict
 motifs["NDTI"] = NDTI

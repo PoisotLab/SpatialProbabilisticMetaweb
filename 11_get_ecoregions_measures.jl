@@ -14,16 +14,8 @@ else
     results_path = joinpath("xtras", "results");
 end
 
-# Load ecoregions
-ecoregions = read_geotiff(eco_path, SimpleSDMPredictor)
-heatmap(ecoregions)
-
-# Separate ecoregions in different layers
-ecoregions_ids = unique(values(ecoregions))
-ecoregions_stack = [convert(Float32, ecoregions .== id) for id in ecoregions_ids]
-for e in ecoregions_stack
-    replace!(e, 0.0 => nothing)
-end
+# Load ecoregion objects and functions
+include("scripts/lib/A5_ecoregions.jl")
 
 ## Basic summary statistics
 
@@ -39,29 +31,10 @@ filenames = [
     "S1", "S2", "S4", "S5",
 ]
 
-# Define the summary functions we will use
-quantile055(x) = quantile(x, 0.055)
-quantile945(x) = quantile(x, 0.945)
-iqr89(x) = quantile945(x) - quantile055(x)
-summary_fs = [median, iqr89]
-
 # Load layers to summarize by ecoregion
 local_layers = Dict{String, SimpleSDMPredictor}()
 for (m, f) in zip(measures, filenames)
     local_layers[m] = read_geotiff(joinpath(results_path, "$f.tif"), SimpleSDMPredictor)
-end
-
-# Define function
-function ecoregionalize(layer, ecoregions_stack; f=median, keepzeros=true)
-    l_eco = similar(layer)
-    @threads for e in ecoregions_stack
-        k = intersect(keys(e), keys(layer))
-        l_eco[k] = fill(f(layer[k]), length(k))
-    end
-    if !keepzeros
-        replace!(l_eco, 0.0 => nothing)
-    end
-    return l_eco
 end
 
 # Predefine set of options
