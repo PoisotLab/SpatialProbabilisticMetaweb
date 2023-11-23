@@ -99,7 +99,7 @@ motifs["NDTI"] = NDTI
 motifs["NDCI"] = NDCI
 
 # Create ecoregion motif layers
-for SX in ["S1", "S2", "S4", "S5", "NDTI", "NDCI"], f in [mean, median, iqr89]
+for SX in ["S1", "S2", "S4", "S5", "NDTI", "NDCI"], f in [mean, median, iqr89, minimum, maximum]
     motifs["$(SX)_$f"] = ecoregionalize(
         motifs["$SX"], ecoregions_stack; f=x -> f(filter(!isnan, (x)))
     )
@@ -119,48 +119,16 @@ for SX in ["S1", "S2", "S4", "S5"]
     end
 end
 
-# S1-S2 comparison - Normalized difference trophic index
-begin
-    fig = background_map()
-    sf = surface!(motifs["NDTI_median"]; shading=false, colorrange=(-1/2,1/2), colormap=:roma)
-    Colorbar(fig[1,2], sf; height=Relative(0.5), label="Normalized Difference Trophic Index")
-    fig
-end
-if (@isdefined SAVE) && SAVE == true
-    save(joinpath("figures", "ecoregions", "motifs_ecoregion_NDI_trophic.png"), fig)
-end
-
-# S4-S5 comparison - Normalized difference competition index
-begin
-    fig = background_map()
-    sf = surface!(motifs["NDCI_median"]; shading=false, colorrange=(-1/2,1/2), colormap=:roma)
-    Colorbar(fig[1,2], sf; height=Relative(0.5), label="Normalized Difference Competition Index")
-    fig
-end
-if (@isdefined SAVE) && SAVE == true
-    save(joinpath("figures", "ecoregions", "motifs_ecoregion_NDI_competition.png"), fig)
-end
-
-## Repeat for IQR
-
-# S1-S2 comparison - Normalized difference trophic index
-begin
-    fig = background_map()
-    sf = surface!(motifs["NDTI_iqr89"]; shading=false)
-    Colorbar(fig[1,2], sf; height=Relative(0.5), label="Normalized Difference Trophic Index 89% IQR")
-    fig
-end
-if (@isdefined SAVE) && SAVE == true
-    save(joinpath("figures", "ecoregions", "motifs_ecoregion_NDI_trophic_iqr.png"), fig)
-end
-
-# S4-S5 comparison - Normalized difference competition index
-begin
-    fig = background_map()
-    sf = surface!(motifs["NDCI_iqr89"]; shading=false)
-    Colorbar(fig[1,2], sf; height=Relative(0.5), label="Normalized Difference Competition Index 89% IQR")
-    fig
-end
-if (@isdefined SAVE) && SAVE == true
-    save(joinpath("figures", "ecoregions", "motifs_ecoregion_NDI_competition_iqr.png"), fig)
+# Plot NDI variations
+for (m,t) in zip(["NDTI", "NDCI"], ["trophic", "competition"]), f in [minimum, maximum]
+    @info "$m $t $f"
+    begin
+        fig = background_map()
+        sf = surface!(motifs["$(m)_$f"]; shading=false, colorrange=(-1.0, 1.0))
+        Colorbar(fig[1,2], sf; height=Relative(0.5), label="Normalized Difference $(uppercasefirst(t)) Index ($f)")
+        fig
+    end
+    if (@isdefined SAVE) && SAVE == true
+        save(joinpath("figures", "ecoregions", "motifs_ecoregion_NDI_$(t)_$f.png"), fig)
+    end
 end
