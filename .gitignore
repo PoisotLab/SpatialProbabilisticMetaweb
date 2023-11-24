@@ -5,7 +5,7 @@ data/input/chelsa*.tif
 data/input/landcover_stack.tif
 data/occurrences/*
 data/presence_absence/*
-data/results/*
+data/results/motifs
 data/sdms/*
 data/shapefiles/canada/
 data/shapefiles/ecoregions/
