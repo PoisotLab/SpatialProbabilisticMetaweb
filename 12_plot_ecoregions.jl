@@ -18,7 +18,7 @@ isdir(fig_path) || mkdir(fig_path)
 
 # Define the network measures to use
 network_measures = ["Co", "L", "Lv", "Ld"]
-measures = ["S", "Sv", "LCBD_species", "LCBD_networks", network_measures..., motifs...]
+measures = ["S", "Sv", "LCBD_species", "LCBD_networks", network_measures...]
 measures_ts = [
     "Richness", "Richness variance", "Relative species LCBD", "Relative network LCBD",
     "Connectance", "Number of links", "Link variance", "Linkage density",
@@ -37,6 +37,7 @@ opt
 # Load the ecoregion summary layers
 ecoregion_layers = Dict{String, SimpleSDMResponse}()
 for o in opt
+    @info o
     # Load layer
     path = joinpath(ecoresults_path, "ecoregion_$(o.m)_$(o.fs).tif")
     ecoregion_layers["$(o.m)_$(o.fs)"] = read_geotiff(path, SimpleSDMResponse)
