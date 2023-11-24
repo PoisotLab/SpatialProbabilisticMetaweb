@@ -18,12 +18,10 @@ isdir(fig_path) || mkdir(fig_path)
 
 # Define the network measures to use
 network_measures = ["Co", "L", "Lv", "Ld"]
-motifs = ["S1", "S2", "S4", "S5"]
 measures = ["S", "Sv", "LCBD_species", "LCBD_networks", network_measures..., motifs...]
 measures_ts = [
     "Richness", "Richness variance", "Relative species LCBD", "Relative network LCBD",
     "Connectance", "Number of links", "Link variance", "Linkage density",
-    motifs...
 ]
 summary_fs = ["median", "iqr89"]
 summary_ts = ["median", "89% IQR"]

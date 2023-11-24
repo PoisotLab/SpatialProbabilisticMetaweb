@@ -22,13 +22,11 @@ include("scripts/lib/A5_ecoregions.jl")
 # Define the network measures to use
 measures = [
     "Co", "L", "Lv", "Ld", "S", "Sv", "LCBD_species", "LCBD_networks",
-    "S1", "S2", "S4", "S5",
 ]
 filenames = [
     "connectance", "links_mean", "links_var", "links_density",
     "richness_mean", "richness_uncertainty",
     "lcbd_species_mean", "lcbd_networks_mean",
-    "S1", "S2", "S4", "S5",
 ]
 
 # Load layers to summarize by ecoregion
@@ -64,14 +62,5 @@ ecoresults_path = joinpath(results_path, "ecoregions");
 isdir(ecoresults_path) || mkdir(ecoresults_path)
 for (key, layer) in ecoregion_layers
     path = joinpath(ecoresults_path, "ecoregion_$key.tif")
-    write_geotiff(path, layer)
-end
-
-# Additionally, we also want the mean for the motifs
-for SX in ["S1", "S2", "S4", "S5"]
-    layer = ecoregionalize(
-        local_layers[SX], ecoregions_stack; f=mean
-    )
-    path = joinpath(ecoresults_path, "ecoregion_$(SX)_mean.tif")
     write_geotiff(path, layer)
 end
