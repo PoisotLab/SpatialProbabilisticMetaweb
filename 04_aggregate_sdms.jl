@@ -24,7 +24,11 @@ spatialrange = boundingbox(reference_layer)
 if (@isdefined JOBARRAY) && JOBARRAY == true
     # Get infos on the job array
     _jobid = parse(Int64, get(ENV, "SLURM_ARRAY_TASK_ID", "1"))
-    _jobcount = parse(Int64, get(ENV, "SLURM_ARRAY_TASK_COUNT", "10"))
+    if @isdefined(TOTAL_JOBS) && !isnothing(TOTAL_JOBS)
+        _jobcount = TOTAL_JOBS
+    else
+        _jobcont = parse(Int64, get(ENV, "SLURM_ARRAY_TASK_COUNT", "10"))
+    end
 
     # Assign sites to all tasks
     _ntot = length(reference_layer)
