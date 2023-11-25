@@ -17,11 +17,11 @@ fig_path = joinpath("figures", "ecoregions")
 isdir(fig_path) || mkdir(fig_path)
 
 # Define the network measures to use
-network_measures = ["Co", "L", "Lv", "Ld"]
+network_measures = ["Co", "L", "Lv"]
 measures = ["S", "Sv", "LCBD_species", "LCBD_networks", network_measures...]
 measures_ts = [
     "Richness", "Richness variance", "Relative species LCBD", "Relative network LCBD",
-    "Connectance", "Number of links", "Link variance", "Linkage density",
+    "Connectance", "Number of links", "Link variance",
 ]
 summary_fs = ["median", "iqr89"]
 summary_ts = ["median", "89% IQR"]
@@ -37,7 +37,6 @@ opt
 # Load the ecoregion summary layers
 ecoregion_layers = Dict{String, SimpleSDMResponse}()
 for o in opt
-    @info o
     # Load layer
     path = joinpath(ecoresults_path, "ecoregion_$(o.m)_$(o.fs).tif")
     ecoregion_layers["$(o.m)_$(o.fs)"] = read_geotiff(path, SimpleSDMResponse)
@@ -45,6 +44,13 @@ for o in opt
     replace!(ecoregion_layers["$(o.m)_$(o.fs)"], 0.0 => nothing)
 end
 ecoregion_layers
+
+# Put values on log scale (except for LCBD measures)
+@threads for o in opt
+    if !contains(o.m, "LCBD")
+        ecoregion_layers["$(o.m)_$(o.fs)"] = log(ecoregion_layers["$(o.m)_$(o.fs)"])
+    end
+end
 
 # We need to fix an issue with the network LCBN layers before we compare with species LCBD
 # Some sites had no links, so their LCBD values was set to nothing to avoid NaNs everywhere
@@ -74,8 +80,8 @@ ecoregion_plots = Dict{String, Figure}()
         sf1 = surface!(p1, ecoregion_layers["$(m)_median"]; colormap=:inferno, shading=false)
         sf2 = surface!(p2, ecoregion_layers["$(m)_iqr89"]; colormap=:inferno, shading=false)
 
-        Colorbar(p1[1,2], sf1; height=Relative(0.5), label="$(t)")
-        Colorbar(p2[1,2], sf2; height=Relative(0.5), label="$(t) 89% IQR")
+        Colorbar(p1[1,2], sf1; height=Relative(0.5), label="log($(t))")
+        Colorbar(p2[1,2], sf2; height=Relative(0.5), label="log($(t) 89% IQR)")
 
         ecoregion_plots[m] = f;
     end;
@@ -92,31 +98,8 @@ ecoregion_plots["LCBD_networks"]
 ecoregion_plots["Co"]
 ecoregion_plots["L"]
 ecoregion_plots["Lv"]
-ecoregion_plots["Ld"]
-ecoregion_plots["S1"]
-ecoregion_plots["S2"]
-ecoregion_plots["S4"]
-ecoregion_plots["S5"]
 
 ## Compare with richness
-
-# Compare with variance measures for the ecoregion
-begin
-    ms = ["S" "Sv"; "L" "Lv"]
-    ts = ["Richness" "Richness variance"; "Links" "Link variance"]
-    fig = Figure(; resolution=(1275,600))
-    for i in 1:2, j in 1:2
-        m = ms[i,j]
-        t = ts[i,j]
-        p = background_map(fig[i,j]; title=t, titlealign=:left)
-        s = surface!(ecoregion_layers["$(m)_median"]; colormap=:inferno, shading=false)
-        Colorbar(p[1,2], s; height=Relative(0.5), label=t)
-    end
-    fig
-end
-if (@isdefined SAVE) && SAVE == true
-    save(joinpath(fig_path, "ecoregion_comparison.png"), fig)
-end
 
 # Compare with IQR values for the ecoregion
 begin
@@ -133,7 +116,7 @@ begin
         ct = cts[i,j]
         p = background_map(fig[i,j]; title=t, titlealign=:left)
         s = surface!(ecoregion_layers["$(m)"]; colormap=cs[i,j], shading=false)
-        Colorbar(p[1,2], s; height=Relative(0.5), label=ct)
+        Colorbar(p[1,2], s; height=Relative(0.5), label="log($ct)")
     end
     fig
 end
@@ -158,7 +141,7 @@ begin
     p1 = background_map(g1[1,1], title="A", titlealign=:left, titlesize=20)
     sf = bivariatesurface!(p1, L1, L2; cmap=cmap2)
 
-    p2 = Axis(g2[1,1]; aspect = 1, xlabel = "Richness", ylabel = "Links", xticks = 20:20:60)
+    p2 = Axis(g2[1,1]; aspect = 1, xlabel = "log(Richness)", ylabel = "log(Links)")
     l2 = bivariatelegend!(p2, L1, L2; cmap=cmap2)
 
     # IQR bivariate
@@ -171,7 +154,7 @@ begin
     p1 = background_map(g3[1,1], title="B", titlealign=:left, titlesize=20)
     sf = bivariatesurface!(p1, L3, L4; cmap=cmap2)
 
-    p2 = Axis(g4[1,1]; aspect = 1, xlabel = "Richness IQR", ylabel = "Links IQR")
+    p2 = Axis(g4[1,1]; aspect = 1, xlabel = "log(Richness IQR)", ylabel = "log(Links IQR)")
     l2 = bivariatelegend!(p2, L3, L4; cmap=cmap2)
 
     fig
@@ -182,24 +165,6 @@ end
 
 ## Compare with LCBD
 
-# Get relative LCBD values
-begin
-    ms = ["S" "LCBD_species"; "L" "LCBD_networks"]
-    ts = ["Richness" "Species LCBD"; "Links" "Network LCBD"]
-    fig = Figure(; resolution=(1275,600))
-    for i in 1:2, j in 1:2
-        m = ms[i,j]
-        t = ts[i,j]
-        p = background_map(fig[i,j]; title=t, titlealign=:left)
-        s = surface!(ecoregion_layers["$(m)_median"]; colormap=:inferno, shading=false)
-        Colorbar(p[1,2], s; height=Relative(0.5), label=t)
-    end
-    fig
-end
-if (@isdefined SAVE) && SAVE == true
-    save(joinpath(fig_path, "ecoregion_comparison_lcbd.png"), fig)
-end
-
 # Bivariate LCBD figure for ecoregion values
 function make_bivariate_figure(L1, L2, fig = Figure(); pal=bv_pal_2, kw...)
     g1 = fig[1:16, 1:4] = GridLayout()
@@ -209,7 +174,8 @@ function make_bivariate_figure(L1, L2, fig = Figure(); pal=bv_pal_2, kw...)
     sf = bivariatesurface!(p1, L1, L2; pal..., kw...)
 
     p2 = Axis(g2[1,1]; aspect = 1, xlabel = "Species LCBD", ylabel = "Network LCBD",
-              xticks=0.3:0.2:0.7)
+            #   xticks=0.3:0.2:0.7
+              )
     l2 = bivariatelegend!(p2, L1, L2; pal..., kw...)
     fig
 end
