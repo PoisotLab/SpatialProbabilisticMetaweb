@@ -139,10 +139,10 @@ begin
     g2 = ga[2:5, 4] = GridLayout()
 
     p1 = background_map(g1[1,1], title="A", titlealign=:left, titlesize=20)
-    sf = bivariatesurface!(p1, L1, L2; cmap=cmap2)
+    sf = bivariatesurface!(p1, L1, L2; bv_pal_2...)
 
     p2 = Axis(g2[1,1]; aspect = 1, xlabel = "log(Richness)", ylabel = "log(Links)")
-    l2 = bivariatelegend!(p2, L1, L2; cmap=cmap2)
+    l2 = bivariatelegend!(p2, L1, L2; bv_pal_2...)
 
     # IQR bivariate
     L3 = ecoregion_layers["S_iqr89"]
@@ -152,10 +152,11 @@ begin
     g4 = gb[2:5, 4] = GridLayout()
 
     p1 = background_map(g3[1,1], title="B", titlealign=:left, titlesize=20)
-    sf = bivariatesurface!(p1, L3, L4; cmap=cmap2)
+    sf = bivariatesurface!(p1, L3, L4; bv_pal_2...)
 
-    p2 = Axis(g4[1,1]; aspect = 1, xlabel = "log(Richness IQR)", ylabel = "log(Links IQR)")
-    l2 = bivariatelegend!(p2, L3, L4; cmap=cmap2)
+    p2 = Axis(g4[1,1]; aspect = 1, xlabel = "log(Richness IQR)", ylabel = "log(Links IQR)",
+              xticks=1.5:1:3.5)
+    l2 = bivariatelegend!(p2, L3, L4; bv_pal_2...)
 
     fig
 end
@@ -174,17 +175,16 @@ function make_bivariate_figure(L1, L2, fig = Figure(); pal=bv_pal_2, kw...)
     sf = bivariatesurface!(p1, L1, L2; pal..., kw...)
 
     p2 = Axis(g2[1,1]; aspect = 1, xlabel = "Species LCBD", ylabel = "Network LCBD",
-            #   xticks=0.3:0.2:0.7
-              )
+              xticks=0.2:0.3:0.8)
     l2 = bivariatelegend!(p2, L1, L2; pal..., kw...)
     fig
 end
 fig = make_bivariate_figure(
     ecoregion_layers["LCBD_species_median"],
     ecoregion_layers["LCBD_networks_median"];
-    # pal=bv_pal_2,
+    pal=bv_pal_2,
     # rev=true,
-    cmap=cmap2
+    # cmap=cmap2
 )
 
 ## Relationship between LCBD median and IQR
@@ -260,7 +260,8 @@ begin
         ecoregion_layers["LCBD_species_median"],
         ecoregion_layers["LCBD_networks_median"],
         g3;
-        cmap=cmap2
+        # cmap=cmap2
+        pal=bv_pal_2
     )
     # Density maps
     p4 = make_density_figure(g4)
