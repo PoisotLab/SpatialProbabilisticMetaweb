@@ -18,6 +18,9 @@ Lv = read_geotiff(joinpath(results_path, "links_var.tif"), SimpleSDMPredictor)
 Ld = read_geotiff(joinpath(results_path, "links_density.tif"), SimpleSDMPredictor)
 S = read_geotiff(joinpath(results_path, "richness_mean.tif"), SimpleSDMPredictor)
 Sv = read_geotiff(joinpath(results_path, "richness_uncertainty.tif"), SimpleSDMPredictor)
+T = read_geotiff(joinpath(results_path, "proportions_T.tif"), SimpleSDMPredictor)
+I = read_geotiff(joinpath(results_path, "proportions_I.tif"), SimpleSDMPredictor)
+B = read_geotiff(joinpath(results_path, "proportions_B.tif"), SimpleSDMPredictor)
 
 ## Some plots
 
@@ -158,6 +161,21 @@ begin
 end
 if (@isdefined SAVE) && SAVE == true
     save(joinpath("figures", "lcbd_bivariate_densities.png"), fig)
+end
+
+## Species proportions
+
+# Top-intermediate-basal species
+for (prop, t) in zip([T, I, B], ["top", "intermediate", "basal"])
+    begin
+        fig = background_map()
+        sf = surface!(prop; shading=false)
+        Colorbar(fig[1,2], sf; height=Relative(0.5), label="Proportion of $t species (%)")
+        fig
+    end
+    if (@isdefined SAVE) && SAVE == true
+        save(joinpath("figures", "proportions_$t.png"), fig)
+    end
 end
 
 ## Compare sampling options
