@@ -46,11 +46,11 @@ end
 ecoregion_layers
 
 # Put values on log scale (except for LCBD measures)
-@threads for o in opt
-    if !contains(o.m, "LCBD")
-        ecoregion_layers["$(o.m)_$(o.fs)"] = log(ecoregion_layers["$(o.m)_$(o.fs)"])
-    end
-end
+# @threads for o in opt
+#     if !contains(o.m, "LCBD")
+#         ecoregion_layers["$(o.m)_$(o.fs)"] = log(ecoregion_layers["$(o.m)_$(o.fs)"])
+#     end
+# end
 
 # We need to fix an issue with the network LCBN layers before we compare with species LCBD
 # Some sites had no links, so their LCBD values was set to nothing to avoid NaNs everywhere
@@ -107,16 +107,25 @@ begin
     ts = ["A) Richness" "B) Links"; "C) Richness IQR" "D) Links IQR"]
     cts = ["Expected Richness" "Expected number of links";
            "Richness 89% IQR" "Links 89% IQR"]
-    cs = [cgrad([p0, bv_pal_2[2]]) cgrad([p0, bv_pal_2[3]]);
-          cgrad([p0, bv_pal_2[2]]) cgrad([p0, bv_pal_2[3]])]
+    cm = [cgrad([p0, bv_pal_2[2]]), cgrad([p0, bv_pal_2[3]])]
+    cs = ReversibleScale(log, exp)
+    cticks = reshape([
+        [20, 40, 60, 80], # Richness
+        [10, 20, 30],     # Richness IQR
+        [100, 300, 500],  # Links
+        [100, 200, 300],  # Links IQR
+    ], (2,2))
     fig = Figure(; resolution=(1275,600))
     for i in 1:2, j in 1:2
         m = ms[i,j]
         t = ts[i,j]
         ct = cts[i,j]
         p = background_map(fig[i,j]; title=t, titlealign=:left)
-        s = surface!(ecoregion_layers["$(m)"]; colormap=cs[i,j], shading=false)
-        Colorbar(p[1,2], s; height=Relative(0.5), label="log($ct)")
+        s = surface!(ecoregion_layers["$(m)"]; colormap=cm[j], colorscale=cs, shading=false)
+        Colorbar(p[1,2], s;
+            height=Relative(0.5), label="$ct\n(log scale)", ticks=cticks[i,j],
+            minorticksvisible=true, minorticks=IntervalsBetween(2)
+        )
     end
     fig
 end
@@ -139,10 +148,13 @@ begin
     g2 = ga[2:5, 4] = GridLayout()
 
     p1 = background_map(g1[1,1], title="A", titlealign=:left, titlesize=20)
-    sf = bivariatesurface!(p1, L1, L2; bv_pal_2...)
+    sf = bivariatesurface!(p1, L1, L2; n_stops=5, bv_pal_2...)
 
-    p2 = Axis(g2[1,1]; aspect = 1, xlabel = "log(Richness)", ylabel = "log(Links)")
-    l2 = bivariatelegend!(p2, L1, L2; bv_pal_2...)
+    p2 = Axis(g2[1,1];
+        aspect = 1, xlabel = "Richness", ylabel = "Links",
+        xticks=0:25:75, yticks=0:200:600
+    )
+    l2 = bivariatelegend!(p2, L1, L2; n_stops=5, bv_pal_2...,)
 
     # IQR bivariate
     L3 = ecoregion_layers["S_iqr89"]
@@ -152,11 +164,13 @@ begin
     g4 = gb[2:5, 4] = GridLayout()
 
     p1 = background_map(g3[1,1], title="B", titlealign=:left, titlesize=20)
-    sf = bivariatesurface!(p1, L3, L4; bv_pal_2...)
+    sf = bivariatesurface!(p1, L3, L4; n_stops=5, bv_pal_2...)
 
-    p2 = Axis(g4[1,1]; aspect = 1, xlabel = "log(Richness IQR)", ylabel = "log(Links IQR)",
-              xticks=1.5:1:3.5)
-    l2 = bivariatelegend!(p2, L3, L4; bv_pal_2...)
+    p2 = Axis(g4[1,1];
+        aspect = 1, xlabel = "Richness IQR", ylabel = "Links IQR",
+        xticks=0:15:45
+    )
+    l2 = bivariatelegend!(p2, L3, L4; n_stops=5, bv_pal_2...)
 
     fig
 end
@@ -174,17 +188,18 @@ function make_bivariate_figure(L1, L2, fig = Figure(); pal=bv_pal_2, kw...)
     p1 = background_map(g1[1,1])
     sf = bivariatesurface!(p1, L1, L2; pal..., kw...)
 
-    p2 = Axis(g2[1,1]; aspect = 1, xlabel = "Species LCBD", ylabel = "Network LCBD",
-              xticks=0.2:0.3:0.8)
+    p2 = Axis(g2[1,1];
+        aspect = 1, xlabel = "Species LCBD", ylabel = "Network LCBD",
+        xticks=0.2:0.3:0.8, yticks=0.3:0.2:0.7
+    )
     l2 = bivariatelegend!(p2, L1, L2; pal..., kw...)
     fig
 end
 fig = make_bivariate_figure(
     ecoregion_layers["LCBD_species_median"],
     ecoregion_layers["LCBD_networks_median"];
-    pal=bv_pal_2,
-    # rev=true,
-    # cmap=cmap2
+    # pal=bv_pal_2,
+    cmap=cmap2
 )
 
 ## Relationship between LCBD median and IQR
@@ -260,8 +275,8 @@ begin
         ecoregion_layers["LCBD_species_median"],
         ecoregion_layers["LCBD_networks_median"],
         g3;
-        # cmap=cmap2
-        pal=bv_pal_2
+        cmap=cmap2
+        # pal=bv_pal_2
     )
     # Density maps
     p4 = make_density_figure(g4)

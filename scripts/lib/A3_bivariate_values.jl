@@ -1,4 +1,4 @@
-function bivariatelayer(l1, l2; n_stops=5, rscale=0.0:0.01:1.0)
+function bivariatelayer(l1, l2; n_stops=3, rscale=0.0:0.01:1.0)
     # Rescale layers
     r1 = convert(SimpleSDMResponse, rescale(l1, rscale));
     r2 = convert(SimpleSDMResponse, rescale(l2, rscale));
@@ -24,7 +24,7 @@ function bivariatelayer(l1, l2; n_stops=5, rscale=0.0:0.01:1.0)
 end
 
 function _get_bivariate_colormap(;
-    n_stops=5,
+    n_stops=3,
     p0 = colorant"#e8e8e8ff",
     p1 = colorant"#5ac8c8ff",
     p2 = colorant"#be64acff",
@@ -45,7 +45,7 @@ function bivariateheatmap!(
     f,
     l1,
     l2;
-    n_stops=5,
+    n_stops=3,
     rscale=0.0:0.01:1.0,
     p0 = colorant"#e8e8e8ff",
     p1 = colorant"#5ac8c8ff",
@@ -73,7 +73,7 @@ function bivariatesurface!(
     f,
     l1,
     l2;
-    n_stops=5,
+    n_stops=3,
     rscale=0.0:0.01:1.0,
     p0 = colorant"#e8e8e8ff",
     p1 = colorant"#5ac8c8ff",
@@ -99,7 +99,7 @@ end
 
 function bivariatelegend!(
     ax, l1, l2;
-    n_stops=5,
+    n_stops=3,
     p0 = colorant"#e8e8e8ff",
     p1 = colorant"#5ac8c8ff",
     p2 = colorant"#be64acff",
