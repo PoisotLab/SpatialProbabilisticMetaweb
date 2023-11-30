@@ -97,7 +97,7 @@ motifs["NDTI"] = NDTI
 motifs["NDCI"] = NDCI
 
 # Create ecoregion motif layers
-for SX in ["S1", "S2", "S4", "S5", "NDTI", "NDCI"], f in [mean, median, iqr89, minimum, maximum]
+for SX in ["S1", "S2", "S4", "S5", "NDTI", "NDCI"], f in [median, iqr89]
     motifs["$(SX)_$f"] = ecoregionalize(
         motifs["$SX"], ecoregions_stack; f=x -> f(filter(!isnan, (x)))
     )
@@ -117,16 +117,32 @@ for SX in ["S1", "S2", "S4", "S5"]
     end
 end
 
-# Plot NDI variations
-for (m,t) in zip(["NDTI", "NDCI"], ["trophic", "competition"]), f in [minimum, maximum]
-    @info "$m $t $f"
-    begin
-        fig = background_map()
-        sf = surface!(motifs["$(m)_$f"]; shading=false, colorrange=(-1.0, 1.0))
-        Colorbar(fig[1,2], sf; height=Relative(0.5), label="Normalized Difference $(uppercasefirst(t)) Index ($f)")
-        fig
+# Plot NDI values & IQR
+begin
+    ms = ["NDTI_median" "NDCI_median"; "NDTI_iqr89" "NDCI_iqr89"]
+    ts = ["A) Normalized Difference Trophic Index (NDTI)" "B) Normalized Difference Competition Index (NDCI)";
+          "C) Normalized Difference Trophic Index IQR" "D) Normalized Difference Competition Index IQR"]
+    cts = ["NDTI score" "NDCI score";
+           "NDTI 89% IQR" "NDCI 89% IQR"]
+    # cms = [:roma, :imola]
+    cms = [cgrad(:roma, rev=true), :imola]
+    # cms = [:roma, :navia]
+    # cms = [:roma, :lajolla]
+    cranges = [(-0.5, 0.5), (0.0, 1.0)]
+    cticks = [([-0.5, 0.0, 0.5], ["≤-0.5", " 0.0", "≥0.5"]), [0.0, 0.5, 1.0]]
+    fig = Figure(; resolution=(1275,600))
+    for i in 1:2, j in 1:2
+        m = ms[i,j]
+        t = ts[i,j]
+        ct = cts[i,j]
+        p = background_map(fig[i,j]; title=t, titlealign=:left)
+        s = surface!(
+            motifs["$(ms[i,j])"]; shading=false, colormap=cms[i], colorrange=cranges[i]
+        )
+        Colorbar(p[1,2], s; height=Relative(0.5), label="$ct", ticks=cticks[i])
     end
-    if (@isdefined SAVE) && SAVE == true
-        save(joinpath("figures", "ecoregions", "motifs_ecoregion_NDI_$(t)_$f.png"), fig)
-    end
+    fig
+end
+if (@isdefined SAVE) && SAVE == true
+    save(joinpath("figures", "ecoregions", "motifs_ecoregion_NDI_4panels.png"), fig)
 end
