@@ -17,8 +17,30 @@ end
 ## Probabilistic distributions
 
 # Define reference layer
-reference_layer = read_geotiff(ref_path, SimpleSDMPredictor)
+reference_layer = read_geotiff(ref_path, SimpleSDMResponse)
 spatialrange = boundingbox(reference_layer)
+
+# Divide sites if using job array
+if (@isdefined JOBARRAY) && JOBARRAY == true
+    # Get infos on the job array
+    _jobid = parse(Int64, get(ENV, "SLURM_ARRAY_TASK_ID", "1"))
+    if @isdefined(TOTAL_JOBS) && !isnothing(TOTAL_JOBS)
+        _jobcount = TOTAL_JOBS
+    else
+        _jobcont = parse(Int64, get(ENV, "SLURM_ARRAY_TASK_COUNT", "10"))
+    end
+
+    # Assign sites to all tasks
+    _ntot = length(reference_layer)
+    _nsites = ceil(Int64, _ntot/_jobcount)
+    _jobsites = repeat(1:_jobcount; inner=_nsites)
+
+    # Set values to nothing for sites that are NOT for the current task
+    _outsites = findall(!=(_jobid), _jobsites)
+    filter!(<=(_ntot), _outsites) # make sure we don't go over the total
+    _outkeys = keys(reference_layer)[_outsites]
+    reference_layer[_outkeys] = fill(nothing, length(_outkeys))
+end
 
 # Select files to load
 map_files = readdir(sdm_path; join=true)
@@ -28,7 +50,7 @@ filter!(!contains(".gitkeep"), map_files)
 μ = Dict{String,SimpleSDMPredictor}()
 σ = Dict{String,SimpleSDMPredictor}()
 p = Progress(length(map_files))
-@threads for map_file in map_files
+for map_file in map_files
     sp_name = @chain map_file begin
         basename
         replace("_error.tif" => "")
@@ -56,7 +78,7 @@ Base.zero(::Type{Truncated{Normal{T}, Continuous, T, T, T}}) where {T} = Truncat
 # Create layers of Truncated Normal distributions given the mean & variance
 D = Dict{String, SimpleSDMResponse}()
 p = Progress(length(μ))
-@threads for sp in String.(keys(μ))
+for sp in String.(keys(μ))
     _t = similar(μ[sp], Truncated{Normal{Float64}, Continuous, Float64, Float64, Float64})
     for site in keys(μ[sp])
         _t[site] = Truncated(Normal(Float64(μ[sp][site]), Float64(σ[sp][site])), 0.0, 1.0)

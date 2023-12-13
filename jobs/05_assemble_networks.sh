@@ -4,8 +4,8 @@
 #SBATCH --cpus-per-task=64
 #SBATCH --mem=140G
 #SBATCH --time=02:00:00
-#SBATCH --job-name=05_assemble_networks.sh
-#SBATCH --output=jobs/job_05_assemble_networks-%J.out
+#SBATCH --job-name=05_assemble_networks
+#SBATCH --output=jobs/out/%x-%J.out
 
 module load StdEnv/2020
 module load julia/1.9.1

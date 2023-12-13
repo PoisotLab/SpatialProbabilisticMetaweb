@@ -75,3 +75,20 @@ test = read_geotiff(out_file, SimpleSDMResponse)
 test = convert(Float32, test .∈ [10, 11, 12, 13, 24]) # Quebec & Maritimes
 replace!(test, 0.0 => nothing)
 write_geotiff(out_file, test)
+
+## Even smaller layer for New Brunswick
+
+# Get file coordinates
+rx, ry = (10/60, 10/60) # 10 arcmin
+l, r, b, t = (left=-80.0, right=-50.0, bottom=45.0, top=65.0)
+
+# Rasterize
+out_file = joinpath(out_path, "newbrunswick_ref_10.tif")
+@time run(`$(GDAL.gdal_rasterize_path()) -a PRUID $tmp_file $out_file -tr $rx $ry -te $l $b $r $t`);
+
+# Replace zero values
+test = read_geotiff(out_file, SimpleSDMResponse)
+test = convert(Float32, test .∈ [13]) # Quebec & Maritimes
+replace!(test, 0.0 => nothing)
+test = clip(test; left=-69.0, right=-63.0, top=49.0)
+write_geotiff(out_file, test)

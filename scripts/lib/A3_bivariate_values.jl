@@ -84,7 +84,7 @@ function bivariatesurface!(
 )
     # Generate colormap
     if isnothing(cmap)
-        cmap = _get_bivariate_colormap(n_stops=3, p0=p0, p1=p1, p2=p2, rev=rev)
+        cmap = _get_bivariate_colormap(n_stops=n_stops, p0=p0, p1=p1, p2=p2, rev=rev)
     end
 
     # Get bivariate layer
@@ -108,7 +108,7 @@ function bivariatelegend!(
 )
     # Generate colormap
     if isnothing(cmap)
-        cmap = _get_bivariate_colormap(n_stops=3, p0=p0, p1=p1, p2=p2, rev=rev)
+        cmap = _get_bivariate_colormap(n_stops=n_stops, p0=p0, p1=p1, p2=p2, rev=rev)
     end
 
     # Add bivariate legend

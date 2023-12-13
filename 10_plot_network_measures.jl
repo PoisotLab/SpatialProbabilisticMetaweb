@@ -1,5 +1,6 @@
 #### Plot network measures ####
 
+SAVE = true
 CAN = true
 include("A0_required.jl");
 
@@ -10,11 +11,6 @@ else
     results_path = joinpath("xtras", "results")
 end
 
-# Load CairoMakie if exporting figures
-if (@isdefined SAVE) && SAVE == true
-    CairoMakie.activate!()
-end
-
 # Objects
 Co = read_geotiff(joinpath(results_path, "connectance.tif"), SimpleSDMPredictor)
 L = read_geotiff(joinpath(results_path, "links_mean.tif"), SimpleSDMPredictor)
@@ -22,6 +18,9 @@ Lv = read_geotiff(joinpath(results_path, "links_var.tif"), SimpleSDMPredictor)
 Ld = read_geotiff(joinpath(results_path, "links_density.tif"), SimpleSDMPredictor)
 S = read_geotiff(joinpath(results_path, "richness_mean.tif"), SimpleSDMPredictor)
 Sv = read_geotiff(joinpath(results_path, "richness_uncertainty.tif"), SimpleSDMPredictor)
+T = read_geotiff(joinpath(results_path, "proportions_T.tif"), SimpleSDMPredictor)
+I = read_geotiff(joinpath(results_path, "proportions_I.tif"), SimpleSDMPredictor)
+B = read_geotiff(joinpath(results_path, "proportions_B.tif"), SimpleSDMPredictor)
 
 ## Some plots
 
@@ -32,7 +31,7 @@ begin
     Colorbar(fig[1,2], sf; height=Relative(0.5), label="Connectance")
     fig
 end
-if Makie.current_backend() == CairoMakie
+if (@isdefined SAVE) && SAVE == true
     save(joinpath("figures", "links_connectance.png"), fig)
 end
 
@@ -43,7 +42,7 @@ begin
     Colorbar(fig[1,2], sf; height=Relative(0.5), label="Expected number of links")
     fig
 end
-if Makie.current_backend() == CairoMakie
+if (@isdefined SAVE) && SAVE == true
     save(joinpath("figures", "links_mean.png"), fig)
 end
 
@@ -54,7 +53,7 @@ begin
     Colorbar(fig[1,2], sf; height=Relative(0.5), label="Link variance")
     fig
 end
-if Makie.current_backend() == CairoMakie
+if (@isdefined SAVE) && SAVE == true
     save(joinpath("figures", "links_var.png"), fig)
 end
 
@@ -71,7 +70,7 @@ begin
     l2 = bivariatelegend!(p2, L, Lv; bv_pal_2...)
     fig
 end
-if Makie.current_backend() == CairoMakie
+if (@isdefined SAVE) && SAVE == true
     save(joinpath("figures", "links_bivariate.png"), fig)
 end
 
@@ -90,7 +89,7 @@ begin
     l2 = bivariatelegend!(p2, S, L; bv_pal_2...)
     fig
 end
-if Makie.current_backend() == CairoMakie
+if (@isdefined SAVE) && SAVE == true
     save(joinpath("figures", "bivariate_richness_links.png"), fig)
 end
 
@@ -107,19 +106,19 @@ begin
     l2 = bivariatelegend!(p2, Sv, Lv; bv_pal_2...)
     fig
 end
-if Makie.current_backend() == CairoMakie
+if (@isdefined SAVE) && SAVE == true
     save(joinpath("figures", "bivariate_richness_links_variance.png"), fig)
 end
 
 ## LCBD & network measures
 
 # Load LCBD results
-include("x_load_lcbd_results.jl");
+include(joinpath("scripts", "x_load_lcbd_results.jl"));
 
 ## Compare link & richness density of unique sites
 
 # Extract the bivariate values
-biv_layer = bivariatelayer(lcbd_species_all["mean"], lcbd_networks_all["mean"])
+biv_layer = bivariatelayer(lcbd_species_nan, lcbd_networks_all["mean"])
 biv_colors = _get_bivariate_colormap()
 
 # Get the specific sites for each group
@@ -128,10 +127,10 @@ sites7 = findall(==(7), biv_layer)
 sites_mid = setdiff(keys(biv_layer), union(sites3, sites7))
 
 # Plot the two extremas in a different color
-_S3 = Float64.(S[sites3])
+_S3 = try Float64.(S[sites3]) catch; Vector{Float64}[] end
 _S7 = Float64.(S[sites7])
 _Smid = Float64.(S[sites_mid])
-_L3 = Float64.(L[sites3])
+_L3 = try Float64.(L[sites3]) catch; Vector{Float64}[] end
 _L7 = Float64.(L[sites7])
 _Lmid = Float64.(L[sites_mid])
 begin
@@ -141,12 +140,12 @@ begin
         xscale=Makie.pseudolog10, yscale=Makie.pseudolog10
     )
     scatter!(_Smid, _Lmid, label="Other sites", color=(:black, 0.1))
-    scatter!(_S3, _L3, label="Unique species only", color=(biv_colors[3], 0.2))
+    try scatter!(_S3, _L3, label="Unique species only", color=(biv_colors[3], 0.2)) catch; end
     scatter!(_S7, _L7, label="Unique networks only", color=(biv_colors[7], 0.2))
     axislegend(ax1, position = :rb)
     ax2 = Axis(fig[1,2]; xlabel="Richness", ylabel="Density")
     density!(ax2, _Smid; color=(:black, 0.3), strokecolor=:black, strokewidth=3)
-    density!(ax2, _S3; color=(biv_colors[3], 0.3), strokecolor=biv_colors[3], strokewidth=3)
+    try density!(ax2, _S3; color=(biv_colors[3], 0.3), strokecolor=biv_colors[3], strokewidth=3) catch; end
     density!(ax2, _S7; color=(biv_colors[7], 0.3), strokecolor=biv_colors[7], strokewidth=3)
     labels = ["Other sites", "Unique species only", "Unique networks only"]
     elements = [
@@ -156,12 +155,27 @@ begin
     axislegend(ax2, elements, labels)
     ax3 = Axis(fig[2,2]; xlabel="Links", ylabel="Density")
     density!(ax3, _Lmid; color=(:black, 0.3), strokecolor=:black, strokewidth=3)
-    density!(ax3, _L3; color=(biv_colors[3], 0.3), strokecolor=biv_colors[3], strokewidth=3)
+    try density!(ax3, _L3; color=(biv_colors[3], 0.3), strokecolor=biv_colors[3], strokewidth=3) catch; end
     density!(ax3, _L7; color=(biv_colors[7], 0.3), strokecolor=biv_colors[7], strokewidth=3)
     fig
 end
-if Makie.current_backend() == CairoMakie
+if (@isdefined SAVE) && SAVE == true
     save(joinpath("figures", "lcbd_bivariate_densities.png"), fig)
+end
+
+## Species proportions
+
+# Top-intermediate-basal species
+for (prop, t) in zip([T, I, B], ["top", "intermediate", "basal"])
+    begin
+        fig = background_map()
+        sf = surface!(prop; shading=false)
+        Colorbar(fig[1,2], sf; height=Relative(0.5), label="Proportion of $t species (%)")
+        fig
+    end
+    if (@isdefined SAVE) && SAVE == true
+        save(joinpath("figures", "proportions_$t.png"), fig)
+    end
 end
 
 ## Compare sampling options

@@ -1,5 +1,6 @@
 #### Ecoregion plots
 
+SAVE = true
 CAN = true
 include("A0_required.jl");
 
@@ -10,22 +11,17 @@ else
     ecoresults_path = joinpath("xtras", "results", "ecoregions");
 end
 
-# Load CairoMakie if exporting figures
-if (@isdefined SAVE) && SAVE == true
-    CairoMakie.activate!()
-end
-
 ## Basic network measures
 
 fig_path = joinpath("figures", "ecoregions")
 isdir(fig_path) || mkdir(fig_path)
 
 # Define the network measures to use
-network_measures = ["Co", "L", "Lv", "Ld"]
-measures = [network_measures..., "S", "Sv", "LCBD_species", "LCBD_networks"]
+network_measures = ["Co", "L", "Lv"]
+measures = ["S", "Sv", "LCBD_species", "LCBD_networks", network_measures...]
 measures_ts = [
-    "Connectance", "Number of links", "Link variance", "Linkage density",
-    "Richness", "Richness variance", "Relative species LCBD", "Relative network LCBD"
+    "Richness", "Richness variance", "Relative species LCBD", "Relative network LCBD",
+    "Connectance", "Number of links", "Link variance",
 ]
 summary_fs = ["median", "iqr89"]
 summary_ts = ["median", "89% IQR"]
@@ -49,27 +45,32 @@ for o in opt
 end
 ecoregion_layers
 
+# Put values on log scale (except for LCBD measures)
+# @threads for o in opt
+#     if !contains(o.m, "LCBD")
+#         ecoregion_layers["$(o.m)_$(o.fs)"] = log(ecoregion_layers["$(o.m)_$(o.fs)"])
+#     end
+# end
+
+# We need to fix an issue with the network LCBN layers before we compare with species LCBD
+# Some sites had no links, so their LCBD values was set to nothing to avoid NaNs everywhere
+# Now we'll also set them to NaN for species LCBD to compare the rest of the two layers
+if length(ecoregion_layers["LCBD_species_median"]) > length(ecoregion_layers["LCBD_networks_median"])
+    _nan_sites = setdiff(
+        keys(ecoregion_layers["LCBD_species_median"]),
+        keys(ecoregion_layers["LCBD_networks_median"])
+    )
+    @info "Creating a species LCBD layers without $(length(_nan_sites)) sites with missing network LCBD values"
+    for f in ["median", "iqr89"]
+        ecoregion_layers["LCBD_species_$f"][_nan_sites] = fill(nothing, length(_nan_sites))
+    end
+end
+
 ## Make some plots!!
 
-# Plot results
-begin
-    fig = Figure(; resolution=(1200,600))
-    for i in 1:2, j in 1:2
-        m = reshape(network_measures, (2,2))[i,j]
-        t = reshape(measures_ts[1:4], (2,2))[i,j]
-        p = background_map(fig[i,j]; title=t, titlealign=:left)
-        s = surface!(ecoregion_layers["$(m)_median"]; colormap=:inferno, shading=false)
-        Colorbar(p[1,2], s; height=Relative(0.5))
-    end
-    fig
-end
-if Makie.current_backend() == CairoMakie
-    save(joinpath(fig_path, "ecoregion_all_median.png"), fig)
-end
-
-# Some variations
+# Single figures
 ecoregion_plots = Dict{String, Figure}()
-for (m,t) in zip(measures, measures_ts)
+@showprogress "Ecoregion single figures:" for (m,t) in zip(measures, measures_ts)
     begin
         f = Figure(; resolution=(850,800))
 
@@ -79,47 +80,26 @@ for (m,t) in zip(measures, measures_ts)
         sf1 = surface!(p1, ecoregion_layers["$(m)_median"]; colormap=:inferno, shading=false)
         sf2 = surface!(p2, ecoregion_layers["$(m)_iqr89"]; colormap=:inferno, shading=false)
 
-        Colorbar(p1[1,2], sf1; height=Relative(0.5), label="$(t)")
-        Colorbar(p2[1,2], sf2; height=Relative(0.5), label="$(t) 89% IQR")
+        Colorbar(p1[1,2], sf1; height=Relative(0.5), label="log($(t))")
+        Colorbar(p2[1,2], sf2; height=Relative(0.5), label="log($(t) 89% IQR)")
 
         ecoregion_plots[m] = f;
     end;
+    if (@isdefined SAVE) && SAVE == true
+        save(joinpath(fig_path, "ecoregion_single_$m.png"), ecoregion_plots[m])
+    end
 end
-ecoregion_plots["Co"]
-ecoregion_plots["L"]
-ecoregion_plots["Lv"]
-ecoregion_plots["Ld"]
+
+# Check results
 ecoregion_plots["S"]
 ecoregion_plots["Sv"]
 ecoregion_plots["LCBD_species"]
 ecoregion_plots["LCBD_networks"]
-
-# Export
-if Makie.current_backend() == CairoMakie
-    @threads for m in String.(keys(ecoregion_plots))
-        save(joinpath(fig_path, "ecoregion_$m.png"), ecoregion_plots[m])
-    end
-end
+ecoregion_plots["Co"]
+ecoregion_plots["L"]
+ecoregion_plots["Lv"]
 
 ## Compare with richness
-
-# Compare with variance measures for the ecoregion
-begin
-    ms = ["S" "Sv"; "L" "Lv"]
-    ts = ["Richness" "Richness variance"; "Links" "Link variance"]
-    fig = Figure(; resolution=(1275,600))
-    for i in 1:2, j in 1:2
-        m = ms[i,j]
-        t = ts[i,j]
-        p = background_map(fig[i,j]; title=t, titlealign=:left)
-        s = surface!(ecoregion_layers["$(m)_median"]; colormap=:inferno, shading=false)
-        Colorbar(p[1,2], s; height=Relative(0.5), label=t)
-    end
-    fig
-end
-if Makie.current_backend() == CairoMakie
-    save(joinpath(fig_path, "ecoregion_comparison.png"), fig)
-end
 
 # Compare with IQR values for the ecoregion
 begin
@@ -127,20 +107,29 @@ begin
     ts = ["A) Richness" "B) Links"; "C) Richness IQR" "D) Links IQR"]
     cts = ["Expected Richness" "Expected number of links";
            "Richness 89% IQR" "Links 89% IQR"]
-    cs = [cgrad([p0, bv_pal_2[2]]) cgrad([p0, bv_pal_2[3]]);
-          cgrad([p0, bv_pal_2[2]]) cgrad([p0, bv_pal_2[3]])]
+    cm = [cgrad([p0, bv_pal_2[2]]), cgrad([p0, bv_pal_2[3]])]
+    cs = ReversibleScale(log, exp)
+    cticks = reshape([
+        [20, 40, 60, 80], # Richness
+        [10, 20, 30],     # Richness IQR
+        [100, 300, 500],  # Links
+        [100, 200, 300],  # Links IQR
+    ], (2,2))
     fig = Figure(; resolution=(1275,600))
     for i in 1:2, j in 1:2
         m = ms[i,j]
         t = ts[i,j]
         ct = cts[i,j]
         p = background_map(fig[i,j]; title=t, titlealign=:left)
-        s = surface!(ecoregion_layers["$(m)"]; colormap=cs[i,j], shading=false)
-        Colorbar(p[1,2], s; height=Relative(0.5), label=ct)
+        s = surface!(ecoregion_layers["$(m)"]; colormap=cm[j], colorscale=cs, shading=false)
+        Colorbar(p[1,2], s;
+            height=Relative(0.5), label="$ct\n(log scale)", ticks=cticks[i,j],
+            minorticksvisible=true, minorticks=IntervalsBetween(2)
+        )
     end
     fig
 end
-if Makie.current_backend() == CairoMakie
+if (@isdefined SAVE) && SAVE == true
     save(joinpath(fig_path, "ecoregion_comparison_iqr.png"), fig)
 end
 
@@ -159,10 +148,13 @@ begin
     g2 = ga[2:5, 4] = GridLayout()
 
     p1 = background_map(g1[1,1], title="A", titlealign=:left, titlesize=20)
-    sf = bivariatesurface!(p1, L1, L2; cmap=cmap2)
+    sf = bivariatesurface!(p1, L1, L2; n_stops=5, bv_pal_2...)
 
-    p2 = Axis(g2[1,1]; aspect = 1, xlabel = "Richness", ylabel = "Links", xticks = 20:20:60)
-    l2 = bivariatelegend!(p2, L1, L2; cmap=cmap2)
+    p2 = Axis(g2[1,1];
+        aspect = 1, xlabel = "Richness", ylabel = "Links",
+        xticks=0:25:75, yticks=0:200:600
+    )
+    l2 = bivariatelegend!(p2, L1, L2; n_stops=5, bv_pal_2...,)
 
     # IQR bivariate
     L3 = ecoregion_layers["S_iqr89"]
@@ -172,36 +164,21 @@ begin
     g4 = gb[2:5, 4] = GridLayout()
 
     p1 = background_map(g3[1,1], title="B", titlealign=:left, titlesize=20)
-    sf = bivariatesurface!(p1, L3, L4; cmap=cmap2)
+    sf = bivariatesurface!(p1, L3, L4; n_stops=5, bv_pal_2...)
 
-    p2 = Axis(g4[1,1]; aspect = 1, xlabel = "Richness IQR", ylabel = "Links IQR")
-    l2 = bivariatelegend!(p2, L3, L4; cmap=cmap2)
+    p2 = Axis(g4[1,1];
+        aspect = 1, xlabel = "Richness IQR", ylabel = "Links IQR",
+        xticks=0:15:45
+    )
+    l2 = bivariatelegend!(p2, L3, L4; n_stops=5, bv_pal_2...)
 
     fig
 end
-if Makie.current_backend() == CairoMakie
+if (@isdefined SAVE) && SAVE == true
     save(joinpath(fig_path, "ecoregion_bivariates.png"), fig)
 end
 
 ## Compare with LCBD
-
-# Get relative LCBD values
-begin
-    ms = ["S" "LCBD_species"; "L" "LCBD_networks"]
-    ts = ["Richness" "Species LCBD"; "Links" "Network LCBD"]
-    fig = Figure(; resolution=(1275,600))
-    for i in 1:2, j in 1:2
-        m = ms[i,j]
-        t = ts[i,j]
-        p = background_map(fig[i,j]; title=t, titlealign=:left)
-        s = surface!(ecoregion_layers["$(m)_median"]; colormap=:inferno, shading=false)
-        Colorbar(p[1,2], s; height=Relative(0.5), label=t)
-    end
-    fig
-end
-if Makie.current_backend() == CairoMakie
-    save(joinpath(fig_path, "ecoregion_comparison_lcbd.png"), fig)
-end
 
 # Bivariate LCBD figure for ecoregion values
 function make_bivariate_figure(L1, L2, fig = Figure(); pal=bv_pal_2, kw...)
@@ -211,8 +188,10 @@ function make_bivariate_figure(L1, L2, fig = Figure(); pal=bv_pal_2, kw...)
     p1 = background_map(g1[1,1])
     sf = bivariatesurface!(p1, L1, L2; pal..., kw...)
 
-    p2 = Axis(g2[1,1]; aspect = 1, xlabel = "Species LCBD", ylabel = "Network LCBD",
-              xticks=0.3:0.2:0.7)
+    p2 = Axis(g2[1,1];
+        aspect = 1, xlabel = "Species LCBD", ylabel = "Network LCBD",
+        xticks=0.2:0.3:0.8, yticks=0.3:0.2:0.7
+    )
     l2 = bivariatelegend!(p2, L1, L2; pal..., kw...)
     fig
 end
@@ -220,12 +199,8 @@ fig = make_bivariate_figure(
     ecoregion_layers["LCBD_species_median"],
     ecoregion_layers["LCBD_networks_median"];
     # pal=bv_pal_2,
-    # rev=true,
     cmap=cmap2
 )
-if Makie.current_backend() == CairoMakie
-    save(joinpath(fig_path, "ecoregion_LCBD_bivariate.png"), fig)
-end
 
 ## Relationship between LCBD median and IQR
 
@@ -270,57 +245,15 @@ function make_density_figure(fig = Figure(;resolution=(800, 400)))
     fig
 end
 fig = make_density_figure()
-if Makie.current_backend() == CairoMakie
-    save(joinpath(fig_path, "ecoregion_relation_lcbd_densities.png"), fig)
-end
-
-# 3 panel version
-begin
-    fig = Figure(resolution=(850,1000))
-    # Define layout
-    g1 = fig[1:2,1] = GridLayout()
-    g2 = fig[3:4,1] = GridLayout()
-    g3 = fig[5,1] = GridLayout()
-    # Species LCBD
-    p1 = background_map(g1[1,1])
-    sf1 = surface!(
-        ecoregion_layers["LCBD_species_median"];
-        colormap=cgrad([p0, bv_pal_2[2]]),
-        shading=false
-    )
-    Colorbar(g1[1,2], sf1; height=Relative(0.5), label="Species LCBD")
-    # Network LCBD
-    p2 = background_map(g2[1,1])
-    sf2 = surface!(
-        ecoregion_layers["LCBD_networks_median"];
-        colormap=cgrad([p0, bv_pal_2[3]]),
-        shading=false
-    )
-    Colorbar(g2[1,2], sf2; height=Relative(0.5), label="Network LCBD")
-    # Density maps
-    p3 = make_density_figure(g3)
-    fig
-end
-if Makie.current_backend() == CairoMakie
-    save(joinpath(fig_path, "ecoregion_LCBD_all_included.png"), fig)
-end
 
 # 4 panel version
 begin
     fig = Figure(resolution=(1500,800))
     # Define layout
-    # g1 = fig[1:4,1] = GridLayout()
-    # g2 = fig[5:8,1] = GridLayout()
-    # g3 = fig[1:6,2] = GridLayout()
-    # g4 = fig[6:7,2] = GridLayout()
     g1 = fig[1:2,1] = GridLayout()
     g2 = fig[1:2,2] = GridLayout()
     g3 = fig[3:4,1] = GridLayout()
     g4 = fig[3:4,2] = GridLayout()
-    # g3 = fig[2:4,1:3] = GridLayout()
-    # g1 = fig[1:2,4:5] = GridLayout()
-    # g2 = fig[3:4,4:5] = GridLayout()
-    # g4 = fig[5,4:5] = GridLayout()
     # Species LCBD
     p1 = background_map(g1[1,1])
     sf1 = surface!(
@@ -343,6 +276,7 @@ begin
         ecoregion_layers["LCBD_networks_median"],
         g3;
         cmap=cmap2
+        # pal=bv_pal_2
     )
     # Density maps
     p4 = make_density_figure(g4)
@@ -357,7 +291,7 @@ begin
     end
     fig
 end
-if Makie.current_backend() == CairoMakie
+if (@isdefined SAVE) && SAVE == true
     save(joinpath(fig_path, "ecoregion_LCBD_4panels.png"), fig)
 end
 
@@ -398,6 +332,6 @@ begin
     )
     fig
 end
-if Makie.current_backend() == CairoMakie
+if (@isdefined SAVE) && SAVE == true
     save(joinpath(fig_path, "ecoregion_relation_lcbd_iqr.png"), fig)
 end

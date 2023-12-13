@@ -1,12 +1,8 @@
 #### Plot richness & LCBD results ####
 
+SAVE = true # to export figures
 CAN = true
 include("A0_required.jl");
-
-# Load CairoMakie if exporting figures
-if (@isdefined SAVE) && SAVE == true
-    CairoMakie.activate!()
-end
 
 # Load LCBD results
 include("scripts/x_load_lcbd_results.jl");
@@ -25,7 +21,7 @@ begin
     Colorbar(fig[1,2], sf; height=Relative(0.5), label="Expected Richness")
     fig
 end
-if Makie.current_backend() == CairoMakie
+if (@isdefined SAVE) && SAVE == true
     save(joinpath("figures", "richness_mean.png"), fig)
 end
 
@@ -36,7 +32,7 @@ begin
     Colorbar(fig[1,2], sf; height=Relative(0.5), label="Richness variance")
     fig
 end
-if Makie.current_backend() == CairoMakie
+if (@isdefined SAVE) && SAVE == true
     save(joinpath("figures", "richness_var.png"), fig)
 end
 
@@ -53,7 +49,7 @@ begin
     l2 = bivariatelegend!(p2, S_all["mean"], Sv; bv_pal_2...)
     fig
 end
-if Makie.current_backend() == CairoMakie
+if (@isdefined SAVE) && SAVE == true
     save(joinpath("figures", "richness_bivariate.png"), fig)
 end
 
@@ -66,7 +62,7 @@ begin
     Colorbar(fig[1,2], sf; height=Relative(0.5), label="Relative species LCBD")
     fig
 end
-if Makie.current_backend() == CairoMakie
+if (@isdefined SAVE) && SAVE == true
     save(joinpath("figures", "lcbd_mean_species.png"), fig)
 end
 
@@ -77,7 +73,7 @@ begin
     Colorbar(fig[1,2], sf; height=Relative(0.5), label="Relative network LCBD")
     fig
 end
-if Makie.current_backend() == CairoMakie
+if (@isdefined SAVE) && SAVE == true
     save(joinpath("figures", "lcbd_mean_networks.png"), fig)
 end
 
@@ -88,13 +84,13 @@ begin
     g2 = fig[2:5, end] = GridLayout()
 
     p1 = background_map(g1[1,1])
-    sf = bivariatesurface!(p1, lcbd_species_all["mean"], lcbd_networks_all["mean"])
+    sf = bivariatesurface!(p1, lcbd_species_nan, lcbd_networks_all["mean"])
 
     p2 = Axis(g2[1,1]; aspect = 1, xlabel = "Species LCBD", ylabel = "Network LCBD")
-    l2 = bivariatelegend!(p2, lcbd_species_all["mean"], lcbd_networks_all["mean"])
+    l2 = bivariatelegend!(p2, lcbd_species_nan, lcbd_networks_all["mean"])
     fig
 end
-if Makie.current_backend() == CairoMakie
+if (@isdefined SAVE) && SAVE == true
     save(joinpath("figures", "lcbd_bivariate_mean.png"), fig)
 end
 
@@ -125,7 +121,7 @@ begin
     end
     fig
 end
-if Makie.current_backend() == CairoMakie
+if (@isdefined SAVE) && SAVE == true
     save(joinpath("figures", "sampling_options", "richness_all.png"), fig)
 end
 
@@ -150,7 +146,7 @@ begin
     )
     fig
 end
-if Makie.current_backend() == CairoMakie
+if (@isdefined SAVE) && SAVE == true
     save(joinpath("figures", "sampling_options", "lcbd_species_all.png"), fig)
 end
 =#
@@ -177,7 +173,7 @@ begin
     )
     fig
 end
-if Makie.current_backend() == CairoMakie
+if (@isdefined SAVE) && SAVE == true
     save(joinpath("figures", "sampling_options", "lcbd_networks_all.png"), fig)
 end
 
@@ -202,7 +198,7 @@ for (i, opt) in enumerate(options)
     push!(biv_plots, bp)
 end
 plot(biv_plots..., size = (900, 600))
-if Makie.current_backend() == CairoMakie
+if (@isdefined SAVE) && SAVE == true
     savefig(joinpath("figures", "sampling_options", "lcbd_bivariate_all.png"))
 end
 =#

@@ -5,16 +5,17 @@ data/input/chelsa*.tif
 data/input/landcover_stack.tif
 data/occurrences/*
 data/presence_absence/*
-data/results/*
+data/results/motifs
 data/sdms/*
 data/shapefiles/canada/
 data/shapefiles/ecoregions/
-jobs/*.out
+jobs/out
 JuliaSysimage.so
 narval*.sh
 xtras/*
 tmp*
 Manifest.toml
+*.zip
 
 # Except
 !data/shapefiles/land/land_50m_curved.shp

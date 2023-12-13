@@ -58,3 +58,49 @@ write_geotiff(joinpath(results_path, "connectance.tif"), Co)
 write_geotiff(joinpath(results_path, "links_mean.tif"), L)
 write_geotiff(joinpath(results_path, "links_var.tif"), Lv)
 write_geotiff(joinpath(results_path, "links_density.tif"), Ld)
+
+## Species proportions
+
+# Extract proportions of top, bottom and intermediate species
+function species_proportions(N)
+    # Compute degrees
+    degrees =  DataFrame(
+        species = species(N)
+    )
+    @rtransform!(degrees, :degree = degree(N)[:species])
+    @rtransform!(degrees, :out_degree = degree(N; dims=1)[:species])
+    @rtransform!(degrees, :in_degree = degree(N; dims=2)[:species])
+    @rtransform!(degrees, :absent = iszero(:degree))
+
+    # Classify species as top, bottom and intermediate
+    @chain degrees begin
+        @rtransform!(:top = !iszero(:out_degree) && iszero(:in_degree) && iszero(:absent))
+        @rtransform!(:interm = !iszero(:out_degree) && !iszero(:in_degree) && iszero(:absent))
+        @rtransform!(:basal = iszero(:out_degree) && !iszero(:in_degree) && iszero(:absent))
+    end
+
+    # Extract proportions
+    T = mean(degrees.top)
+    I = mean(degrees.interm)
+    B = mean(degrees.basal)
+
+    return (T = T, I = I, B = B)
+end
+
+# Apply on complete layer
+sites = keys(layer)
+T = similar(layer, Float64)
+I = similar(layer, Float64)
+B = similar(layer, Float64)
+p = Progress(length(sites))
+@threads for s in sites
+    T[s], I[s], B[s] = species_proportions(layer[s])
+    if !(@isdefined quiet) || quiet == false
+        next!(p)
+    end
+end
+
+# Export layers
+write_geotiff(joinpath(results_path, "proportions_T.tif"), T)
+write_geotiff(joinpath(results_path, "proportions_I.tif"), I)
+write_geotiff(joinpath(results_path, "proportions_B.tif"), B)

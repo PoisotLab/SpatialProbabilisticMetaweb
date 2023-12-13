@@ -48,3 +48,16 @@ lcbd_networks_all
 for lcbd_set in [lcbd_species_all, lcbd_networks_all], opt in keys(lcbd_set)
     lcbd_set[opt] = lcbd_set[opt]/maximum(lcbd_set[opt])
 end
+
+# We need to fix an issue with the network LCBN layers before we compare with species LCBD
+# Some sites had no links, so their LCBD values was set to nothing to avoid NaNs everywhere
+# Now we'll also set them to NaN for species LCBD to compare the rest of the two layers
+if length(lcbd_species_all["mean"]) > length(lcbd_networks_all["mean"])
+    _ndiff = length(lcbd_species_all["mean"]) - length(lcbd_networks_all["mean"])
+    @info "Creating a species LCBD layers without $_ndiff sites with missing network LCBD values"
+    _nan_sites = setdiff(keys(lcbd_species_all["mean"]), keys(lcbd_networks_all["mean"]))
+    lcbd_species_nan = convert(SimpleSDMResponse, lcbd_species_all["mean"])
+    lcbd_species_nan[_nan_sites] = fill(nothing, length(_nan_sites))
+else
+    lcbd_species_nan = lcbd_species_all["mean"]
+end;
