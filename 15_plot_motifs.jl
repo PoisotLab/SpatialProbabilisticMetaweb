@@ -124,22 +124,26 @@ begin
           "C) Normalized Difference Trophic Index IQR" "D) Normalized Difference Competition Index IQR"]
     cts = ["NDTI score" "NDCI score";
            "NDTI 89% IQR" "NDCI 89% IQR"]
-    # cms = [:roma, :imola]
     cms = [cgrad(:roma, rev=true), :imola]
-    # cms = [:roma, :navia]
-    # cms = [:roma, :lajolla]
     cranges = [(-0.5, 0.5), (0.0, 1.0)]
     cticks = [([-0.5, 0.0, 0.5], ["≤-0.5", " 0.0", "≥0.5"]), [0.0, 0.5, 1.0]]
+    labels = [("⬆S1", "⬇S2") ("⬆S4", "⬇S5"); (" ", " ") (" ", " ")]
     fig = Figure(; resolution=(1275,600))
     for i in 1:2, j in 1:2
         m = ms[i,j]
         t = ts[i,j]
         ct = cts[i,j]
-        p = background_map(fig[i,j]; title=t, titlealign=:left)
+        gx = GridLayout(fig[i,j])
+        p = background_map(gx[1,1]; title=t, titlealign=:left)
         s = surface!(
-            motifs["$(ms[i,j])"]; shading=false, colormap=cms[i], colorrange=cranges[i]
+            motifs[m]; shading=false, colormap=cms[i], colorrange=cranges[i]
         )
-        Colorbar(p[1,2], s; height=Relative(0.5), label="$ct", ticks=cticks[i])
+        subgrid = GridLayout(gx[1,2], tellheight=false, height=Relative(0.7))
+        Label(subgrid[1, 1], labels[i,j][1])
+        Colorbar(subgrid[2,1], s; label=ct, ticks=cticks[i])
+        Label(subgrid[3, 1], labels[i,j][2])
+        rowgap!(subgrid, 10)
+        colgap!(gx, 10)
     end
     fig
 end
