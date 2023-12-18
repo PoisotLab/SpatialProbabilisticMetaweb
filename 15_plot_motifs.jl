@@ -43,8 +43,15 @@ end
 # S1-S2 comparison - Normalized difference trophic index
 begin
     fig = background_map()
-    sf = surface!(NDTI; shading=false, colorrange=(-1/2,1/2), colormap=:roma)
-    Colorbar(fig[1,2], sf; height=Relative(0.5), label="Normalized Difference Trophic Index")
+    sf = surface!(NDTI; shading=false, colorrange=(-1/2,1/2), colormap=cgrad(:roma, rev=true))
+    subgrid = GridLayout(fig[1,2], tellheight=false, height=Relative(0.55))
+    Label(subgrid[1, 1], "⬆S1")
+    Colorbar(subgrid[2,1], sf;
+        label="Normalized Difference Trophic Index",
+        ticks=([-0.5, 0.0, 0.5], ["≤-0.5", " 0.0", "≥0.5"])
+    )
+    Label(subgrid[3, 1], "⬇️S2")
+    rowgap!(subgrid, 10)
     fig
 end
 if (@isdefined SAVE) && SAVE == true
@@ -54,8 +61,15 @@ end
 # S4-S5 comparison - Normalized difference competition index
 begin
     fig = background_map()
-    sf = surface!(NDCI; shading=false, colorrange=(-1/2,1/2), colormap=:roma)
-    Colorbar(fig[1,2], sf; height=Relative(0.5), label="Normalized Difference Competition Index")
+    sf = surface!(NDCI; shading=false, colorrange=(-1/2,1/2), colormap=cgrad(:roma, rev=true))
+    subgrid = GridLayout(fig[1,2], tellheight=false, height=Relative(0.55))
+    Label(subgrid[1, 1], "⬆S4")
+    Colorbar(subgrid[2,1], sf;
+        label="Normalized Difference Competition Index",
+        ticks=([-0.5, 0.0, 0.5], ["≤-0.5", " 0.0", "≥0.5"])
+    )
+    Label(subgrid[3, 1], "⬇️S5")
+    rowgap!(subgrid, 10)
     fig
 end
 if (@isdefined SAVE) && SAVE == true

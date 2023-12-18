@@ -83,10 +83,10 @@ begin
     g2 = fig[2:5, end] = GridLayout()
 
     p1 = background_map(g1[1,1])
-    sf = bivariatesurface!(p1, S, L; bv_pal_2...)
+    sf = bivariatesurface!(p1, S, L; n_stops=5, bv_pal_2...)
 
     p2 = Axis(g2[1,1]; aspect = 1, xlabel = "Richness", ylabel = "Links")
-    l2 = bivariatelegend!(p2, S, L; bv_pal_2...)
+    l2 = bivariatelegend!(p2, S, L; n_stops=5, bv_pal_2...)
     fig
 end
 if (@isdefined SAVE) && SAVE == true
@@ -100,10 +100,10 @@ begin
     g2 = fig[2:5, end] = GridLayout()
 
     p1 = background_map(g1[1,1])
-    sf = bivariatesurface!(p1, Sv, Lv; bv_pal_2...)
+    sf = bivariatesurface!(p1, Sv, Lv; n_stops=5, bv_pal_2...)
 
     p2 = Axis(g2[1,1]; aspect = 1, xlabel = "Richness variance", ylabel = "Link variance")
-    l2 = bivariatelegend!(p2, Sv, Lv; bv_pal_2...)
+    l2 = bivariatelegend!(p2, Sv, Lv; n_stops=5, bv_pal_2...)
     fig
 end
 if (@isdefined SAVE) && SAVE == true
