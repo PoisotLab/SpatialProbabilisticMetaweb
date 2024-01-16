@@ -14,7 +14,6 @@ JuliaSysimage.so
 narval*.sh
 xtras/*
 tmp*
-Manifest.toml
 *.zip
 
 # Except
