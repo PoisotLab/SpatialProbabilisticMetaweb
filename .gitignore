@@ -1,8 +1,6 @@
 .vscode
 *.code-workspace
 data/backup
-data/input/chelsa*.tif
-data/input/landcover_stack.tif
 data/occurrences/*
 data/presence_absence/*
 data/results/motifs
