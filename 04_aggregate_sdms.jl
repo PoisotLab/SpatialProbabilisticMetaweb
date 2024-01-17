@@ -43,14 +43,21 @@ if (@isdefined JOBARRAY) && JOBARRAY == true
 end
 
 # Select files to load
-map_files = readdir(sdm_path; join=true)
-filter!(!contains(".gitkeep"), map_files)
+sdm_files = readdir(sdm_path; join=true)
+filter!(!contains(".gitkeep"), sdm_files)
+if iszero(length(sdm_files))
+    prev = "03_generate_sdms.jl"
+    @warn "Missing necessary files. Attempting to re-run previous script $prev"
+    include(prev)
+    sdm_files = readdir(sdm_path; join=true)
+    filter!(!contains(".gitkeep"), sdm_files)
+end
 
 # Load predictions mean & variance layers
 μ = Dict{String,SimpleSDMPredictor}()
 σ = Dict{String,SimpleSDMPredictor}()
-p = Progress(length(map_files))
-for map_file in map_files
+p = Progress(length(sdm_files))
+for map_file in sdm_files
     sp_name = @chain map_file begin
         basename
         replace("_error.tif" => "")

@@ -45,6 +45,13 @@ df = [
 # List all species files
 pa_files = readdir(pa_path; join=true)
 filter!(contains(".tif"), pa_files)
+if iszero(length(pa_files))
+    prev = "02_get_absences.jl"
+    @warn "Missing necessary files. Attempting to re-run previous script $prev"
+    include(prev)
+    pa_files = readdir(pa_path; join=true)
+    filter!(contains(".tif"), pa_files)
+end
 
 # Run SDMs, one species per loop
 p = Progress(length(pa_files))
