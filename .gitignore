@@ -18,7 +18,7 @@ tmp*
 
 # Except
 !data/shapefiles/land/land_50m_curved.shp
-!xtras/*.jl
+!xtras/input
 
 # Gitkeep files
 !data/*/.gitkeep
