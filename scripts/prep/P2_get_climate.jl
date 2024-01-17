@@ -1,7 +1,7 @@
 include("../../A0_required.jl");
 
 # Option to run for CAN
-CAN = true
+# CAN = true
 if (@isdefined CAN) && CAN == true
     res = 2.5;
     out_path = joinpath("data", "input");

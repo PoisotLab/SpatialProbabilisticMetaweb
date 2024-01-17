@@ -1,7 +1,7 @@
 #### Plot network measures ####
 
 SAVE = true
-CAN = true
+# CAN = true
 include("A0_required.jl");
 
 # Load the corresponding sdm results if dealing with QC or CAN data

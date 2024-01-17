@@ -1,7 +1,7 @@
 #### Plot richness & LCBD results ####
 
 SAVE = true # to export figures
-CAN = true
+# CAN = true
 include("A0_required.jl");
 
 # Load LCBD results
