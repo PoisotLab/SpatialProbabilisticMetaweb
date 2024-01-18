@@ -10,6 +10,7 @@ jobs/out
 JuliaSysimage.so
 narval*.sh
 xtras/*
+xtras/results/motifs
 tmp*
 *.zip
 
@@ -17,7 +18,7 @@ tmp*
 !data/shapefiles/land/land_50m_curved.shp
 !xtras/input
 !xtras/presence_absence
+!xtras/results
 
 # Gitkeep files
 !data/*/.gitkeep
-!xtras/.gitkeep
