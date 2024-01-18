@@ -55,7 +55,7 @@ end
 
 ispath(pa_path) || mkpath(pa_path)
 
-p = Progress(length(occfiles))
+p = Progress(length(occfiles), "Generating absences")
 
 Threads.@threads for i in axes(jobfiles, 1)
     try

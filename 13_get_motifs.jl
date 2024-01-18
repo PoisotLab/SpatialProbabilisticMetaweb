@@ -69,7 +69,7 @@ end
 
 # Create layers for the motifs
 SX_layer = similar(layer, Float64)
-p = Progress(length(layer))
+p = Progress(length(layer), "Computing motif $MOTIF")
 @threads for k in keys(layer)
     SX_layer[k] = first(expected_motif_count(find_motif(layer[k], SX)))
     if !(@isdefined quiet) || quiet == false

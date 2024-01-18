@@ -56,7 +56,7 @@ end
 # Load predictions mean & variance layers
 μ = Dict{String,SimpleSDMPredictor}()
 σ = Dict{String,SimpleSDMPredictor}()
-p = Progress(length(sdm_files))
+p = Progress(length(sdm_files), "Loading SDMs")
 for map_file in sdm_files
     sp_name = @chain map_file begin
         basename
@@ -84,7 +84,7 @@ Base.zero(::Type{Truncated{Normal{T}, Continuous, T, T, T}}) where {T} = Truncat
 
 # Create layers of Truncated Normal distributions given the mean & variance
 D = Dict{String, SimpleSDMResponse}()
-p = Progress(length(μ))
+p = Progress(length(μ), "Assembling distributions")
 for sp in String.(keys(μ))
     _t = similar(μ[sp], Truncated{Normal{Float64}, Continuous, Float64, Float64, Float64})
     for site in keys(μ[sp])

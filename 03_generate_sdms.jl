@@ -54,7 +54,7 @@ if iszero(length(pa_files))
 end
 
 # Run SDMs, one species per loop
-p = Progress(length(pa_files))
+p = Progress(length(pa_files), "Generating SDMs")
 @threads for i in axes(pa_files, 1)
     # Seed for reproducibility
     Random.seed!(i)

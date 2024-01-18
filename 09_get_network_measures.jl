@@ -99,7 +99,7 @@ sites = keys(layer)
 T = similar(layer, Float64)
 I = similar(layer, Float64)
 B = similar(layer, Float64)
-p = Progress(length(sites))
+p = Progress(length(sites), "Species proportions")
 @threads for s in sites
     T[s], I[s], B[s] = species_proportions(layer[s])
     if !(@isdefined quiet) || quiet == false

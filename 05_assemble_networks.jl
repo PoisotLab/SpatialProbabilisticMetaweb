@@ -99,7 +99,7 @@ function assemble_networks(
         # Networkify it
         sites = keys(mini_reference_layer)
         networks = zeros(Bool, length(sites), size(P)..., n_itr)
-        p = Progress(length(sites))
+        p = Progress(length(sites), "Assembling networks ($((j-1)*n_lat+i)/$(n_lat*n_lon))")
         @threads for i in eachindex(sites)
             site = sites[i]
             s = [mini_D[s][site] for s in species(P)]
