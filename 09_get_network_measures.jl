@@ -1,13 +1,20 @@
 #### Network measures ####
 
 # CAN = true
-include("05_assemble_networks.jl"); # Load networks
 
 # Load the corresponding sdm results if dealing with QC or CAN data
 if (@isdefined CAN) && CAN == true
     results_path = joinpath("data", "results")
 else
     results_path = joinpath("xtras", "results")
+end
+
+# Load local networks
+if (@isdefined networks) && networks isa BitArray{4}
+    @info "Object networks is already defined. Not re-running previous script."
+else
+    @info "Running 05_assemble_networks.jl"
+    include("05_assemble_networks.jl");
 end
 
 ## Network layer
