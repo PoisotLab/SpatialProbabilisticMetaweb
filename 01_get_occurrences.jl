@@ -103,7 +103,8 @@ end
 ## 3. Select the columns of interest ###
 
 # Load the dataset
-occ_df = CSV.read(joinpath(csv_file), DataFrame; delim="\t", quoted=false)
+cols = [:occurrenceID, :species, :decimalLongitude, :decimalLatitude]
+occ_df = CSV.read(joinpath(csv_file), DataFrame; delim="\t", quoted=false, select=cols)
 
 # Note that quoted=false is absolutely necessary to avoid a bug while reading.
 # After manual verification, the data is not quoted.
@@ -127,6 +128,7 @@ occ_path = joinpath("data", "occurrences")
 ispath(occ_path) || mkpath(occ_path)
 for sp in mammals
     sp_df = filter(:name => ==(sp), occ_df)
+    select!(sp_df, Not(:name))
     sp = replace(sp, " " => "_")
     CSV.write(joinpath(occ_path, "$sp.csv"), sp_df)
 end

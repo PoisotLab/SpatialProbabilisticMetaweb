@@ -1,7 +1,6 @@
 .vscode
 *.code-workspace
 data/backup
-data/occurrences/*
 data/presence_absence/*
 data/results/motifs
 data/sdms/*
@@ -17,6 +16,7 @@ tmp*
 # Except
 !data/shapefiles/land/land_50m_curved.shp
 !xtras/input
+!xtras/presence_absence
 
 # Gitkeep files
 !data/*/.gitkeep
