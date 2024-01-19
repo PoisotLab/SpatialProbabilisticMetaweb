@@ -46,7 +46,7 @@ _mat = fill(nothing, size(reference_layer.grid));
 _mat = convert(Matrix{Union{Nothing, eltype(networks_vec)}}, _mat);
 _inds = findall(!isnothing, reference_layer.grid);
 _mat[_inds] = networks_vec;
-layer = SimpleSDMResponse(_mat, reference_layer);
+layer = SimpleSDMResponse(_mat, reference_layer)
 
 ## Motifs
 
@@ -56,9 +56,9 @@ if !(@isdefined MOTIF)
 end
 SX = getproperty(unipartitemotifs(), MOTIF)
 
-# Create a mini layer for New Brunswick
-# NB = true
-if (@isdefined NB) && NB == true
+# Create a mini layer for New Brunswick if running minimal example
+# CAN = true
+if !(@isdefined CAN) || CAN == false
     nb_ref = read_geotiff(joinpath("data", "input", "newbrunswick_ref_10.tif"), SimpleSDMPredictor)
     nb_layer = clip(layer; boundingbox(nb_ref)...)
     _non_nb_keys = setdiff(keys(nb_layer), keys(nb_ref))

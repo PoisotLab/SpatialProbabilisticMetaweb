@@ -24,7 +24,9 @@ function ecoregionalize(layer, ecoregions_stack; f=median, keepzeros=true)
     l_eco = similar(layer)
     @threads for e in ecoregions_stack
         k = intersect(keys(e), keys(layer))
-        l_eco[k] = fill(f(layer[k]), length(k))
+        if length(k) > 0
+            l_eco[k] = fill(f(layer[k]), length(k))
+        end
     end
     if !keepzeros
         replace!(l_eco, 0.0 => nothing)
