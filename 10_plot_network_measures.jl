@@ -1,6 +1,6 @@
 #### Plot network measures ####
 
-SAVE = true
+# SAVE = true
 # CAN = true
 include("A0_required.jl");
 

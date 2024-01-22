@@ -8,6 +8,7 @@ data/shapefiles/canada/
 data/shapefiles/ecoregions/
 jobs/out
 JuliaSysimage.so
+Makefile
 narval*.sh
 xtras/*
 xtras/results/motifs
