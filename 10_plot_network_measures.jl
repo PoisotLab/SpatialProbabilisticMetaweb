@@ -22,11 +22,14 @@ T = read_geotiff(joinpath(results_path, "proportions_T.tif"), SimpleSDMPredictor
 I = read_geotiff(joinpath(results_path, "proportions_I.tif"), SimpleSDMPredictor)
 B = read_geotiff(joinpath(results_path, "proportions_B.tif"), SimpleSDMPredictor)
 
+# Set coordinate limits for plots
+lims = boundingbox(L)
+
 ## Some plots
 
 # Connectance
 begin
-    fig = background_map()
+    fig = background_map(; lims=lims)
     sf = surface!(Co; colormap=:acton, shading=false)
     Colorbar(fig[1,2], sf; height=Relative(0.5), label="Connectance")
     fig
@@ -37,7 +40,7 @@ end
 
 # Links
 begin
-    fig = background_map()
+    fig = background_map(; lims=lims)
     sf = surface!(L; colormap=:acton, shading=false)
     Colorbar(fig[1,2], sf; height=Relative(0.5), label="Expected number of links")
     fig
@@ -48,7 +51,7 @@ end
 
 # Link variance
 begin
-    fig = background_map()
+    fig = background_map(; lims=lims)
     sf = surface!(Lv; colormap=:acton, shading=false)
     Colorbar(fig[1,2], sf; height=Relative(0.5), label="Link variance")
     fig
@@ -63,7 +66,7 @@ begin
     g1 = fig[1:16, 1:4] = GridLayout()
     g2 = fig[2:5, end] = GridLayout()
 
-    p1 = background_map(g1[1,1])
+    p1 = background_map(g1[1,1]; lims=lims)
     sf = bivariatesurface!(p1, L, Lv; bv_pal_2...)
 
     p2 = Axis(g2[1,1]; aspect = 1, xlabel = "Links", ylabel = "Link variance")
@@ -82,7 +85,7 @@ begin
     g1 = fig[1:16, 1:4] = GridLayout()
     g2 = fig[2:5, end] = GridLayout()
 
-    p1 = background_map(g1[1,1])
+    p1 = background_map(g1[1,1]; lims=lims)
     sf = bivariatesurface!(p1, S, L; n_stops=5, bv_pal_2...)
 
     p2 = Axis(g2[1,1]; aspect = 1, xlabel = "Richness", ylabel = "Links")
@@ -99,7 +102,7 @@ begin
     g1 = fig[1:16, 1:4] = GridLayout()
     g2 = fig[2:5, end] = GridLayout()
 
-    p1 = background_map(g1[1,1])
+    p1 = background_map(g1[1,1]; lims=lims)
     sf = bivariatesurface!(p1, Sv, Lv; n_stops=5, bv_pal_2...)
 
     p2 = Axis(g2[1,1]; aspect = 1, xlabel = "Richness variance", ylabel = "Link variance")
@@ -168,7 +171,7 @@ end
 # Top-intermediate-basal species
 for (prop, t) in zip([T, I, B], ["top", "intermediate", "basal"])
     begin
-        fig = background_map()
+        fig = background_map(; lims=lims)
         sf = surface!(prop; shading=false)
         Colorbar(fig[1,2], sf; height=Relative(0.5), label="Proportion of $t species (%)")
         fig
