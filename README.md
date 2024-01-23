@@ -14,9 +14,10 @@ All scripts for the main analyses are numbered and in the top level folder. [`00
 
 ## Folder organization
 
-- `figures`: contains all the figures produced in the analysis steps
-- `jobs`: contains the job scripts to run the resource-intensive scripts on compute clusters
-- `xtras`: contains previous scripts (version-controlled) and the files to run a smaller-scale analysis (not version-controlled yet)
+- `data`: contains the input data and result layers. Intermediate outputs of full-scale analyses are also exported here but are not version-controlled.
+- `figures`: contains all the figures produced in the analysis steps.
+- `jobs`: contains the job scripts to run the resource-intensive scripts on compute clusters.
+- `xtras`: contains the input files to run a reproducible minimal example. Results (version-controlled) and intermediate outputs are also exported here.
 
 ## Reproducibility
 
@@ -61,15 +62,15 @@ using Pkg; Pkg.instantiate()
 |  |  |  |
 | **Data preparation** |  |  |
 | [01_get_occurrences.jl](01_get_occurrences.jl) | ✅ Yes | ✅ Same as minimal |
-| [02_get_absences.jl](02_get_absences.jl) | ✅ Yes<br>⏰ > 10 minutes | ✔️ Data available<br>⚠ Requires several hours<br> |
-| [03_generate_sdms.jl](03_generate_sdms.jl) | ✅ Yes<br>⏰ ~ 10 minutes | ⤴ Requires previous<br>⚠ Memory intensive |
+| [02_get_absences.jl](02_get_absences.jl) | ✅ Yes<br>⏰ > 10 minutes | ✔️ Data available<br>:warning: Requires several hours<br> |
+| [03_generate_sdms.jl](03_generate_sdms.jl) | ✅ Yes<br>⏰ ~ 10 minutes | ⤴ Requires previous<br>:warning: Memory intensive |
 |  |  |  |
 | **Assembling results** |  |  |
-| [04_aggregate_sdms.jl](04_aggregate_sdms.jl) | ✅ Yes<br>⤴ Will re-run previous script once | ⤴ Requires previous<br>⚠ Memory intensive |
+| [04_aggregate_sdms.jl](04_aggregate_sdms.jl) | ✅ Yes<br>⤴ Will re-run previous script once | ⤴ Requires previous<br>:warning: Memory intensive |
 | [05_assemble_networks.jl](05_assemble_networks.jl) | ✅ Yes | 🚫 Requires high memory and long computations |
 |  |  |  |
 | **Analysis** |  |  |
-| [06_get_species_lcbd.jl](06_get_species_lcbd.jl) | ✅ Yes<br> | ⤴ Requires 04<br>⚠ Memory intensive |
+| [06_get_species_lcbd.jl](06_get_species_lcbd.jl) | ✅ Yes<br> | ⤴ Requires 04<br>:warning: Memory intensive |
 | [07_get_network_lcbd.jl](07_get_network_lcbd.jl) | ✅ Yes<br> | 🚫 Requires high memory and long computations |
 | [09_get_network_measures.jl](09_get_network_measures.jl) | ✅ Yes<br> | 🚫 Requires high memory and long computations |
 | [11_get_ecoregions_measures.jl](11_get_ecoregions_measures.jl) | ✅ Yes | ✅  Yes |
@@ -81,7 +82,7 @@ using Pkg; Pkg.instantiate()
 |  |  |  |
 | **Motifs analysis** |  |  |
 | (This analysis is especially intensive) |  |  |
-| [13_get_motifs.jl](13_get_motifs.jl) | ⚠ ~ 15-20 mins per motif, only for New-Brunswick | 🚫🚫🚫 Requires job arrays |
+| [13_get_motifs.jl](13_get_motifs.jl) | :warning: ~ 15-20 mins per motif, only for New-Brunswick | 🚫🚫🚫 Requires job arrays |
 | [14_assemble_motifs.jl](14_assemble_motifs.jl) | ✅ Yes | 🚫 Requires previous |
 | [15_plot_motifs.jl](15_plot_motifs.jl) | ✅ Yes | ✅ Result files are available |
 |  |  |  |
