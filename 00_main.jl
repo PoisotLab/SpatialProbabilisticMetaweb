@@ -8,18 +8,6 @@ include("A0_required.jl");
 # CAN = true # to run script for Canada, which is resource-intensive
 # quiet = true # whether to disable progress bar (mostly for clusters)
 
-## Preparation scripts
-
-# These scripts are not part of the analysis pipeline but produce required
-# elements which are version-controlled and available on the repo (e.g. in the
-# data/input/ folder).
-
-include("scripts/prep/P1_get_canada_shapefile.jl");
-include("scripts/prep/P2_get_climate.jl");
-include("scripts/prep/P3_get_landcover.jl");
-include("scripts/prep/P4_get_ecoregions.jl");
-include("scripts/prep/P5_reconcile_metaweb.jl");
-
 ## Part I - Prepare data ####
 
 # Get occurrences from GBIF
@@ -37,9 +25,9 @@ include("03_generate_sdms.jl");
 # These scripts are resource-intensive at the Canada scale and need to run on
 # the clusters.
 
-# These scripts are run by later scripts to assemble the species distribution
-# and network results (which are too large to be exported). There's usually no
-# need to run them alone.
+# These scripts are run by following scripts to assemble the species
+# distribution and network results (which are too large to be exported). There's
+# usually no need to run them alone.
 include("04_aggregate_sdms.jl"); # faster, not memory-intensive
 include("05_assemble_networks.jl"); # longer, memory-intensive, requires script 04
 
@@ -71,11 +59,30 @@ include("10_plot_network_measures.jl");
 # Plot ecoregion results
 include("12_plot_ecoregions.jl");
 
-## Additional analyses
+## Part IV - Motifs analysis ####
 
-# These has-beens were actually really cool in their own time, you know. We
-# can't throw away our past just like that.
+# This analysis is especially resource-intensive so we consider it separately
 
-# include("xtras/archive/x_get_network_extras.jl");
-# include("xtras/archive/x_get_ecoregions_metaweb.jl");
-# include("xtras/archive/x_working_group.jl");
+# Get motifs
+MOTIF = :S4 # Need to choose a motif (S1, S2, S4, S5) and re-run separately for each
+include("13_get_motifs.jl")
+
+# Assemble motif result layers
+include("14_assemble_motifs.jl")
+
+# Plot motif results
+include("15_plot_motifs.jl")
+
+## Preparation scripts ####
+
+# These scripts are not part of the analysis pipeline but produce required
+# elements which are version-controlled and available on the repo (e.g. in the
+# data/input/ folder).
+
+#=
+include("scripts/prep/P1_get_canada_shapefile.jl");
+include("scripts/prep/P2_get_climate.jl");
+include("scripts/prep/P3_get_landcover.jl");
+include("scripts/prep/P4_get_ecoregions.jl");
+include("scripts/prep/P5_reconcile_metaweb.jl");
+=#
