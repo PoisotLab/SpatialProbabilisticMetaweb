@@ -57,7 +57,7 @@ cutoffs
 # We can now get the species richness for the thresholded distributions
 Smeans_cut = Dict{String, SimpleSDMResponse}()
 Srands_cut = Dict{String, SimpleSDMResponse}()
-@threads for sp in spp
+for sp in spp
     Smeans_cut[sp] = Smeans[sp] .> cutoffs[sp]
     Srands_cut[sp] = Srands[sp] .> cutoffs[sp]
 end
