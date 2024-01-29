@@ -49,9 +49,10 @@ using Pkg; Pkg.instantiate()
 
 ### Running the scripts
 
-- *All analyses are reproducible using the scripts in this repo*. However, not all of them are directly reproducible from the repository because of file size restrictions and required computations (see the following table). By direct reproducibility we mean cloning the repo, setting up Julia as detailed above, then running the script *alone and as-is*.
-- **Minimal example**: Scripts are directly reproducible with the minimal example. Leave the scripts as-is or set `CAN = false` before running.
+- *All analyses are reproducible using the scripts in this repo*. However, not all of them are directly reproducible from the repository because of file size restrictions and required computations (see the following table). By direct reproducibility we mean cloning the repo, setting up Julia as detailed above, then running the script *alone and as-is* (without re-running previous scripts).
+- **Minimal example**: Scripts are directly reproducible with the minimal example. Leave the scripts as-is or set `CAN = false` before running. You can directly run scripts `06`, `07`, etc.
 - **Full-scale analyses**: Plotting scripts are directly reproducible at full scale. All other analysis steps are scripted but as a whole they require high resources (most steps were run on high memory clusters). To run analyses at full scale, manually set `CAN = true` before running the script.
+- Many steps use [threads](https://docs.julialang.org/en/v1/manual/multi-threading/) (if available) to run analyses faster. We recommend doing so if you have multiple cores available, but note that it will require more memory. For example, to start Julia with 8 threads available: `julia +1.9.1 --project --threads 8`
 
 
 | Script | Directly reproducible for minimal example (10 arc-min) | Directly reproducible for CAN (2.5 arc-min) |
