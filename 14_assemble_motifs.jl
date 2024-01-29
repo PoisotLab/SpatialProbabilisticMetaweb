@@ -10,11 +10,25 @@ else
     results_path = joinpath("xtras", "results")
 end
 
+# Make sure motif results exist
+motifs_path = joinpath(results_path, "motifs")
+if !isdir(motifs_path) && length(readdir(motifs_path)) < 1
+    @info "No motif result. Running 13_get_motifs.jl"
+    include("13_get_motifs.jl")
+end
+
 ## Assemble motif results
+
+# Check available motifs
+SX_all = unique(first.(split.(readdir(motifs_path), "-")))
+SX_all = replace.(SX_all, ".tif" => "")
+SX_missing = setdiff(["S1", "S2", "S4", "S5"], SX_all)
+if length(SX_missing) > 1
+    @warn "Missing motifs $(SX_missing). Re-run 13_get_motifs.jl manually for those."
+end
 
 # Assemble target motifs
 motifs = Dict{String, SimpleSDMResponse}()
-SX_all = unique(first.(split.(readdir(joinpath("data", "results", "motifs")), "-")))
 for SX in SX_all
     # Load the files for the motif
     @info "Loading motif $SX"

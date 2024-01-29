@@ -12,6 +12,14 @@ else
     results_path = joinpath("xtras", "results")
 end
 
+# Load local networks
+if (@isdefined networks) && networks isa BitArray{4}
+    @info "Object networks is already defined. Not re-running previous script."
+else
+    @info "Running 05_assemble_networks.jl"
+    include("05_assemble_networks.jl");
+end
+
 ## Network layer
 
 # Verify loaded objects
