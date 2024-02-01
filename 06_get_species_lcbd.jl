@@ -3,7 +3,7 @@
 # CAN = true
 include("04_aggregate_sdms.jl");
 
-# Load the corresponding sdm results if dealing with QC or CAN data
+# Load the corresponding results if dealing with CAN data or minimal example
 if (@isdefined CAN) && CAN == true
     fit_path = joinpath("data", "input", "sdm_fit_results.csv")
     results_path = joinpath("data", "results")

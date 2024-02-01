@@ -3,7 +3,7 @@
 # CAN = true
 include("A0_required.jl");
 
-# Load the corresponding sdm results if dealing with QC or CAN data
+# Load the corresponding results if dealing with CAN data or minimal example
 if (@isdefined CAN) && CAN == true
     eco_path = joinpath("data", "input", "canada_ecoregions.tif");
     ref_path = joinpath("data", "input", "canada_ref_2.tif")

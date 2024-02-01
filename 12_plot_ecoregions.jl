@@ -4,7 +4,7 @@
 # CAN = true
 include("A0_required.jl");
 
-# Load the corresponding results if dealing with QC or CAN data
+# Load the corresponding results if dealing with CAN data or minimal example
 if (@isdefined CAN) && CAN == true
     ecoresults_path = joinpath("data", "results", "ecoregions");
 else

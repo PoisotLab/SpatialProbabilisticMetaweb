@@ -3,9 +3,8 @@
 # CAN = true
 # JOBARRAY = true
 # MOTIF = :S4
-include("05_assemble_networks.jl"); # Load networks
 
-# Load the corresponding sdm results if dealing with QC or CAN data
+# Load the corresponding results if dealing with CAN data or minimal example
 if (@isdefined CAN) && CAN == true
     results_path = joinpath("data", "results")
 else
