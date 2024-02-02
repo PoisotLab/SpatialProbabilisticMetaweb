@@ -43,11 +43,18 @@ df = [
 ]
 
 # List all species files
-pa_files = readdir(pa_path; join=true)
+pa_files = readdir(pa_path)
 filter!(contains(".tif"), pa_files)
+if iszero(length(pa_files))
+    prev = "02_get_absences.jl"
+    @warn "Missing necessary files. Attempting to re-run previous script $prev"
+    include(prev)
+    pa_files = readdir(pa_path)
+    filter!(contains(".tif"), pa_files)
+end
 
 # Run SDMs, one species per loop
-p = Progress(length(pa_files))
+p = Progress(length(pa_files), "Generating SDMs")
 @threads for i in axes(pa_files, 1)
     # Seed for reproducibility
     Random.seed!(i)
@@ -68,8 +75,8 @@ p = Progress(length(pa_files))
     )
 
     # Species name
-    pa_file = pa_files[i]
-    spname = replace(split(pa_file, "/")[3], ".tif" => "")
+    spname = replace(pa_files[i], ".tif" => "")
+    pa_file = joinpath(pa_path, pa_files[i])
 
     # Presence-absence files
     pr = read_geotiff(pa_file, SimpleSDMResponse; bandnumber=1)

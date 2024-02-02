@@ -1,9 +1,6 @@
 .vscode
 *.code-workspace
 data/backup
-data/input/chelsa*.tif
-data/input/landcover_stack.tif
-data/occurrences/*
 data/presence_absence/*
 data/results/motifs
 data/sdms/*
@@ -11,15 +8,18 @@ data/shapefiles/canada/
 data/shapefiles/ecoregions/
 jobs/out
 JuliaSysimage.so
+Makefile
 narval*.sh
 xtras/*
+xtras/results/motifs
 tmp*
 *.zip
 
 # Except
 !data/shapefiles/land/land_50m_curved.shp
-!xtras/*.jl
+!xtras/input
+!xtras/presence_absence
+!xtras/results
 
 # Gitkeep files
 !data/*/.gitkeep
-!xtras/.gitkeep

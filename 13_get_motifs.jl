@@ -3,13 +3,20 @@
 # CAN = true
 # JOBARRAY = true
 # MOTIF = :S4
-include("05_assemble_networks.jl"); # Load networks
 
-# Load the corresponding sdm results if dealing with QC or CAN data
+# Load the corresponding results if dealing with CAN data or minimal example
 if (@isdefined CAN) && CAN == true
     results_path = joinpath("data", "results")
 else
     results_path = joinpath("xtras", "results")
+end
+
+# Load local networks
+if (@isdefined networks) && networks isa BitArray{4}
+    @info "Object networks is already defined. Not re-running previous script."
+else
+    @info "Running 05_assemble_networks.jl"
+    include("05_assemble_networks.jl");
 end
 
 ## Network layer
@@ -46,7 +53,7 @@ _mat = fill(nothing, size(reference_layer.grid));
 _mat = convert(Matrix{Union{Nothing, eltype(networks_vec)}}, _mat);
 _inds = findall(!isnothing, reference_layer.grid);
 _mat[_inds] = networks_vec;
-layer = SimpleSDMResponse(_mat, reference_layer);
+layer = SimpleSDMResponse(_mat, reference_layer)
 
 ## Motifs
 
@@ -56,9 +63,9 @@ if !(@isdefined MOTIF)
 end
 SX = getproperty(unipartitemotifs(), MOTIF)
 
-# Create a mini layer for New Brunswick
-# NB = true
-if (@isdefined NB) && NB == true
+# Create a mini layer for New Brunswick if running minimal example
+# CAN = true
+if !(@isdefined CAN) || CAN == false
     nb_ref = read_geotiff(joinpath("data", "input", "newbrunswick_ref_10.tif"), SimpleSDMPredictor)
     nb_layer = clip(layer; boundingbox(nb_ref)...)
     _non_nb_keys = setdiff(keys(nb_layer), keys(nb_ref))
@@ -69,7 +76,7 @@ end
 
 # Create layers for the motifs
 SX_layer = similar(layer, Float64)
-p = Progress(length(layer))
+p = Progress(length(layer), "Computing motif $MOTIF")
 @threads for k in keys(layer)
     SX_layer[k] = first(expected_motif_count(find_motif(layer[k], SX)))
     if !(@isdefined quiet) || quiet == false

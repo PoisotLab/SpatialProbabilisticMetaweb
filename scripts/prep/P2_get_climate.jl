@@ -1,7 +1,7 @@
 include("../../A0_required.jl");
 
 # Option to run for CAN
-CAN = true
+# CAN = true
 if (@isdefined CAN) && CAN == true
     res = 2.5;
     out_path = joinpath("data", "input");
@@ -67,6 +67,7 @@ ch2_path = joinpath(SimpleSDMDatasets._LAYER_PATH, "CHELSA2", "BioClim")
 
 # Make sure we have the files locally
 if !isdir(ch2_path)
+    @info "Downloading CHELSA2 data"
     ch2_provider = RasterData(CHELSA2, BioClim)
     @threads for l in layers(ch2_provider)
         SimpleSDMPredictor(ch2_provider; layer=l, spatialrange...)

@@ -19,6 +19,7 @@ if !isfile(shp_file)
         n = replace(f.name, "lpr_000b21a_e" => "canada")
         write(joinpath(shp_path, n), read(f, String))
     end
+    close(r)
     # Remove archive
     rm(zip_file)
 end

@@ -9,24 +9,32 @@ include("A0_required.jl")
 # Option to run for CAN
 # CAN = true
 if (@isdefined CAN) && CAN == true
-    occ_path = joinpath("data", "occurrences");
     pa_path = joinpath("data", "presence_absence");
     input_path = joinpath("data", "input");
     @info "Running for Canada at 2.5 arcmin resolution"
 else
-    occ_path = joinpath("data", "occurrences");
     pa_path = joinpath("xtras", "presence_absence");
     input_path = joinpath("xtras", "input");
     @info "Running for Quebec at 10 arcmin resolution"
 end
 
+# List occurrences files
+occ_path = joinpath("data", "occurrences");
+ispath(occ_path) || mkpath(occ_path)
+occfiles = readdir(occ_path)
+filter!(!contains(".gitkeep"), occfiles)
+if iszero(length(occfiles))
+    prev = "01_get_occurrences.jl"
+    @warn "Missing necessary files. Attempting to re-run previous script $prev"
+    include(prev)
+    occfiles = readdir(occ_path)
+    filter!(!contains(".gitkeep"), occfiles)
+end
+
+# Load the reference to create layers
 reference_layer = read_geotiff(
     joinpath(input_path, "landcover_stack.tif"), SimpleSDMPredictor
 )
-
-occfiles = readdir(occ_path)
-filter!(!contains("all_occurrences"), occfiles) # remove backup files for QC data
-filter!(!contains(".gitkeep"), occfiles)
 
 # Divide files if using job array
 if (@isdefined JOBARRAY) && JOBARRAY == true
@@ -47,7 +55,7 @@ end
 
 ispath(pa_path) || mkpath(pa_path)
 
-p = Progress(length(occfiles))
+p = Progress(length(occfiles), "Generating absences")
 
 Threads.@threads for i in axes(jobfiles, 1)
     try

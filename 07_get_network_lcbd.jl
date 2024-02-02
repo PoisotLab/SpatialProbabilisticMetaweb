@@ -1,13 +1,20 @@
 #### Network LCBD analysis ####
 
 # CAN = true
-include("05_assemble_networks.jl"); # load networks
 
-# Load the corresponding sdm results if dealing with QC or CAN data
+# Load the corresponding results if dealing with CAN data or minimal example
 if (@isdefined CAN) && CAN == true
     results_path = joinpath("data", "results")
 else
     results_path = joinpath("xtras", "results")
+end
+
+# Load local networks
+if (@isdefined networks) && networks isa BitArray{4}
+    @info "Object networks is already defined. Not re-running previous script."
+else
+    @info "Running 05_assemble_networks.jl"
+    include("05_assemble_networks.jl"); # load networks
 end
 
 # Verify loaded objects

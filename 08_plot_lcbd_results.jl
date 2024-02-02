@@ -1,7 +1,7 @@
 #### Plot richness & LCBD results ####
 
-SAVE = true # to export figures
-CAN = true
+# SAVE = true # to export figures
+# CAN = true
 include("A0_required.jl");
 
 # Load LCBD results
@@ -12,11 +12,14 @@ S_all
 lcbd_species_all
 lcbd_networks_all
 
+# Set coordinate limits for plots
+lims = boundingbox(S_all["mean"])
+
 ## Richness plots
 
 # Richness for mean only
 begin
-    fig = background_map()
+    fig = background_map(; lims=lims)
     sf = surface!(S_all["mean"]; colormap=:cividis, shading=false)
     Colorbar(fig[1,2], sf; height=Relative(0.5), label="Expected Richness")
     fig
@@ -27,7 +30,7 @@ end
 
 # Richness variance for mean only
 begin
-    fig = background_map()
+    fig = background_map(; lims=lims=lims)
     sf = surface!(Sv; colormap=:cividis, shading=false)
     Colorbar(fig[1,2], sf; height=Relative(0.5), label="Richness variance")
     fig
@@ -42,7 +45,7 @@ begin
     g1 = fig[1:16, 1:4] = GridLayout()
     g2 = fig[2:5, end] = GridLayout()
 
-    p1 = background_map(g1[1,1])
+    p1 = background_map(g1[1,1]; lims=lims)
     sf = bivariatesurface!(p1, S_all["mean"], Sv; bv_pal_2...)
 
     p2 = Axis(g2[1,1]; aspect=1, xlabel = "Expected richness", ylabel = "Richness variance")
@@ -57,7 +60,7 @@ end
 
 # Species LCBD
 begin
-    fig = background_map()
+    fig = background_map(; lims=lims)
     sf = surface!(lcbd_species_all["mean"]; colormap=:viridis, shading=false)
     Colorbar(fig[1,2], sf; height=Relative(0.5), label="Relative species LCBD")
     fig
@@ -68,7 +71,7 @@ end
 
 # Network LCBD
 begin
-    fig = background_map()
+    fig = background_map(; lims=lims)
     sf = surface!(lcbd_networks_all["mean"]; colormap=:viridis, shading=false)
     Colorbar(fig[1,2], sf; height=Relative(0.5), label="Relative network LCBD")
     fig
@@ -83,7 +86,7 @@ begin
     g1 = fig[1:16, 1:4] = GridLayout()
     g2 = fig[2:5, end] = GridLayout()
 
-    p1 = background_map(g1[1,1])
+    p1 = background_map(g1[1,1]; lims=lims)
     sf = bivariatesurface!(p1, lcbd_species_nan, lcbd_networks_all["mean"])
 
     p2 = Axis(g2[1,1]; aspect = 1, xlabel = "Species LCBD", ylabel = "Network LCBD")
@@ -113,7 +116,7 @@ begin
         o = options[i,j]
         l = layers_all[o]
         t = titles[i,j]
-        p = background_map(fig[i,j]; title=t, titlealign=:left)
+        p = background_map(fig[i,j]; title=t, titlealign=:left, lims=lims)
         s = surface!(
             fig[i,j], l; colormap=:cividis, colorrange=(cbmin, cbmax), shading=false
         )

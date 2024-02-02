@@ -32,6 +32,7 @@ if !isfile(shp_file)
     for f in r.files
         write(joinpath(path, f.name), read(f, String))
     end
+    close(r)
     # Remove archive
     rm(zip_file)
 end
@@ -60,7 +61,6 @@ if length(diff_sites) > 0
     diff_layer[diff_sites] = ones(length(diff_sites))
 
     # Map them
-    CairoMakie.activate!()
     begin
         fig = heatmap(ecoregions)
         scatter!(diff_sites; color=:red)
@@ -69,7 +69,6 @@ if length(diff_sites) > 0
     save(joinpath("xtras", "ecoregion_mismatch_scatter.png"), fig; px_per_unit=4.0)
     fig = heatmap(diff_layer)
     save(joinpath("xtras", "ecoregion_mismatch_heatmap.png"), fig; px_per_unit=4.0)
-    GLMakie.activate!()
 
     # Update reference layer
     # reference_layer = convert(SimpleSDMResponse, reference_layer)
@@ -96,6 +95,7 @@ if !isfile(shp_file_can)
         n = replace(f.name, "Ecoregions/" => "")
         write(joinpath(path, n), read(f, String))
     end
+    close(r)
     # Remove archive
     rm(zip_file)
 end
@@ -128,7 +128,6 @@ if length(diff_sites) > 0
     diff_layer[diff_sites] = ones(length(diff_sites))
 
     # Map them
-    CairoMakie.activate!()
     begin
         fig = heatmap(ecoregions_can)
         scatter!(diff_sites; color=:red)
@@ -137,7 +136,6 @@ if length(diff_sites) > 0
     save(joinpath("xtras", "ecoregioncan_mismatch_scatter.png"), fig; px_per_unit=4.0)
     fig = heatmap(diff_layer)
     save(joinpath("xtras", "ecoregioncan_mismatch_heatmap.png"), fig; px_per_unit=4.0)
-    GLMakie.activate!()
 
     # Update reference layer
     # reference_layer = convert(SimpleSDMResponse, reference_layer)

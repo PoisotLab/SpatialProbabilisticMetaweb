@@ -1,13 +1,20 @@
 #### Network measures ####
 
 # CAN = true
-include("05_assemble_networks.jl"); # Load networks
 
-# Load the corresponding sdm results if dealing with QC or CAN data
+# Load the corresponding results if dealing with CAN data or minimal example
 if (@isdefined CAN) && CAN == true
     results_path = joinpath("data", "results")
 else
     results_path = joinpath("xtras", "results")
+end
+
+# Load local networks
+if (@isdefined networks) && networks isa BitArray{4}
+    @info "Object networks is already defined. Not re-running previous script."
+else
+    @info "Running 05_assemble_networks.jl"
+    include("05_assemble_networks.jl");
 end
 
 ## Network layer
@@ -92,7 +99,7 @@ sites = keys(layer)
 T = similar(layer, Float64)
 I = similar(layer, Float64)
 B = similar(layer, Float64)
-p = Progress(length(sites))
+p = Progress(length(sites), "Species proportions")
 @threads for s in sites
     T[s], I[s], B[s] = species_proportions(layer[s])
     if !(@isdefined quiet) || quiet == false

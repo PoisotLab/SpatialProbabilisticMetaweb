@@ -1,10 +1,10 @@
 #### Ecoregion plots
 
-SAVE = true
-CAN = true
+# SAVE = true
+# CAN = true
 include("A0_required.jl");
 
-# Load the corresponding results if dealing with QC or CAN data
+# Load the corresponding results if dealing with CAN data or minimal example
 if (@isdefined CAN) && CAN == true
     ecoresults_path = joinpath("data", "results", "ecoregions");
 else
@@ -68,14 +68,17 @@ end
 
 ## Make some plots!!
 
+# Set coordinate limit for figures
+lims = boundingbox(ecoregion_layers["L_median"])
+
 # Single figures
 ecoregion_plots = Dict{String, Figure}()
 @showprogress "Ecoregion single figures:" for (m,t) in zip(measures, measures_ts)
     begin
         f = Figure(; resolution=(850,800))
 
-        p1 = background_map(f[1,1]; title="Median", titlealign=:left)
-        p2 = background_map(f[2,1]; title="89% IQR", titlealign=:left)
+        p1 = background_map(f[1,1]; title="Median", titlealign=:left, lims=lims)
+        p2 = background_map(f[2,1]; title="89% IQR", titlealign=:left, lims=lims)
 
         sf1 = surface!(p1, ecoregion_layers["$(m)_median"]; colormap=:inferno, shading=false)
         sf2 = surface!(p2, ecoregion_layers["$(m)_iqr89"]; colormap=:inferno, shading=false)
@@ -120,7 +123,7 @@ begin
         m = ms[i,j]
         t = ts[i,j]
         ct = cts[i,j]
-        p = background_map(fig[i,j]; title=t, titlealign=:left)
+        p = background_map(fig[i,j]; title=t, titlealign=:left, lims=lims)
         s = surface!(ecoregion_layers["$(m)"]; colormap=cm[j], colorscale=cs, shading=false)
         Colorbar(p[1,2], s;
             height=Relative(0.5), label="$ct\n(log scale)", ticks=cticks[i,j],
@@ -147,7 +150,7 @@ begin
     g1 = ga[1:16, 1:4] = GridLayout()
     g2 = ga[2:5, 4] = GridLayout()
 
-    p1 = background_map(g1[1,1], title="A", titlealign=:left, titlesize=20)
+    p1 = background_map(g1[1,1], title="A", titlealign=:left, titlesize=20, lims=lims)
     sf = bivariatesurface!(p1, L1, L2; n_stops=5, bv_pal_2...)
 
     p2 = Axis(g2[1,1];
@@ -163,7 +166,7 @@ begin
     g3 = gb[1:16, 1:4] = GridLayout()
     g4 = gb[2:5, 4] = GridLayout()
 
-    p1 = background_map(g3[1,1], title="B", titlealign=:left, titlesize=20)
+    p1 = background_map(g3[1,1], title="B", titlealign=:left, titlesize=20, lims=lims)
     sf = bivariatesurface!(p1, L3, L4; n_stops=5, bv_pal_2...)
 
     p2 = Axis(g4[1,1];
@@ -185,7 +188,7 @@ function make_bivariate_figure(L1, L2, fig = Figure(); pal=bv_pal_2, kw...)
     g1 = fig[1:16, 1:4] = GridLayout()
     g2 = fig[2:5, end] = GridLayout()
 
-    p1 = background_map(g1[1,1])
+    p1 = background_map(g1[1,1]; lims=lims)
     sf = bivariatesurface!(p1, L1, L2; pal..., kw...)
 
     p2 = Axis(g2[1,1];
@@ -255,7 +258,7 @@ begin
     g3 = fig[3:4,1] = GridLayout()
     g4 = fig[3:4,2] = GridLayout()
     # Species LCBD
-    p1 = background_map(g1[1,1])
+    p1 = background_map(g1[1,1]; lims=lims)
     sf1 = surface!(
         ecoregion_layers["LCBD_species_median"];
         colormap=cgrad([p0, bv_pal_2[2]]),
@@ -263,7 +266,7 @@ begin
     )
     Colorbar(g1[1,2], sf1; height=Relative(0.5), label="Species LCBD")
     # Network LCBD
-    p2 = background_map(g2[1,1])
+    p2 = background_map(g2[1,1]; lims=lims)
     sf2 = surface!(
         ecoregion_layers["LCBD_networks_median"];
         colormap=cgrad([p0, bv_pal_2[3]]),

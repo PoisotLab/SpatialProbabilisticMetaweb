@@ -1,10 +1,10 @@
 #### Plot motifs ####
 
-SAVE = true
-CAN = true
+# SAVE = true
+# CAN = true
 include("A0_required.jl");
 
-# Load the corresponding sdm results if dealing with QC or CAN data
+# Load the corresponding results if dealing with CAN data or minimal example
 if (@isdefined CAN) && CAN == true
     results_path = joinpath("data", "results")
 else
@@ -27,11 +27,14 @@ NDCI = (S4-S5)/(S4+S5)
 
 ## Plot
 
+# Set coordinate limits for figures
+lims = boundingbox(S1)
+
 # Plot single motifs
 for (motif, layer) in motifs
     begin
-        fig = background_map()
-        sf = surface!(log1p(layer); shading=false)
+        fig = background_map(; lims=lims)
+        sf = surface!(log1p(layer); shading=false, lims=lims)
         Colorbar(fig[1,2], sf; height=Relative(0.5), label="log($motif + 1)")
         fig
     end
@@ -42,7 +45,7 @@ end
 
 # S1-S2 comparison - Normalized difference trophic index
 begin
-    fig = background_map()
+    fig = background_map(; lims=lims)
     sf = surface!(NDTI; shading=false, colorrange=(-1/2,1/2), colormap=cgrad(:roma, rev=true))
     subgrid = GridLayout(fig[1,2], tellheight=false, height=Relative(0.55))
     Label(subgrid[1, 1], "⬆S1")
@@ -60,7 +63,7 @@ end
 
 # S4-S5 comparison - Normalized difference competition index
 begin
-    fig = background_map()
+    fig = background_map(; lims=lims)
     sf = surface!(NDCI; shading=false, colorrange=(-1/2,1/2), colormap=cgrad(:roma, rev=true))
     subgrid = GridLayout(fig[1,2], tellheight=false, height=Relative(0.55))
     Label(subgrid[1, 1], "⬆S4")
@@ -121,7 +124,7 @@ end
 # Plot ecoregion motifs
 for SX in ["S1", "S2", "S4", "S5"]
     begin
-        fig = background_map()
+        fig = background_map(; lims=lims)
         sf = surface!(log1p(motifs["$(SX)_median"]); shading=false)
         Colorbar(fig[1,2], sf; height=Relative(0.5), label="log($SX + 1)")
         fig
@@ -148,7 +151,7 @@ begin
         t = ts[i,j]
         ct = cts[i,j]
         gx = GridLayout(fig[i,j])
-        p = background_map(gx[1,1]; title=t, titlealign=:left)
+        p = background_map(gx[1,1]; title=t, titlealign=:left, lims=lims)
         s = surface!(
             motifs[m]; shading=false, colormap=cms[i], colorrange=cranges[i]
         )

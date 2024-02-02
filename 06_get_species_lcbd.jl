@@ -3,7 +3,7 @@
 # CAN = true
 include("04_aggregate_sdms.jl");
 
-# Load the corresponding sdm results if dealing with QC or CAN data
+# Load the corresponding results if dealing with CAN data or minimal example
 if (@isdefined CAN) && CAN == true
     fit_path = joinpath("data", "input", "sdm_fit_results.csv")
     results_path = joinpath("data", "results")
@@ -57,7 +57,7 @@ cutoffs
 # We can now get the species richness for the thresholded distributions
 Smeans_cut = Dict{String, SimpleSDMResponse}()
 Srands_cut = Dict{String, SimpleSDMResponse}()
-@threads for sp in spp
+for sp in spp
     Smeans_cut[sp] = Smeans[sp] .> cutoffs[sp]
     Srands_cut[sp] = Srands[sp] .> cutoffs[sp]
 end
