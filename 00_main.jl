@@ -1,5 +1,7 @@
 #### Main analysis script ####
 
+# Use this script to run all other analysis scripts.
+
 # Load required packages and define custom functions
 include("A0_required.jl");
 

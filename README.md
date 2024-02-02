@@ -53,18 +53,18 @@ using Pkg; Pkg.instantiate()
 - **Minimal example**: Scripts are directly reproducible with the minimal example. Leave the scripts as-is or set `CAN = false` before running. You can directly run scripts `06`, `07`, etc.
 - **Full-scale analyses**: Plotting scripts are directly reproducible at full scale. All other analysis steps are scripted but as a whole they require high resources (most steps were run on high memory clusters). To run analyses at full scale, manually set `CAN = true` before running the script.
 - Many steps use [threads](https://docs.julialang.org/en/v1/manual/multi-threading/) (if available) to run analyses faster. We recommend doing so if you have multiple cores available, but note that it will require more memory. For example, to start Julia with 8 threads available: `julia +1.9.1 --project --threads 8`
-
+- The following table shows the reproducibility of all scripts. Timing for the minimal example was evaluated on a laptop with 8 GB of RAM and 8 cores (using 8 threads). Running [00_main.jl](00_main.jl), which re-runs all other scripts, took ~ 1h 20 minutes.
 
 | Script | Directly reproducible for minimal example (10 arc-min) | Directly reproducible for CAN (2.5 arc-min) |
 | ---- | ---- | ---- |
 |  | Leave as-is or set `CAN = false` | Set `CAN = true` |
 | **Main** |  |  |
-| [00_main.jl](00_main.jl) | ✅ Yes, re-runs everything in -- min | 🚫 Not recommended |
+| [00_main.jl](00_main.jl) | ✅ Yes, re-runs everything in ~ 1h 20 min | 🚫 Not recommended |
 |  |  |  |
 | **Data preparation** |  |  |
 | [01_get_occurrences.jl](01_get_occurrences.jl) | ✅ Yes | ✅ Same as minimal |
-| [02_get_absences.jl](02_get_absences.jl) | ✅ Yes<br>⏰ > 10 minutes | ✔️ Data available<br>:warning: Requires several hours<br> |
-| [03_generate_sdms.jl](03_generate_sdms.jl) | ✅ Yes<br>⏰ ~ 10 minutes | ⤴ Requires previous<br>:warning: Memory intensive |
+| [02_get_absences.jl](02_get_absences.jl) | ✅ Yes<br>⏰ ~ 25 minutes | ✔️ Data available<br>:warning: Requires several hours |
+| [03_generate_sdms.jl](03_generate_sdms.jl) | ✅ Yes<br>⏰ ~ 12 minutes | ⤴ Requires previous<br>:warning: Memory intensive |
 |  |  |  |
 | **Assembling results** |  |  |
 | [04_aggregate_sdms.jl](04_aggregate_sdms.jl) | ✅ Yes<br>⤴ Will re-run previous script once | ⤴ Requires previous<br>:warning: Memory intensive |
@@ -82,12 +82,13 @@ using Pkg; Pkg.instantiate()
 | [12_plot_ecoregions.jl](12_plot_ecoregions.jl) | ✅ Yes | ✅ Yes |
 |  |  |  |
 | **Motifs analysis** |  |  |
-| (This analysis is especially intensive) |  |  |
-| [13_get_motifs.jl](13_get_motifs.jl) | :warning: ~ 15-20 mins per motif, only for New-Brunswick | 🚫🚫🚫 Requires job arrays |
+| ⚠ This analysis is especially intensive ⚠ |  |  |
+| [13_get_motifs.jl](13_get_motifs.jl) | ✅ Yes<br>:warning: ~ 25 mins per motif, only for New-Brunswick | 🚫🚫🚫 Requires job arrays |
 | [14_assemble_motifs.jl](14_assemble_motifs.jl) | ✅ Yes | 🚫 Requires previous |
 | [15_plot_motifs.jl](15_plot_motifs.jl) | ✅ Yes | ✅ Result files are available |
 |  |  |  |
 |  |  |  |
 | **Preparation scripts** |  |  |
 | (Usually no need to re-run as all outputs are on GitHub) |  |  |
-| Any script in scripts/prep | ✅ | ✅ |
+| Any script in scripts/prep | ✅ Yes | ✅ Yes |
+|  |  |  |
