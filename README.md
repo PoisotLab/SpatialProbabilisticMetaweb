@@ -3,7 +3,7 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.8350065.svg)](https://doi.org/10.5281/zenodo.8350065)
 
-Code repo for the manuscript *Spatially explicit predictions of food web structure from regional level data* available as a preprint on [EcoEvoRxiv](https://ecoevorxiv.org/repository/view/5941/) (manuscript preparation on [GitHub](https://github.com/PoisotLab/ms_spatial_metaweb)). This repository provides code for both the full-scale analyses and a reproducible minimal example (see instructions below).
+Code repo for the manuscript *Spatially explicit predictions of food web structure from regional-level data* published in [Philosophical Transactions of the Royal Society B](https://doi.org/10.1098/rstb.2023.0166) (author version on [GitHub](https://github.com/PoisotLab/ms_spatial_metaweb)). This repository provides code for both the full-scale analyses and a reproducible minimal example (see instructions below).
 
 ## Scripts
 
